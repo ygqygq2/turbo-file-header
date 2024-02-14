@@ -5,21 +5,48 @@ import * as vscode from 'vscode';
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-  // Use the console to output diagnostic information (console.log) and errors (console.error)
-  // This line of code will only be executed once when your extension is activated
-  console.log('Congratulations, your extension "turbo-file-header" is now active!');
-
-  // The command has been defined in the package.json file
-  // Now provide the implementation of the command with registerCommand
-  // The commandId parameter must match the command field in package.json
-  const disposable = vscode.commands.registerCommand('turbo-file-header.helloWorld', () => {
-    // The code you place here will be executed every time your command is executed
-    // Display a message box to the user
-    vscode.window.showInformationMessage('Hello World from turbo-file-header!');
+  // 注册一个命令
+  const disposable = vscode.commands.registerCommand('extension.runCommand', () => {
+    // 执行命令并显示进度条
+    runCommandWithProgress();
   });
 
   context.subscriptions.push(disposable);
 }
+
+// 在命令执行时显示进度条
+const runCommandWithProgress = () => {
+  // 显示进度条
+  vscode.window.withProgress(
+    {
+      location: vscode.ProgressLocation.Notification, // 进度条显示在通知栏
+      title: '执行命令中...', // 进度条标题
+      cancellable: false, // 是否允许取消操作
+    },
+    async (progress, _token) => {
+      // 设置进度条总进度为 100
+      progress.report({ increment: 0, message: '开始执行命令' });
+
+      // 模拟执行命令的过程
+      for (let i = 0; i <= 100; i += 10) {
+        // 更新进度条
+        progress.report({ increment: i, message: `已完成 ${i}%` });
+
+        // 模拟耗时操作
+        await sleep(500);
+      }
+
+      // 完成进度条
+      progress.report({ increment: 100, message: '命令执行完成' });
+      return new Promise<void>((resolve) => resolve());
+    },
+  );
+};
+
+// 等待指定的毫秒数
+const sleep = (ms: number) => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};
 
 // This method is called when your extension is deactivated
 export function deactivate() {}

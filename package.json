@@ -1,21 +1,60 @@
 {
   "name": "turbo-file-header",
-  "displayName": "turbo-file-header",
+  "displayName": "Turbo File Header",
   "description": "Sets file header information globally or for a project.",
   "version": "0.0.1",
+  "icon": "icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ygqygq2/turbo-file-header"
+  },
+  "publisher": "ygqygq2",
+  "__metadata": {
+    "id": "ygqygq2.turbo-file-header",
+    "publisherDisplayName": "ygqygq2",
+    "publisherId": "e0b1421e-635c-639a-85a0-8b271dcb3d11",
+    "isPreReleaseVersion": false
+  },
+  "bugs": {
+    "url": "https://github.com/ygqygq2/turbo-file-header/issues",
+    "email": "ygqygq2@qq.com"
+  },
   "engines": {
     "vscode": "^1.50.0"
   },
   "categories": [
     "Other"
   ],
+  "keywords": [
+    "fileheader",
+    "copyright",
+    "头部注释",
+    "文件头注释",
+    "项目文件注释",
+    "许可证注释"
+  ],
+  "license": "MIT",
   "activationEvents": [],
   "main": "./out/extension.js",
   "contributes": {
+    "configuration": {
+      "type": "object",
+      "title": "Turbo File Header Configuration",
+      "properties": {
+      }
+    },
     "commands": [
       {
-        "command": "turbo-file-header.helloWorld",
-        "title": "Hello World"
+        "command": "turboFileHeader.insertFileHeader",
+        "title": "Turbo File Header: Inser file header"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "turboFileHeader.insertFileHeader",
+        "key": "ctrl+alt+h",
+        "mac": "ctrl+alt+h",
+        "when": "editorTextFocus"
       }
     ]
   },
@@ -49,6 +88,7 @@
     "@typescript-eslint/parser": "^6.20.0",
     "@vscode/test-cli": "^0.0.4",
     "@vscode/test-electron": "^2.3.9",
+    "esbuild": "^0.20.0",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.1.3",
