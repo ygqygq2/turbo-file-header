@@ -6,7 +6,7 @@ import * as vscode from 'vscode';
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
   // 注册一个命令
-  const disposable = vscode.commands.registerCommand('extension.runCommand', () => {
+  const disposable = vscode.commands.registerCommand('turboFileHeader.insertFileHeader', () => {
     // 执行命令并显示进度条
     runCommandWithProgress();
   });
