@@ -8,6 +8,7 @@ export enum ConfigSection {
   autoInsertOnCreateFile = 'TurboFileHeader.autoInsertOnCreateFile',
   autoUpdateOnSave = 'TurboFileHeader.autoUpdateOnSave',
   disableFields = 'TurboFileHeader.disableFields',
+  language = 'TurboFileHeader.language',
 }
 
 export const TEMPLATE_SYMBOL_KEY = Symbol.for('template');
@@ -33,7 +34,7 @@ export const WILDCARD_ACCESS_VARIABLES: Readonly<Required<IFileheaderVariables>>
   fileName: `${TEMPLATE_NAMED_GROUP_WILDCARD_PLACEHOLDER}_fileName_${TEMPLATE_NAMED_GROUP_WILDCARD_PLACEHOLDER}`,
 };
 
-export const CUSTOM_TEMPLATE_FILE_NAME = 'fileheader.template.js';
+export const CUSTOM_TEMPLATE_FILE_NAME = 'fileheader.config.yaml';
 
 export const UPDATE_FILEHEADER_THRESHOLD = 10;
 

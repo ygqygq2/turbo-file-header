@@ -20,7 +20,7 @@
     "email": "ygqygq2@qq.com"
   },
   "engines": {
-    "vscode": "^1.50.0"
+    "vscode": "^1.86.0"
   },
   "categories": [
     "Other"
@@ -34,7 +34,9 @@
     "许可证注释"
   ],
   "license": "MIT",
-  "activationEvents": [],
+  "activationEvents": [
+    "onLanguage:*"
+  ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
@@ -121,6 +123,21 @@
             "the file name including extension"
           ],
           "markdownDescription": "Disable some fields in default fileheader. This properties can not affect the custom fileheader"
+        },
+        "TurboFileHeader.language": {
+          "type": "array",
+          "description": "Custom language to support",
+          "default": [
+            {
+              "id": "astro",
+              "extensions": [
+                ".astro"
+              ],
+              "lineComment": "//",
+              "blockCommentStart": "<!--",
+              "blockCommentEnd": "-->"
+            }
+          ]
         }
       }
     }
@@ -148,6 +165,7 @@
   },
   "devDependencies": {
     "@types/glob": "^8.1.0",
+    "@types/lodash": "^4.14.202",
     "@types/lodash-es": "^4.17.12",
     "@types/mocha": "^10.0.6",
     "@types/node": "~20.11.19",
@@ -171,7 +189,10 @@
   },
   "dependencies": {
     "dayjs": "^1.11.10",
-    "lodash-es": "^4.17.21",
-    "upath": "^2.0.1"
+    "handlebars": "^4.7.8",
+    "json5": "^2.2.3",
+    "lodash": "^4.17.21",
+    "upath": "^2.0.1",
+    "yaml": "^2.3.4"
   }
 }

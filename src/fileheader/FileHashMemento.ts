@@ -1,5 +1,5 @@
 import vscode from 'vscode';
-import { difference } from 'lodash-es';
+import { difference } from 'lodash';
 import { getStringHash } from '../utils/utils';
 
 class FileHashMemento {

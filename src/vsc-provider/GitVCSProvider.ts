@@ -20,11 +20,12 @@ export class GitVCSProvider implements BaseVCSProvider {
         `git --no-pager log --format='%aN' --follow --reverse ${filePath}`,
         { cwd: dirname(filePath) },
       );
-      // TODO: find out why std out have extra `'`
+      // 如果结果有空格，会有单引号
       return getFirstLine(authors).replace(/'/g, '');
     } catch (error) {
-      throw error;
+      console.error(error);
     }
+    return ''
   }
   async getAuthorEmail(filePath: string): Promise<string> {
     try {
@@ -34,8 +35,9 @@ export class GitVCSProvider implements BaseVCSProvider {
       );
       return getFirstLine(emails).replace(/'/g, '');
     } catch (error) {
-      throw error;
+      console.error(error);
     }
+    return ''
   }
   async getUserName(repoPath: string): Promise<string> {
     try {
@@ -76,8 +78,9 @@ Set your username via 'git config user.email "your Email"'`,
 
       return dayjs(ctimeISO);
     } catch (error) {
-      throw error;
+      console.error(error);
     }
+    return dayjs(new Date());
   }
 
   async isTracked(filePath: string): Promise<boolean> {

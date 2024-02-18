@@ -1,8 +1,9 @@
 import * as vscode from 'vscode';
 import { ConfigSection, CUSTOM_TEMPLATE_FILE_NAME } from '../constants';
 import { extensionConfigManager } from './ExtensionConfigManager';
-import { FileheaderLanguageProvider } from '../fileheader-language-providers';
 import { fileheaderManager } from '../fileheader/FileheaderManager';
+import { getAllCommands } from '@/commands';
+import { Command } from '@/typings/types';
 
 export class Extension {
   private disposers: vscode.Disposable[] = [];
@@ -10,25 +11,15 @@ export class Extension {
 
   activate = async (context: vscode.ExtensionContext) => {
     await fileheaderManager.loadProviders();
-    this.disposers.push(
-      vscode.commands.registerCommand('turboFileHeader.addFileheader', this.addFileheader, this),
-    );
 
-    this.disposers.push(
-      vscode.commands.registerCommand(
-        'turboFileHeader.generateCustomTemplate',
-        this.createCustomTemplate,
-        this,
-      ),
-    );
-
-    this.disposers.push(
-      vscode.commands.registerCommand(
-        'turboFileHeader.reloadCustomTemplateProvider',
-        fileheaderManager.loadProviders,
-        fileheaderManager,
-      ),
-    );
+    // 获取所有命令
+    const commands: Array<Command> = getAllCommands();
+    // 遍历所有命令，注册命令
+    for (const { name, handler } of commands) {
+      vscode.commands.registerCommand(name, (args: unknown[]) => {
+        handler(args);
+      });
+    }
 
     this.createCustomTemplateFileListener();
 
@@ -51,18 +42,6 @@ export class Extension {
       disposer.dispose();
     }
   };
-
-  private async addFileheader(...args: any[]) {
-    const currentDocument = vscode.window.activeTextEditor?.document;
-    if (!currentDocument) {
-      return vscode.window.showErrorMessage('Turbo File Header: You should open a file first.');
-    }
-    return fileheaderManager.updateFileheader(currentDocument);
-  }
-
-  createCustomTemplate() {
-    return FileheaderLanguageProvider.createCustomTemplate();
-  }
 
   private async onCreateDocument(e: vscode.FileCreateEvent) {
     const enabled = extensionConfigManager.get<boolean>(ConfigSection.autoInsertOnCreateFile);

@@ -76,3 +76,8 @@ export type IFileheaderVariables = {
    */
   fileName?: string;
 };
+
+export type Command = {
+  name: string;
+  handler: (args?: unknown[]) => Promise<void>;
+};

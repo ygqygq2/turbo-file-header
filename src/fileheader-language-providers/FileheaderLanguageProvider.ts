@@ -7,15 +7,16 @@ import {
   TEMPLATE_OPTIONAL_GROUP_PLACEHOLDER,
   WILDCARD_ACCESS_VARIABLES,
 } from '../constants';
-import { mkdir, writeFile } from 'fs/promises';
+import { mkdir, writeFile, access } from 'fs/promises';
 import path from 'path';
-import fsExists from 'fs.promises.exists';
+import { constants } from 'fs';
 
 export abstract class FileheaderLanguageProvider {
-  public static async createCustomTemplate() {
-    const customTemplateContent = (await import('./provider.template'))
-      .default as unknown as string;
+  // 使用静态导入或其他机制替代动态导入
+  private static customTemplateContent: string = require('./provider.template').default;
 
+  public static async createCustomTemplate() {
+    const customTemplateContent = FileheaderLanguageProvider.customTemplateContent;
     const workspaces = vscode.workspace.workspaceFolders;
     if (!workspaces) {
       vscode.window.showErrorMessage('Turbo File Header: Your workspace is not contain any folder');
@@ -42,8 +43,10 @@ export abstract class FileheaderLanguageProvider {
     const templateDir = path.join(targetWorkspace.uri.fsPath, '.vscode');
 
     const templatePath = path.join(templateDir, CUSTOM_TEMPLATE_FILE_NAME);
-
-    if (!(await fsExists(templateDir))) {
+    // 使用access代替exists检查目录
+    try {
+      await access(templateDir, constants.F_OK);
+    } catch (e) {
       await mkdir(templateDir, { recursive: true });
     }
     await writeFile(templatePath, customTemplateContent);
