@@ -15,8 +15,8 @@
 # @property {string} dirPath the directory path, relative to project root with POSIX path separator
 # @property {string} fileName filename with extension
 
-#
-languages: ['javascript', 'typescript', 'javascriptreact', 'typescriptreact']
-template: |
-  author: {{ authorName }}
-  email: {{ authorEmail }}
+providers:
+  - languages: ['javascript', 'typescript', 'javascriptreact', 'typescriptreact']
+    template: |
+      author: {{ authorName }}
+      email: {{ authorEmail }}

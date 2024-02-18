@@ -1,6 +1,5 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
-
 import * as json5 from 'json5';
 import { TextDecoder } from 'util';
 
@@ -12,14 +11,14 @@ export class Configuration {
    * Creates a new instance of the Parser class
    */
   public constructor() {
-    this.UpdateLanguagesDefinitions();
+    this.updateLanguagesDefinitions();
   }
 
   /**
    * Generate a map of configuration files by language as defined by extensions
    * External extensions can override default configurations os VSCode
    */
-  public UpdateLanguagesDefinitions() {
+  public updateLanguagesDefinitions() {
     this.commentConfig.clear();
 
     for (const extension of vscode.extensions.all) {
@@ -41,7 +40,7 @@ export class Configuration {
    * @param languageId
    * @returns
    */
-  public async GetCommentConfiguration(languageId: string): Promise<CommentConfig | undefined> {
+  public async getCommentConfiguration(languageId: string): Promise<CommentConfig | undefined> {
     // * check if the language config has already been loaded
     if (this.commentConfig.has(languageId)) {
       return this.commentConfig.get(languageId);

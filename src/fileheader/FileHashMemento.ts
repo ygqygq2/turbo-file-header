@@ -39,7 +39,4 @@ class FileHashMemento {
   }
 }
 
-/**
- * @singleton
- */
 export const fileHashMemento = new FileHashMemento();

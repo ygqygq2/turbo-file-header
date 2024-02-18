@@ -15,7 +15,4 @@ class ExtensionConfigManager {
   }
 }
 
-/**
- * @singleton
- */
 export const extensionConfigManager = new ExtensionConfigManager();

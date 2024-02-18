@@ -1,17 +1,19 @@
 import dayjs, { Dayjs } from 'dayjs';
 import { dirname } from 'path';
 import { CommandExecError } from '../error/CommandExecError';
-import { MissUserNameEmailError } from '../error/MissUserNameEmailError';
-import { NoVCSProviderError } from '../error/NoVCSProviderError';
 import { exec, getFirstLine } from '../utils/utils';
 import { BaseVCSProvider } from './types';
+import { ErrorCode, errorCodeMessages } from '@/error/ErrorHandler.enum';
+import { CustomError, errorHandler } from '@/error/ErrorHandler';
 
 export class GitVCSProvider implements BaseVCSProvider {
   async validate(repoPath: string): Promise<void> {
     try {
       await exec('git status', { cwd: repoPath });
     } catch (error) {
-      throw new NoVCSProviderError('Please init git via `git init` first.');
+      errorHandler.handle(
+        new CustomError(ErrorCode.GitNotInit, errorCodeMessages[ErrorCode.GitNotInit]),
+      );
     }
   }
   async getAuthorName(filePath: string): Promise<string> {
@@ -23,9 +25,11 @@ export class GitVCSProvider implements BaseVCSProvider {
       // 如果结果有空格，会有单引号
       return getFirstLine(authors).replace(/'/g, '');
     } catch (error) {
-      console.error(error);
+      errorHandler.handle(
+        new CustomError(ErrorCode.GetUserNameFail, errorCodeMessages[ErrorCode.GetUserNameFail]),
+      );
     }
-    return ''
+    return '';
   }
   async getAuthorEmail(filePath: string): Promise<string> {
     try {
@@ -37,7 +41,7 @@ export class GitVCSProvider implements BaseVCSProvider {
     } catch (error) {
       console.error(error);
     }
-    return ''
+    return '';
   }
   async getUserName(repoPath: string): Promise<string> {
     try {
@@ -45,9 +49,8 @@ export class GitVCSProvider implements BaseVCSProvider {
       return getFirstLine(userName);
     } catch (e) {
       if (e instanceof CommandExecError) {
-        throw new MissUserNameEmailError(
-          `You should set user.name in git config first.
-Set your username via 'git config user.name "your username"'`,
+        errorHandler.handle(
+          new CustomError(ErrorCode.GetUserNameFail, errorCodeMessages[ErrorCode.GetUserNameFail]),
         );
       }
       throw e;
@@ -59,9 +62,10 @@ Set your username via 'git config user.name "your username"'`,
       return getFirstLine(userEmail);
     } catch (e) {
       if (e instanceof CommandExecError) {
-        throw new MissUserNameEmailError(
+        throw new CustomError(
           `You should set user.email in git config first.
 Set your username via 'git config user.email "your Email"'`,
+          ErrorCode.MissingUserNameEmail,
         );
       }
       throw e;

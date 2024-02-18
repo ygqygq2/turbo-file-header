@@ -1,22 +1,16 @@
-import fs from 'fs/promises';
 import { internalProviders, FileheaderLanguageProvider } from '../fileheader-language-providers';
 
 class FileheaderProviderLoader {
   public async loadProviders(): Promise<FileheaderLanguageProvider[]> {
-    return [...internalProviders];
+    const customProviders = await this.loadCustomProvers();
+
+    return [...internalProviders, ...customProviders];
   }
 
-  private async fileExists(path: string): Promise<boolean> {
-    try {
-      await fs.access(path);
-      return true;
-    } catch (error) {
-      return false;
-    }
+  private async loadCustomProvers(): Promise<FileheaderLanguageProvider[]> {
+    const providers: FileheaderLanguageProvider[] = [];
+    return providers;
   }
 }
 
-/**
- * @singleton
- */
 export const fileheaderProviderLoader = new FileheaderProviderLoader();

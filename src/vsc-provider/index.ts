@@ -1,17 +1,18 @@
-import assert from 'assert';
 import { BaseVCSProvider } from './types';
 import { GitVCSProvider } from './GitVCSProvider';
+import { CustomError, errorHandler } from '@/error/ErrorHandler';
+import { ErrorCode } from '@/error/ErrorHandler.enum';
 
 function createVCSProvider(): BaseVCSProvider {
   return new GitVCSProvider();
 }
 
-const vscProvider = createVCSProvider();
-// 断言确保 vscProvider 不为 null
-assert.ok(vscProvider, 'vscProvider is not found.');
+let vscProvider: BaseVCSProvider;
 
-if (!vscProvider) {
-  throw new Error('vscProvider is null.');
+try {
+  vscProvider = createVCSProvider();
+} catch (error) {
+  errorHandler.handle(new CustomError('Error creating VCS provider', ErrorCode.NoVCSProvider));
 }
 
 export { vscProvider };

@@ -65,7 +65,7 @@ export class Parser {
     this.ignoreFirstLine = false;
     this.isPlainText = false;
 
-    const config = await this.configuration.GetCommentConfiguration(languageId);
+    const config = await this.configuration.getCommentConfiguration(languageId);
     if (config) {
       const blockCommentStart = config.blockComment ? config.blockComment[0] : null;
       const blockCommentEnd = config.blockComment ? config.blockComment[1] : null;

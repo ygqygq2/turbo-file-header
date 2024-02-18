@@ -4,10 +4,9 @@ import { FileheaderLanguageProvider } from '../fileheader-language-providers';
 import { hasShebang } from '../utils/utils';
 import { FileheaderVariableBuilder } from './FileheaderVariableBuilder';
 import { IFileheaderVariables } from '../typings/types';
-import { MissUserNameEmailError } from '../error/MissUserNameEmailError';
-import { NoVCSProviderError } from '../error/NoVCSProviderError';
 import { fileHashMemento } from './FileHashMemento';
 import { vscProvider } from '../vsc-provider';
+import {errorHandler} from '@/error/ErrorHandler';
 
 type UpdateFileheaderManagerOptions = {
   silent?: boolean;
@@ -104,12 +103,7 @@ class FileheaderManager {
         originFileheaderInfo.variables,
       );
     } catch (error) {
-      if (error instanceof MissUserNameEmailError) {
-        !silent && vscode.window.showErrorMessage(error.message);
-      }
-
-      if (error instanceof NoVCSProviderError) {
-        !silent && vscode.window.showErrorMessage(error.message);
+        !silent && errorHandler(error);
       }
       return;
     }
@@ -157,7 +151,4 @@ class FileheaderManager {
   }
 }
 
-/**
- * @singleton
- */
 export const fileheaderManager = new FileheaderManager();
