@@ -1,12 +1,12 @@
-import * as vscode from 'vscode';
-import { ErrorCode } from './ErrorCodeMessage.enum';
+import { ErrorCode, errorCodeMessages } from './ErrorCodeMessage.enum';
+import output from './output';
 
 export class CustomError extends Error {
   code: ErrorCode;
   originalError: Error | undefined | unknown;
 
-  constructor(code: ErrorCode, message: string, originalError?: Error | unknown) {
-    super(message);
+  constructor(code: ErrorCode, originalError?: Error | unknown) {
+    super(errorCodeMessages[code]);
     this.code = code;
     this.originalError = originalError;
   }
@@ -26,21 +26,10 @@ class ErrorHandler {
   }
 
   public handle(error: CustomError) {
-    console.error(error.originalError);
-    switch (error.code) {
-      case ErrorCode.MissingUserNameEmail:
-        vscode.window.showErrorMessage(
-          'Missing user name or email configuration. Please configure them.',
-        );
-        break;
-      case ErrorCode.NoVCSProvider:
-        vscode.window.showErrorMessage(
-          'No version control provider initialized. Please initialize Git.',
-        );
-        break;
-      default:
-        vscode.window.showErrorMessage(error.message);
+    if (error.originalError) {
+      output.error(error.originalError);
     }
+    output.error(error.message);
   }
 }
 

@@ -2,7 +2,6 @@ import { Configuration } from '@/utils/configuration';
 import { IFileheaderVariables, ITemplateFunction } from '../typings/types';
 import { FileheaderLanguageProvider } from './FileheaderLanguageProvider';
 import { Parser } from '@/utils/parser';
-import * as vscode from 'vscode';
 
 export class VscodeInternalLanguageProvider extends FileheaderLanguageProvider {
   private parser: Parser;
@@ -39,21 +38,16 @@ export class VscodeInternalLanguageProvider extends FileheaderLanguageProvider {
     const authorEmailPart = !!variables.authorEmail && tpl`<${variables.authorEmail}>`;
 
     const authorLine =
-      hasAuthor && tpl`\n * @author        ${variables.authorName} ${authorEmailPart}`;
+      hasAuthor && tpl` * @author        ${variables.authorName} ${authorEmailPart}\n`;
 
-    const ctimeLine = variables.ctime && tpl`\n * @date          ${variables.ctime}`;
+    const ctimeLine = variables.ctime && tpl` * @date          ${variables.ctime}\n`;
 
-    const lastModifiedLine = variables.mtime && tpl`\n * @lastModified  ${variables.mtime}`;
+    const lastModifiedLine = variables.mtime && tpl` * @lastModified  ${variables.mtime}\n`;
 
     const companyNameLine =
-      variables.companyName && tpl`\n * Copyright © ${variables.companyName} All rights reserved`;
+      variables.companyName && tpl` * Copyright © ${variables.companyName} All rights reserved\n`;
 
-    vscode.window.showInformationMessage(
-      '🚀 ~ file: VscodeInternalLanguageProvider.ts:46 ~ blockCommentStart:',
-      this.blockCommentStart,
-    );
-    // prettier-ignore
-    return tpl `${this.blockCommentStart}\n${authorLine}${ctimeLine}${lastModifiedLine}${companyNameLine}\n${this.blockCommentEnd}`;
+    return tpl`${this.blockCommentStart}\n${authorLine}${ctimeLine}${lastModifiedLine}${companyNameLine}${this.blockCommentEnd}`;
 
     // like this:
     /**

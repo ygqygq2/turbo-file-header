@@ -115,14 +115,7 @@ class FileheaderManager {
         originFileheaderInfo.variables,
       );
     } catch (error) {
-      !silent &&
-        errorHandler.handle(
-          new CustomError(
-            ErrorCode.VariableBuilderFail,
-            errorCodeMessages[ErrorCode.VariableBuilderFail],
-            error,
-          ),
-        );
+      !silent && errorHandler.handle(new CustomError(ErrorCode.VariableBuilderFail, error));
       return;
     }
 

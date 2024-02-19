@@ -125,3 +125,11 @@ export function evaluateTemplate(
 export function getStringHash(input: string) {
   return crypto.createHash('sha1').update(input).digest('base64');
 }
+
+/**
+ * Sleep micro second
+ * @param ms micro second to sleep
+ */
+export function sleep(ms: number) {
+  return new Promise<void>((resolve) => setTimeout(resolve, ms));
+}

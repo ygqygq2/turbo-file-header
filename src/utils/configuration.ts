@@ -46,11 +46,14 @@ export class Configuration {
       return this.commentConfig.get(languageId);
     }
 
-    // todo, 还没搞明白这块是怎么处理的
+    // todo 还没搞明白这块是怎么处理的
+    /**
+     * todo test
+     */
     // * if no config exists for this language, back out and leave the language unsupported
-    // if (!this.languageConfigFiles.has(languageId)) {
-    //   return undefined;
-    // }
+    if (!this.languageConfigFiles.has(languageId)) {
+      return undefined;
+    }
 
     try {
       // Get the filepath from the map
@@ -61,10 +64,6 @@ export class Configuration {
       // use json5, because the config can contains comments
       const config = json5.parse(content);
 
-      vscode.window.showInformationMessage(
-        '🚀 ~ file: configuration.ts:63 ~ this.commentConfig:',
-        config.comments,
-      );
       this.commentConfig.set(languageId, config.comments);
 
       return config.comments;

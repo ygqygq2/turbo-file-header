@@ -2,7 +2,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import { dirname } from 'path';
 import { exec, getFirstLine } from '../utils/utils';
 import { BaseVCSProvider } from './types';
-import { ErrorCode, errorCodeMessages } from '@/error/ErrorCodeMessage.enum';
+import { ErrorCode } from '@/error/ErrorCodeMessage.enum';
 import { CustomError, errorHandler } from '@/error/ErrorHandler';
 
 export class GitVCSProvider implements BaseVCSProvider {
@@ -10,9 +10,7 @@ export class GitVCSProvider implements BaseVCSProvider {
     try {
       await exec('git status', { cwd: repoPath });
     } catch (error) {
-      errorHandler.handle(
-        new CustomError(ErrorCode.GitNotInit, errorCodeMessages[ErrorCode.GitNotInit], error),
-      );
+      errorHandler.handle(new CustomError(ErrorCode.GitNotInit, error));
     }
   }
   async getAuthorName(filePath: string): Promise<string> {
@@ -24,13 +22,7 @@ export class GitVCSProvider implements BaseVCSProvider {
       // 如果结果有空格，会有单引号
       return getFirstLine(authors).replace(/'/g, '');
     } catch (error) {
-      errorHandler.handle(
-        new CustomError(
-          ErrorCode.GetUserNameFail,
-          errorCodeMessages[ErrorCode.GetUserNameFail],
-          error,
-        ),
-      );
+      errorHandler.handle(new CustomError(ErrorCode.GitGetUserNameFail, error));
     }
     return '';
   }
@@ -42,13 +34,7 @@ export class GitVCSProvider implements BaseVCSProvider {
       );
       return getFirstLine(emails).replace(/'/g, '');
     } catch (error) {
-      errorHandler.handle(
-        new CustomError(
-          ErrorCode.GetUserNameFail,
-          errorCodeMessages[ErrorCode.GetUserNameFail],
-          error,
-        ),
-      );
+      errorHandler.handle(new CustomError(ErrorCode.GitGetUserEmailFail, error));
     }
     return '';
   }
@@ -57,13 +43,7 @@ export class GitVCSProvider implements BaseVCSProvider {
       const userName = await exec(`git config user.name`, { cwd: repoPath });
       return getFirstLine(userName);
     } catch (error) {
-      errorHandler.handle(
-        new CustomError(
-          ErrorCode.ShouldSetUserName,
-          errorCodeMessages[ErrorCode.ShouldSetUserName],
-          error,
-        ),
-      );
+      errorHandler.handle(new CustomError(ErrorCode.ShouldSetUserName, error));
     }
     return '';
   }
@@ -72,13 +52,7 @@ export class GitVCSProvider implements BaseVCSProvider {
       const userEmail = await exec(`git config user.email`, { cwd: repoPath });
       return getFirstLine(userEmail);
     } catch (error) {
-      errorHandler.handle(
-        new CustomError(
-          ErrorCode.ShouldSetUserName,
-          errorCodeMessages[ErrorCode.ShouldSetUserName],
-          error,
-        ),
-      );
+      errorHandler.handle(new CustomError(ErrorCode.ShouldSetUserName, error));
     }
     return '';
   }
@@ -93,13 +67,7 @@ export class GitVCSProvider implements BaseVCSProvider {
 
       return dayjs(ctimeISO);
     } catch (error) {
-      errorHandler.handle(
-        new CustomError(
-          ErrorCode.GitGetCtimeFail,
-          errorCodeMessages[ErrorCode.GitGetCtimeFail],
-          error,
-        ),
-      );
+      errorHandler.handle(new CustomError(ErrorCode.GitGetCtimeFail, error));
     }
     return dayjs(new Date());
   }
