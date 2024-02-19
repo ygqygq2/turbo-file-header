@@ -1,4 +1,6 @@
 import vscode from 'vscode';
+import * as fs from 'fs';
+import path from 'path';
 import { evaluateTemplate, getTaggedTemplateInputs } from '../utils/utils';
 import { IFileheaderVariables, ITemplateFunction, Template } from '../typings/types';
 import {
@@ -7,19 +9,23 @@ import {
   TEMPLATE_OPTIONAL_GROUP_PLACEHOLDER,
   WILDCARD_ACCESS_VARIABLES,
 } from '../constants';
-import { mkdir, writeFile, access } from 'fs/promises';
-import path from 'path';
-import { constants } from 'fs';
+import { CustomError, errorHandler } from '@/error/ErrorHandler';
+import { ErrorCode, errorCodeMessages } from '@/error/ErrorCodeMessage.enum';
 
 export abstract class FileheaderLanguageProvider {
-  // 使用静态导入或其他机制替代动态导入
-  private static customTemplateContent: string = require('./provider.template').default;
+  // 自定义 fileheader.config.yaml 模板
+  private static customTemplatePath: string = path.resolve(__dirname, 'fileheader.config.yaml');
 
   public static async createCustomTemplate() {
-    const customTemplateContent = FileheaderLanguageProvider.customTemplateContent;
+    const customTemplatePath = FileheaderLanguageProvider.customTemplatePath;
     const workspaces = vscode.workspace.workspaceFolders;
     if (!workspaces) {
-      vscode.window.showErrorMessage('Turbo File Header: Your workspace is not contain any folder');
+      errorHandler.handle(
+        new CustomError(
+          ErrorCode.WorkspaceFolderNotFound,
+          errorCodeMessages[ErrorCode.WorkspaceFolderNotFound],
+        ),
+      );
       return;
     }
 
@@ -41,15 +47,34 @@ export abstract class FileheaderLanguageProvider {
     }
 
     const templateDir = path.join(targetWorkspace.uri.fsPath, '.vscode');
-
     const templatePath = path.join(templateDir, CUSTOM_TEMPLATE_FILE_NAME);
-    // 使用access代替exists检查目录
+
     try {
-      await access(templateDir, constants.F_OK);
-    } catch (e) {
-      await mkdir(templateDir, { recursive: true });
+      // 读取fileheader.config.yaml文件内容
+      const content = fs.readFileSync(customTemplatePath, 'utf8');
+
+      // 确保目标目录存在
+      if (!fs.existsSync(templateDir)) {
+        fs.mkdirSync(templateDir, { recursive: true });
+      }
+
+      if (!fs.existsSync(templatePath)) {
+        // 将文件内容写入目标文件
+        fs.writeFileSync(templatePath, content);
+      }
+
+      // 打开新创建的文件
+      const document = await vscode.workspace.openTextDocument(templatePath);
+      vscode.window.showTextDocument(document);
+    } catch (error) {
+      errorHandler.handle(
+        new CustomError(
+          ErrorCode.GitGetCtimeFail,
+          errorCodeMessages[ErrorCode.GitGetCtimeFail],
+          error,
+        ),
+      );
     }
-    await writeFile(templatePath, customTemplateContent);
 
     const document = await vscode.workspace.openTextDocument(path.resolve(templatePath));
 

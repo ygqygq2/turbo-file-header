@@ -14,9 +14,9 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "paths": {
-      "@/*": ["src/*"],
-    },
+      "@/*": ["src/*"]
+    }
   },
-  "include": ["./src", "src/commands/reloadCustomTemplateProvider.ts"],
-  "exclude": ["node_modules", ".vscode-test"],
+  "include": ["./src"],
+  "exclude": ["node_modules", ".vscode-test"]
 }

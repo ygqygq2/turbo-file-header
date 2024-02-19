@@ -1,12 +1,14 @@
 import * as vscode from 'vscode';
-import { ErrorCode } from './ErrorHandler.enum';
+import { ErrorCode } from './ErrorCodeMessage.enum';
 
 export class CustomError extends Error {
   code: ErrorCode;
+  originalError: Error | undefined | unknown;
 
-  constructor(code: ErrorCode, message: string) {
+  constructor(code: ErrorCode, message: string, originalError?: Error | unknown) {
     super(message);
     this.code = code;
+    this.originalError = originalError;
   }
 }
 
@@ -24,6 +26,7 @@ class ErrorHandler {
   }
 
   public handle(error: CustomError) {
+    console.error(error.originalError);
     switch (error.code) {
       case ErrorCode.MissingUserNameEmail:
         vscode.window.showErrorMessage(

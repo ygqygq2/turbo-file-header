@@ -6,7 +6,9 @@ import { FileheaderVariableBuilder } from './FileheaderVariableBuilder';
 import { IFileheaderVariables } from '../typings/types';
 import { fileHashMemento } from './FileHashMemento';
 import { vscProvider } from '../vsc-provider';
-import {errorHandler} from '@/error/ErrorHandler';
+import { CustomError, errorHandler } from '@/error/ErrorHandler';
+import { ErrorCode, errorCodeMessages } from '@/error/ErrorCodeMessage.enum';
+import { VscodeInternalLanguageProvider } from '@/fileheader-language-providers/VscodeInternalLanguageProvider';
 
 type UpdateFileheaderManagerOptions = {
   silent?: boolean;
@@ -29,6 +31,11 @@ class FileheaderManager {
           provider.workspaceScopeUri?.path
       ) {
         return false;
+      }
+      // provider.languages 是空数组时，使用 VscodeInternalLanguageProvider
+      if (provider.languages.length === 0 && provider instanceof VscodeInternalLanguageProvider) {
+        provider.getBlockComment(languageId);
+        return true;
       }
       return provider.languages.some((l) => l === languageId);
     });
@@ -84,7 +91,12 @@ class FileheaderManager {
     if (!provider) {
       !silent &&
         !allowInsert &&
-        vscode.window.showErrorMessage('Turbo File Header: This language is not supported.');
+        errorHandler.handle(
+          new CustomError(
+            ErrorCode.LanguageNotSupport,
+            errorCodeMessages[ErrorCode.LanguageNotSupport],
+          ),
+        );
       return;
     }
 
@@ -103,8 +115,14 @@ class FileheaderManager {
         originFileheaderInfo.variables,
       );
     } catch (error) {
-        !silent && errorHandler(error);
-      }
+      !silent &&
+        errorHandler.handle(
+          new CustomError(
+            ErrorCode.VariableBuilderFail,
+            errorCodeMessages[ErrorCode.VariableBuilderFail],
+            error,
+          ),
+        );
       return;
     }
 

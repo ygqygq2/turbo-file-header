@@ -1,7 +1,7 @@
 import { BaseVCSProvider } from './types';
 import { GitVCSProvider } from './GitVCSProvider';
 import { CustomError, errorHandler } from '@/error/ErrorHandler';
-import { ErrorCode } from '@/error/ErrorHandler.enum';
+import { ErrorCode } from '@/error/ErrorCodeMessage.enum';
 
 function createVCSProvider(): BaseVCSProvider {
   return new GitVCSProvider();

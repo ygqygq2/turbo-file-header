@@ -2,8 +2,6 @@ import * as vscode from 'vscode';
 import { Configuration } from './configuration';
 
 export class Parser {
-  private expression: string = '';
-
   private delimiter: string = '';
 
   public blockCommentStart: string = '';
@@ -38,21 +36,8 @@ export class Parser {
    * @param languageId The short code of the current language
    * https://code.visualstudio.com/docs/languages/identifiers
    */
-  public async SetRegex(languageId: string) {
+  public async getBlockComment(languageId: string) {
     await this.setDelimiter(languageId);
-
-    // if the language isn't supported, we don't need to go any further
-    if (!this.supportedLanguage) {
-      return;
-    }
-
-    if (this.isPlainText && this.contributions.supportPlainText) {
-      // start by tying the regex to the first character in a line
-      this.expression = '(^)+([ \\t]*[ \\t]*)';
-    } else {
-      // start by finding the delimiter (//, --, #, ') with optional spaces or tabs
-      this.expression = '(' + this.delimiter + ')+( |\t)*';
-    }
   }
 
   /**
@@ -138,5 +123,9 @@ export class Parser {
       this.blockCommentStart = this.escapeRegExp(start);
       this.blockCommentEnd = this.escapeRegExp(end);
     }
+    vscode.window.showInformationMessage(
+      '🚀 ~ file: parser.ts:124 ~ this.blockCommentStart:',
+      this.blockCommentStart,
+    );
   }
 }

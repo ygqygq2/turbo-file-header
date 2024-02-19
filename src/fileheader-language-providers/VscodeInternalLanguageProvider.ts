@@ -2,14 +2,37 @@ import { Configuration } from '@/utils/configuration';
 import { IFileheaderVariables, ITemplateFunction } from '../typings/types';
 import { FileheaderLanguageProvider } from './FileheaderLanguageProvider';
 import { Parser } from '@/utils/parser';
-export class VscodeInternalLanguageProvider extends FileheaderLanguageProvider {
-  private configuration: Configuration = new Configuration();
-  private parser: Parser = new Parser(this.configuration);
+import * as vscode from 'vscode';
 
+export class VscodeInternalLanguageProvider extends FileheaderLanguageProvider {
+  private parser: Parser;
+  private configuration: Configuration;
+  constructor() {
+    super();
+    this.configuration = new Configuration();
+    this.parser = new Parser(this.configuration);
+  }
   readonly languages: string[] = [];
 
-  blockCommentStart: string = this.parser.blockCommentStart;
-  blockCommentEnd: string = this.parser.blockCommentEnd;
+  public getBlockComment = (languageId: string) => {
+    this.parser.getBlockComment(languageId);
+  };
+
+  get blockCommentStart(): string {
+    if (this.parser) {
+      return this.parser.blockCommentStart;
+    } else {
+      return '';
+    }
+  }
+
+  get blockCommentEnd(): string {
+    if (this.parser) {
+      return this.parser.blockCommentEnd;
+    } else {
+      return '';
+    }
+  }
 
   override getTemplate(tpl: ITemplateFunction, variables: IFileheaderVariables) {
     const hasAuthor = variables.authorName;
@@ -25,10 +48,12 @@ export class VscodeInternalLanguageProvider extends FileheaderLanguageProvider {
     const companyNameLine =
       variables.companyName && tpl`\n * Copyright © ${variables.companyName} All rights reserved`;
 
+    vscode.window.showInformationMessage(
+      '🚀 ~ file: VscodeInternalLanguageProvider.ts:46 ~ blockCommentStart:',
+      this.blockCommentStart,
+    );
     // prettier-ignore
-    return tpl
-`/**${authorLine}${ctimeLine}${lastModifiedLine}${companyNameLine}
- */`;
+    return tpl `${this.blockCommentStart}\n${authorLine}${ctimeLine}${lastModifiedLine}${companyNameLine}\n${this.blockCommentEnd}`;
 
     // like this:
     /**
