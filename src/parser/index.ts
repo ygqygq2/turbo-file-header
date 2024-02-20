@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { useBlockPicker } from './block-picker';
 import { useLinePicker } from './line-picker';
 import configuration from '@/configuration';
+import { TagFlatten } from '@/configuration/types';
 
 export type LinePicker = ReturnType<typeof useLinePicker>;
 export type BlockPicker = ReturnType<typeof useBlockPicker>;
@@ -43,7 +44,7 @@ function generateTagDecorations() {
 /**
  * Parse decoration render option by tag configuration
  */
-function parseDecorationRenderOption(tag: configuration.TagFlatten) {
+function parseDecorationRenderOption(tag: TagFlatten) {
   const options: vscode.DecorationRenderOptions = {
     color: tag.color,
     backgroundColor: tag.backgroundColor,
@@ -67,7 +68,7 @@ function parseDecorationRenderOption(tag: configuration.TagFlatten) {
 
 export function useParser() {
   // Vscode active editor
-  let activedEditor: vscode.TextEditor | undefined;
+  let activeEditor: vscode.TextEditor | undefined;
 
   let tagDecorations: TagDecoration[] = generateTagDecorations();
   configuration.onDidChange(() => {
@@ -84,47 +85,47 @@ export function useParser() {
     return linePicker;
   }
 
-  const blockPickes = new Map<string, BlockPicker>();
+  const blockPickers = new Map<string, BlockPicker>();
   function getBlockPicker(languageId: string) {
-    let blockPicker = blockPickes.get(languageId);
+    let blockPicker = blockPickers.get(languageId);
     if (!blockPicker) {
       blockPicker = useBlockPicker(languageId);
-      blockPickes.set(languageId, blockPicker);
+      blockPickers.set(languageId, blockPicker);
     }
     return blockPicker;
   }
 
   /**
-   * Get actived editor
+   * Get active editor
    */
   function getEditor() {
-    return activedEditor;
+    return activeEditor;
   }
 
   /**
    * Switch editor for parser and setup pickers
    */
   async function setEditor(editor: vscode.TextEditor) {
-    activedEditor = editor;
+    activeEditor = editor;
   }
 
   /**
    * Apply decorations after finding all relevant comments
    */
   async function updateDecorationsDirectly(): Promise<void> {
-    if (!activedEditor) {
+    if (!activeEditor) {
       return;
     }
 
     const [linePicker, blockPicker] = await Promise.all([
-      getLinePicker(activedEditor.document.languageId),
-      getBlockPicker(activedEditor.document.languageId),
+      getLinePicker(activeEditor.document.languageId),
+      getBlockPicker(activeEditor.document.languageId),
     ]);
 
-    const blockPicked = await blockPicker.pick({ editor: activedEditor });
+    const blockPicked = await blockPicker.pick({ editor: activeEditor });
     const linePicked = await linePicker.pick({
       skipRanges: blockPicked.blockRanges,
-      editor: activedEditor,
+      editor: activeEditor,
     });
 
     for (const td of tagDecorations) {
@@ -134,14 +135,14 @@ export function useParser() {
       const lineOpts = (linePicked?.decorationOptions.filter((opt) => opt.tag === lowerTag) ||
         []) as vscode.DecorationOptions[];
 
-      activedEditor.setDecorations(td.decorationType, [...blockOpts, ...lineOpts]);
+      activeEditor.setDecorations(td.decorationType, [...blockOpts, ...lineOpts]);
     }
   }
 
   // * IMPORTANT:
   // * To avoid calling update too often,
   // * set a timer for 100ms to wait before updating decorations
-  let triggerUpdateTimeout: NodeJS.Timer | undefined;
+  let triggerUpdateTimeout: NodeJS.Timeout;
   function updateDecorations(time: true | number = 100) {
     if (triggerUpdateTimeout) {
       clearTimeout(triggerUpdateTimeout);

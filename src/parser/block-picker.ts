@@ -7,7 +7,7 @@ import { TagDecorationOptions } from '.';
 export interface BlockPicker {
   markStart: string;
   markEnd: string;
-  blockpicker: RegExp;
+  blockPicker: RegExp;
   linePicker: RegExp;
   docLinePicker: RegExp;
   docLinePrefix: string;
@@ -32,7 +32,7 @@ async function parseBlockPickers(languageId: string) {
     return {
       markStart: marks[0],
       markEnd: marks[1],
-      blockpicker: new RegExp(
+      blockPicker: new RegExp(
         `(${start}+)([ \\t]?)(.*?)(${end})|(${start}+)([ \\t\\r\\n]?)([\\s\\S]*?)(${end})`,
         'gm',
       ),
@@ -52,11 +52,11 @@ interface _BlockPickOptions {
   text?: string;
   editor: vscode.TextEditor;
   picker?: BlockPicker;
-  hightlight?: boolean;
+  highlight?: boolean;
 }
 
 function _pick(options: _BlockPickOptions) {
-  const { editor, picker, hightlight = true } = options;
+  const { editor, picker, highlight: highlight = true } = options;
 
   if (!editor) {
     return;
@@ -77,10 +77,10 @@ function _pick(options: _BlockPickOptions) {
   // Find the multiline comment block
   let block: RegExpExecArray | null;
   // eslint-disable-next-line no-cond-assign
-  while ((block = picker.blockpicker.exec(options.text))) {
+  while ((block = picker.blockPicker.exec(options.text))) {
     blockRanges.push([block.index, block.index + block[0].length]);
 
-    if (!hightlight) {
+    if (!highlight) {
       continue;
     }
 
@@ -125,13 +125,18 @@ interface _BlockPickManyOptions extends Omit<_BlockPickOptions, 'picker'> {
 }
 
 function _pickMany(options: _BlockPickManyOptions) {
-  const { editor, pickers, text = editor.document.getText(), hightlight = true } = options;
+  const {
+    editor,
+    pickers,
+    text = editor.document.getText(),
+    highlight: highlight = true,
+  } = options;
 
   let blockRanges: [number, number][] = [];
   let decorationOptions: TagDecorationOptions[] = [];
 
   for (const picker of pickers) {
-    const picked = _pick({ editor, text, hightlight, picker });
+    const picked = _pick({ editor, text, highlight: highlight, picker });
 
     if (!picked) {
       continue;
@@ -175,7 +180,7 @@ export function useBlockPicker(languageId: string) {
     const configs = configuration.getConfigurationFlatten();
     const comments = await languages.getAvailableCommentRules(languageId);
 
-    const hightlight = comments.blockComments.length > 0 && configs.multilineComments;
+    const highlight = comments.blockComments.length > 0 && configs.multilineComments;
 
     const pickers = await getPickers();
 
@@ -183,7 +188,7 @@ export function useBlockPicker(languageId: string) {
       text,
       editor,
       pickers,
-      hightlight,
+      highlight: highlight,
     });
   }
 

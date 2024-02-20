@@ -18,8 +18,8 @@ export async function loadCommentRuleFromFile(
     const config = json5Parse(content) as vscode.LanguageConfiguration;
 
     return config.comments;
-  } catch (error: any) {
-    output.error(`Parse configuration file ${fileUri.toString()} failed: ${error.message}`);
+  } catch (error) {
+    output.error(`Parse configuration file ${fileUri.toString()} failed: ${error}`);
     return undefined;
   }
 }

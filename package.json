@@ -52,7 +52,7 @@
     "keybindings": [
       {
         "command": "turboFileHeader.addFileheader",
-        "key": "ctr+alt+h",
+        "key": "ctrl+alt+h",
         "mac": "ctrl+alt+h",
         "when": "editorTextFocus"
       }

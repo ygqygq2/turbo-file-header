@@ -2,13 +2,19 @@ import { escapeRegexString } from '@/utils/str';
 import * as vscode from 'vscode';
 import type { WorkspaceConfiguration } from 'vscode';
 import { Configuration, ConfigurationFlatten, Tag, TagFlatten } from './types';
+import { ErrorCode } from '@/error/ErrorCodeMessage.enum';
+import { CustomError, errorHandler } from '@/error/ErrorHandler';
 
 /**
  * Get better comments configuration
  */
 function getConfiguration() {
-  return vscode.workspace.getConfiguration('turbo-file-header') as Configuration &
+  const config = vscode.workspace.getConfiguration('TurboFileHeader') as Configuration &
     WorkspaceConfiguration;
+  if (!config) {
+    errorHandler.handle(new CustomError(ErrorCode.GetConfigurationFail));
+  }
+  return config;
 }
 
 // Cache configuration
@@ -21,6 +27,10 @@ export function getConfigurationFlatten(forceRefresh = false) {
     return configFlatten;
   }
   const orig = getConfiguration();
+
+  if (!orig) {
+    return;
+  }
 
   configFlatten = {
     multilineComments: orig.multilineComments,

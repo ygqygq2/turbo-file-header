@@ -16,6 +16,7 @@ export enum ErrorCode {
   VariableBuilderFail = 111,
   WorkspaceFolderNotFound = 112,
   LanguageNotSupport = 113,
+  GetConfigurationFail = 114,
 }
 
 const extensionPrefix = 'Turbo File Header: ';
@@ -34,4 +35,5 @@ export const errorCodeMessages: ErrorCodeMessage = {
   [ErrorCode.VariableBuilderFail]: `${extensionPrefix}${extensionPrefix}Failed to build variable.`,
   [ErrorCode.WorkspaceFolderNotFound]: `${extensionPrefix}Your workspace is not contain any folder.`,
   [ErrorCode.LanguageNotSupport]: `${extensionPrefix}This language is not supported.`,
+  [ErrorCode.GetConfigurationFail]: `${extensionPrefix}Failed to get configuration.`,
 };

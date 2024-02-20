@@ -26,7 +26,7 @@ function useLanguage(languageId: string, autoUpdateDefinition = true) {
 }
 
 /**
- * Init definitions if not inited
+ * Init definitions if not initd
  */
 export function initDefinitions() {
   if (languages.size === 0) {
