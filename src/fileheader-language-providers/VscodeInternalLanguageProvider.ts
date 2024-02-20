@@ -1,36 +1,29 @@
-import { Configuration } from '@/utils/configuration';
+import languages from '@/languages';
 import { IFileheaderVariables, ITemplateFunction } from '../typings/types';
 import { FileheaderLanguageProvider } from './FileheaderLanguageProvider';
-import { Parser } from '@/utils/parser';
 
 export class VscodeInternalLanguageProvider extends FileheaderLanguageProvider {
-  private parser: Parser;
-  private configuration: Configuration;
-  constructor() {
-    super();
-    this.configuration = new Configuration();
-    this.parser = new Parser(this.configuration);
-  }
   readonly languages: string[] = [];
+  private _blockCommentStart: string = '';
+  private _blockCommentEnd: string = '';
 
-  public getBlockComment = (languageId: string) => {
-    this.parser.getBlockComment(languageId);
+  public getBlockComment = async (languageId: string) => {
+    const comments = await languages.getAvailableCommentRules(languageId);
+    if (!comments.blockComments || !comments.blockComments.length) {
+      this._blockCommentStart = '';
+      this._blockCommentEnd = '';
+      return;
+    }
+    this._blockCommentStart = comments.blockComments[0][0];
+    this._blockCommentEnd = comments.blockComments[0][1];
   };
 
   get blockCommentStart(): string {
-    if (this.parser) {
-      return this.parser.blockCommentStart;
-    } else {
-      return '';
-    }
+    return this._blockCommentStart;
   }
 
   get blockCommentEnd(): string {
-    if (this.parser) {
-      return this.parser.blockCommentEnd;
-    } else {
-      return '';
-    }
+    return this._blockCommentEnd;
   }
 
   override getTemplate(tpl: ITemplateFunction, variables: IFileheaderVariables) {

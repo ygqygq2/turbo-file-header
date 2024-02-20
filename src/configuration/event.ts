@@ -1,10 +1,9 @@
 import * as vscode from 'vscode';
-import type { ConfigurationFlatten } from './configuration';
 import { getConfigurationFlatten } from './configuration';
-
-export type OnDidChangeCallback = (config: ConfigurationFlatten) => void;
+import { OnDidChangeCallback } from './types';
 
 const onDidChangeCallbacks: OnDidChangeCallback[] = [];
+
 export function onDidChange(callback: OnDidChangeCallback) {
   onDidChangeCallbacks.push(callback);
 }
@@ -13,7 +12,7 @@ let disposable: vscode.Disposable | undefined;
 export function registerEvent() {
   // Refresh configuration after configuration changed
   disposable = vscode.workspace.onDidChangeConfiguration((event) => {
-    if (!event.affectsConfiguration('better-comments')) {
+    if (!event.affectsConfiguration('TurboFileHeader')) {
       return;
     }
 

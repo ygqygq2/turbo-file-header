@@ -1,5 +1,5 @@
 import { ConfigSection } from '@/constants';
-import { extensionConfigManager } from '@/main/ExtensionConfigManager';
+import { ExtensionConfigManager } from '@/extension-operate/ExtensionConfigManager';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { WorkspaceConfiguration, workspace } from 'vscode';
 
@@ -26,12 +26,14 @@ describe('ExtensionConfigManager Tests', () => {
 
   it('应该获取到正确配置', () => {
     workspace.getConfiguration = vi.fn().mockReturnValueOnce(mockWorkspaceConfiguration);
+    const extensionConfigManager = new ExtensionConfigManager();
     const result = extensionConfigManager.get(ConfigSection.companyName);
     expect(result).toBe('mockValue');
   });
 
   it('应该设置成功正确配置', async () => {
     workspace.getConfiguration = vi.fn().mockReturnValue(mockWorkspaceConfiguration);
+    const extensionConfigManager = new ExtensionConfigManager();
     await extensionConfigManager.set(ConfigSection.userName, 'mockUsername');
     const result = extensionConfigManager.get(ConfigSection.userName);
     expect(result).toBe('mockUsername');

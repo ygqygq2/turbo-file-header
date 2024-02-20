@@ -1,4 +1,4 @@
-import { fileheaderManager } from '@/fileheader/FileheaderManager';
+import { fileheaderManager } from '@/extension';
 
 export const reloadCustomTemplateProvider = () => {
   return {

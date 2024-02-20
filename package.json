@@ -138,6 +138,209 @@
               "blockCommentEnd": "-->"
             }
           ]
+        },
+        "TurboFileHeader.multilineComments": {
+          "type": "boolean",
+          "description": "Whether the multiline comment highlighter should be active",
+          "default": true
+        },
+        "TurboFileHeader.highlightPlainText": {
+          "type": "boolean",
+          "description": "Whether the plaintext comment highlighter should be active",
+          "default": false
+        },
+        "TurboFileHeader.tags": {
+          "type": "array",
+          "description": "Tags which are used to color the comments.",
+          "items": {
+            "type": "object",
+            "title": "tag item",
+            "properties": {
+              "tag": {
+                "type": [
+                  "string",
+                  "array"
+                ],
+                "description": "Name of tag, case insensitive, could be string or string[]",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "color": {
+                "type": "string",
+                "description": "Font color, eg: #FF2D00"
+              },
+              "strikethrough": {
+                "type": "boolean",
+                "description": "Enable text strikethrough."
+              },
+              "underline": {
+                "type": "boolean",
+                "description": "Enable text underline."
+              },
+              "backgroundColor": {
+                "type": "string",
+                "description": "Background color, eg: transparent"
+              },
+              "bold": {
+                "type": "boolean",
+                "description": "Set text font style to bold."
+              },
+              "italic": {
+                "type": "boolean",
+                "description": "Set text font style to italic."
+              }
+            }
+          },
+          "default": [
+            {
+              "tag": "#",
+              "color": "#18b566",
+              "strikethrough": false,
+              "underline": false,
+              "backgroundColor": "transparent",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "tag": "!",
+              "color": "#FF2D00",
+              "strikethrough": false,
+              "underline": false,
+              "backgroundColor": "transparent",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "tag": "?",
+              "color": "#3498DB",
+              "strikethrough": false,
+              "underline": false,
+              "backgroundColor": "transparent",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "tag": "//",
+              "color": "#474747",
+              "strikethrough": true,
+              "underline": false,
+              "backgroundColor": "transparent",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "tag": [
+                "todo",
+                "to-do"
+              ],
+              "color": "#FF8C00",
+              "strikethrough": false,
+              "underline": false,
+              "backgroundColor": "transparent",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "tag": "*",
+              "color": "#98C379",
+              "strikethrough": false,
+              "underline": false,
+              "backgroundColor": "transparent",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        "TurboFileHeader.tagsLight": {
+          "type": "array",
+          "description": "Overwrite tags options for light themes",
+          "items": {
+            "type": "object",
+            "title": "tag item",
+            "properties": {
+              "tag": {
+                "type": [
+                  "string",
+                  "array"
+                ],
+                "description": "Name of tag, case insensitive, could be string or string[]",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "color": {
+                "type": "string",
+                "description": "Font color, eg: #FF2D00"
+              },
+              "strikethrough": {
+                "type": "boolean",
+                "description": "Enable text strikethrough."
+              },
+              "underline": {
+                "type": "boolean",
+                "description": "Enable text underline."
+              },
+              "backgroundColor": {
+                "type": "string",
+                "description": "Background color, eg: transparent"
+              },
+              "bold": {
+                "type": "boolean",
+                "description": "Set text font style to bold."
+              },
+              "italic": {
+                "type": "boolean",
+                "description": "Set text font style to italic."
+              }
+            }
+          },
+          "default": []
+        },
+        "TurboFileHeader.tagsDark": {
+          "type": "array",
+          "description": "Overwrite tags options for dark themes",
+          "items": {
+            "type": "object",
+            "title": "tag item",
+            "properties": {
+              "tag": {
+                "type": [
+                  "string",
+                  "array"
+                ],
+                "description": "Name of tag, case insensitive, could be string or string[]",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "color": {
+                "type": "string",
+                "description": "Font color, eg: #FF2D00"
+              },
+              "strikethrough": {
+                "type": "boolean",
+                "description": "Enable text strikethrough."
+              },
+              "underline": {
+                "type": "boolean",
+                "description": "Enable text underline."
+              },
+              "backgroundColor": {
+                "type": "string",
+                "description": "Background color, eg: transparent"
+              },
+              "bold": {
+                "type": "boolean",
+                "description": "Set text font style to bold."
+              },
+              "italic": {
+                "type": "boolean",
+                "description": "Set text font style to italic."
+              }
+            }
+          },
+          "default": []
         }
       }
     }

@@ -1,6 +1,4 @@
 import vscode from 'vscode';
-import { fileheaderProviderLoader } from './FileheaderProviderLoader';
-import { FileheaderLanguageProvider } from '../fileheader-language-providers';
 import { hasShebang } from '../utils/utils';
 import { FileheaderVariableBuilder } from './FileheaderVariableBuilder';
 import { IFileheaderVariables } from '../typings/types';
@@ -9,22 +7,29 @@ import { vscProvider } from '../vsc-provider';
 import { CustomError, errorHandler } from '@/error/ErrorHandler';
 import { ErrorCode, errorCodeMessages } from '@/error/ErrorCodeMessage.enum';
 import { VscodeInternalLanguageProvider } from '@/fileheader-language-providers/VscodeInternalLanguageProvider';
+import { FileheaderProviderLoader } from './FileheaderProviderLoader';
+import { FileheaderLanguageProvider } from '@/fileheader-language-providers';
 
 type UpdateFileheaderManagerOptions = {
   silent?: boolean;
   allowInsert?: boolean;
 };
 
-class FileheaderManager {
-  private _providers: FileheaderLanguageProvider[] = [];
+export class FileheaderManager {
+  private providers: FileheaderLanguageProvider[] = [];
+  private fileheaderProviderLoader: FileheaderProviderLoader;
+
+  constructor(fileheaderProviderLoader: FileheaderProviderLoader) {
+    this.fileheaderProviderLoader = fileheaderProviderLoader;
+  }
 
   public async loadProviders() {
-    this._providers = await fileheaderProviderLoader.loadProviders();
+    this.providers = await this.fileheaderProviderLoader.loadProviders();
   }
 
   private findProvider(document: vscode.TextDocument) {
     const languageId = document.languageId;
-    return this._providers.find((provider) => {
+    return this.providers.find((provider) => {
       if (
         provider.workspaceScopeUri &&
         vscode.workspace.getWorkspaceFolder(document.uri)?.uri.path !==
@@ -161,5 +166,3 @@ class FileheaderManager {
     }
   }
 }
-
-export const fileheaderManager = new FileheaderManager();

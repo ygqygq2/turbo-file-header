@@ -67,13 +67,7 @@ export abstract class FileheaderLanguageProvider {
       const document = await vscode.workspace.openTextDocument(templatePath);
       vscode.window.showTextDocument(document);
     } catch (error) {
-      errorHandler.handle(
-        new CustomError(
-          ErrorCode.GitGetCtimeFail,
-          errorCodeMessages[ErrorCode.GitGetCtimeFail],
-          error,
-        ),
-      );
+      errorHandler.handle(new CustomError(ErrorCode.GitGetCtimeFail, error));
     }
 
     const document = await vscode.workspace.openTextDocument(path.resolve(templatePath));
@@ -148,7 +142,7 @@ export abstract class FileheaderLanguageProvider {
       this.accessVariableFields.add(p as keyof IFileheaderVariables);
 
     const proxyVariables = new Proxy(WILDCARD_ACCESS_VARIABLES, {
-      get(target, p, receiver) {
+      get(target, p, _receiver) {
         addVariableAccess(p as string);
         return Reflect.get(target, p);
       },

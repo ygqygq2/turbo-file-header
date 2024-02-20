@@ -1,7 +1,7 @@
 import vscode from 'vscode';
 import { ConfigSection } from '../constants';
 
-class ExtensionConfigManager {
+export class ExtensionConfigManager {
   private get _config() {
     return vscode.workspace.getConfiguration();
   }
@@ -14,5 +14,3 @@ class ExtensionConfigManager {
     await this._config.update(section, value);
   }
 }
-
-export const extensionConfigManager = new ExtensionConfigManager();

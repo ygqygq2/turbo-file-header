@@ -1,6 +1,6 @@
 import { internalProviders, FileheaderLanguageProvider } from '../fileheader-language-providers';
 
-class FileheaderProviderLoader {
+export class FileheaderProviderLoader {
   public async loadProviders(): Promise<FileheaderLanguageProvider[]> {
     const customProviders = await this.loadCustomProvers();
 
@@ -12,5 +12,3 @@ class FileheaderProviderLoader {
     return providers;
   }
 }
-
-export const fileheaderProviderLoader = new FileheaderProviderLoader();

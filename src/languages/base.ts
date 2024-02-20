@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { parse as json5Parse } from 'json5';
+import output from '@/error/output';
 
 export async function loadCommentRuleFromFile(
   fileUri?: vscode.Uri,
@@ -18,7 +19,7 @@ export async function loadCommentRuleFromFile(
 
     return config.comments;
   } catch (error: any) {
-    console.error(`Parse configuration file ${fileUri.toString()} failed: ${error.message}`);
+    output.error(`Parse configuration file ${fileUri.toString()} failed: ${error.message}`);
     return undefined;
   }
 }

@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { Command } from '@/typings/types';
-import { fileheaderManager } from '@/fileheader/FileheaderManager';
+import { fileheaderManager } from '@/extension';
 
 export const addFileheader = (): Command => {
   return {
