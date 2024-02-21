@@ -1,23 +1,22 @@
 import * as vscode from 'vscode';
-import configuration from '@/configuration';
-import languages from '@/languages';
 import { escapeRegexString } from '@/utils/str';
+import { configEvent, configManager, languageEvent, languageManager } from '@/extension';
 import { TagDecorationOptions } from '.';
 
 async function parseLinePicker(languageId: string) {
-  const configs = configuration.getConfigurationFlatten();
+  const configs = configManager.getConfigurationFlatten();
 
-  const escapedTags = configs.tags.map((tag) => tag.tagEscaped);
+  const escapedTags = configs?.tags.map((tag) => tag.tagEscaped) || [];
 
   if (languageId === 'plaintext') {
-    if (!configs.highlightPlainText) {
+    if (!configs?.highlightPlainText) {
       return;
     }
 
     return new RegExp(`(^)([ \\t]*)(${escapedTags.join('|')})+(.*)`, 'igm');
   }
 
-  const comments = await languages.getAvailableCommentRules(languageId);
+  const comments = await languageManager.getAvailableCommentRules(languageId);
 
   if (!comments.lineComments || !comments.lineComments.length) {
     return;
@@ -84,12 +83,12 @@ export function useLinePicker(languageId: string) {
     return _picker!;
   }
 
-  languages.onDidChange(() => {
+  languageEvent.onDidChange(() => {
     _picker = undefined;
     getPicker(); // Init picker once
   });
 
-  configuration.onDidChange(() => {
+  configEvent.onDidChange(() => {
     _picker = undefined;
     getPicker(); // Init picker once
   });

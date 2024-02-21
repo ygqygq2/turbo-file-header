@@ -1,22 +1,19 @@
 import * as vscode from 'vscode';
-import { ExtensionConfigManager } from './ExtensionConfigManager';
+import { ConfigManager } from '../configuration/ConfigManager';
 import { FileheaderManager } from '../fileheader/FileheaderManager';
 import { CUSTOM_TEMPLATE_FILE_NAME, ConfigSection } from '@/constants';
 
 export class DocumentHandler {
-  private extensionConfigManager: ExtensionConfigManager;
+  private configManager: ConfigManager;
   private fileheaderManager: FileheaderManager;
 
-  constructor(
-    extensionConfigManager: ExtensionConfigManager,
-    fileheaderManager: FileheaderManager,
-  ) {
-    this.extensionConfigManager = extensionConfigManager;
+  constructor(configManager: ConfigManager, fileheaderManager: FileheaderManager) {
+    this.configManager = configManager;
     this.fileheaderManager = fileheaderManager;
   }
 
   public onCreateDocument = async (e: vscode.FileCreateEvent) => {
-    const enabled = this.extensionConfigManager.get<boolean>(ConfigSection.autoInsertOnCreateFile);
+    const enabled = this.configManager.get<boolean>(ConfigSection.autoInsertOnCreateFile);
     if (!enabled) {
       return;
     }
@@ -34,7 +31,7 @@ export class DocumentHandler {
   };
 
   public onSaveDocument = (e: vscode.TextDocumentWillSaveEvent) => {
-    const enabled = this.extensionConfigManager.get<boolean>(ConfigSection.autoUpdateOnSave);
+    const enabled = this.configManager.get<boolean>(ConfigSection.autoUpdateOnSave);
     if (!enabled) {
       return;
     }

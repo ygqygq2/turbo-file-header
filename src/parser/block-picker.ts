@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
-import configuration from '@/configuration';
-import languages from '@/languages';
 import { escapeRegexString } from '@/utils/str';
+import { configEvent, configManager, languageEvent, languageManager } from '@/extension';
 import { TagDecorationOptions } from '.';
 
 export interface BlockPicker {
@@ -14,13 +13,13 @@ export interface BlockPicker {
 }
 
 async function parseBlockPickers(languageId: string) {
-  const comments = await languages.getAvailableCommentRules(languageId);
+  const comments = await languageManager.getAvailableCommentRules(languageId);
 
   if (!comments.blockComments || !comments.blockComments.length) {
     return [];
   }
 
-  const configs = configuration.getConfigurationFlatten();
+  const configs = configManager.getConfigurationFlatten();
 
   const escapedTags = configs.tags.map((tag) => tag.tagEscaped);
 
@@ -165,20 +164,20 @@ export function useBlockPicker(languageId: string) {
     return _pickers;
   }
 
-  languages.onDidChange(() => {
+  languageEvent.onDidChange(() => {
     _pickers = undefined;
     getPickers(); // Init pickers once
   });
 
-  configuration.onDidChange(() => {
+  configEvent.onDidChange(() => {
     _pickers = undefined;
     getPickers(); // Init pickers once
   });
 
   async function pick({ editor }: PickOptions) {
     const text = editor.document.getText();
-    const configs = configuration.getConfigurationFlatten();
-    const comments = await languages.getAvailableCommentRules(languageId);
+    const configs = configManager.getConfigurationFlatten();
+    const comments = await languageManager.getAvailableCommentRules(languageId);
 
     const highlight = comments.blockComments.length > 0 && configs.multilineComments;
 

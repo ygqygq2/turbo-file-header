@@ -4,31 +4,38 @@ import { getAllCommands } from '@/commands';
 import { FileheaderManager } from '@/fileheader/FileheaderManager';
 import { FileWatcher } from './FileWatcher';
 import { Command } from '@/typings/types';
-import configuration from '@/configuration';
 import { useParser } from '@/parser';
-import languages from '@/languages';
+import { ConfigEvent } from '@/configuration/ConfigEvent';
+import { LanguageEvent } from '@/languages/LanguageEvent';
 
 export class ExtensionActivator {
+  private configEvent: ConfigEvent;
+  private languageEvent: LanguageEvent;
   private disposers: vscode.Disposable[] = [];
   private watcher: FileWatcher;
   private documentHandler: DocumentHandler;
   private fileheaderManager: FileheaderManager;
 
   constructor(
+    configEvent: ConfigEvent,
+    languageEvent: LanguageEvent,
     watcher: FileWatcher,
     documentHandler: DocumentHandler,
     fileheaderManager: FileheaderManager,
   ) {
+    this.configEvent = configEvent;
+    this.languageEvent = languageEvent;
     this.watcher = watcher;
     this.documentHandler = documentHandler;
     this.fileheaderManager = fileheaderManager;
   }
 
   activate = async (context: vscode.ExtensionContext) => {
-    configuration.activate();
-    languages.activate();
     const parser = useParser();
     await this.fileheaderManager.loadProviders();
+
+    this.disposers.push(this.configEvent.registerEvent());
+    this.disposers.push(this.languageEvent.registerEvent());
 
     // 获取所有命令
     const commands: Array<Command> = getAllCommands();

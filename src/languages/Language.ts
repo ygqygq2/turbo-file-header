@@ -1,10 +1,6 @@
 import type * as vscode from 'vscode';
 import { getBaseCommentRule, loadCommentRuleFromFile } from './base';
-
-export interface AvailableComments {
-  lineComments: string[];
-  blockComments: vscode.CharacterPair[];
-}
+import { AvailableComments } from './types';
 
 export default class Language {
   public readonly languageId: string;
@@ -90,14 +86,14 @@ export default class Language {
   }
 
   /**
-   * Get avaiable comments
+   * Get available comments
    */
   getAvailableComments() {
     return this.availableComments;
   }
 
   /**
-   * Set avaiable comments
+   * Set available comments
    */
   setAvailableComments(comments: AvailableComments) {
     this.availableComments = comments;

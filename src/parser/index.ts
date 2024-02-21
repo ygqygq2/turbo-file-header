@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { useBlockPicker } from './block-picker';
 import { useLinePicker } from './line-picker';
-import configuration from '@/configuration';
+import { configEvent, configManager } from '@/extension';
 import { TagFlatten } from '@/configuration/types';
 
 export type LinePicker = ReturnType<typeof useLinePicker>;
@@ -17,7 +17,7 @@ export interface TagDecoration {
 }
 
 function generateTagDecorations() {
-  const configs = configuration.getConfigurationFlatten();
+  const configs = configManager.getConfigurationFlatten();
   const decorations: TagDecoration[] = [];
   for (const tag of configs.tags) {
     const opt = parseDecorationRenderOption(tag);
@@ -71,7 +71,7 @@ export function useParser() {
   let activeEditor: vscode.TextEditor | undefined;
 
   let tagDecorations: TagDecoration[] = generateTagDecorations();
-  configuration.onDidChange(() => {
+  configEvent.onDidChange(() => {
     tagDecorations = generateTagDecorations();
   });
 
@@ -157,7 +157,7 @@ export function useParser() {
   }
 
   // Update decorations when configuration changed
-  configuration.onDidChange(updateDecorationsDirectly);
+  configEvent.onDidChange(updateDecorationsDirectly);
 
   return {
     getEditor,

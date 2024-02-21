@@ -1,4 +1,4 @@
-import languages from '@/languages';
+import { languageManager } from '@/extension';
 import { IFileheaderVariables, ITemplateFunction } from '../typings/types';
 import { FileheaderLanguageProvider } from './FileheaderLanguageProvider';
 
@@ -8,7 +8,7 @@ export class VscodeInternalLanguageProvider extends FileheaderLanguageProvider {
   private _blockCommentEnd: string = '';
 
   public getBlockComment = async (languageId: string) => {
-    const comments = await languages.getAvailableCommentRules(languageId);
+    const comments = await languageManager.getAvailableCommentRules(languageId);
     if (!comments.blockComments || !comments.blockComments.length) {
       this._blockCommentStart = '';
       this._blockCommentEnd = '';

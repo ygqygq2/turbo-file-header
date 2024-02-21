@@ -19,7 +19,7 @@ export enum ErrorCode {
   GetConfigurationFail = 114,
 }
 
-const extensionPrefix = 'Turbo File Header: ';
+const extensionPrefix = '';
 
 export const errorCodeMessages: ErrorCodeMessage = {
   [ErrorCode.MissingUserNameEmail]: `${extensionPrefix}Missing user name and email.`,

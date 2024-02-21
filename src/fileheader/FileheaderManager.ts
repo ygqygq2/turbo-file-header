@@ -2,13 +2,14 @@ import vscode from 'vscode';
 import { hasShebang } from '../utils/utils';
 import { FileheaderVariableBuilder } from './FileheaderVariableBuilder';
 import { IFileheaderVariables } from '../typings/types';
-import { fileHashMemento } from './FileHashMemento';
+import { FileHashMemento } from './FileHashMemento';
 import { vscProvider } from '../vsc-provider';
 import { CustomError, errorHandler } from '@/error/ErrorHandler';
 import { ErrorCode, errorCodeMessages } from '@/error/ErrorCodeMessage.enum';
 import { VscodeInternalLanguageProvider } from '@/fileheader-language-providers/VscodeInternalLanguageProvider';
 import { FileheaderProviderLoader } from './FileheaderProviderLoader';
 import { FileheaderLanguageProvider } from '@/fileheader-language-providers';
+import output from '@/error/output';
 
 type UpdateFileheaderManagerOptions = {
   silent?: boolean;
@@ -18,9 +19,14 @@ type UpdateFileheaderManagerOptions = {
 export class FileheaderManager {
   private providers: FileheaderLanguageProvider[] = [];
   private fileheaderProviderLoader: FileheaderProviderLoader;
+  private fileHashMemento: FileHashMemento;
 
-  constructor(fileheaderProviderLoader: FileheaderProviderLoader) {
+  constructor(
+    fileheaderProviderLoader: FileheaderProviderLoader,
+    fileHashMemento: FileHashMemento,
+  ) {
     this.fileheaderProviderLoader = fileheaderProviderLoader;
+    this.fileHashMemento = fileHashMemento;
   }
 
   public async loadProviders() {
@@ -84,7 +90,7 @@ export class FileheaderManager {
     const isTracked = await vscProvider.isTracked(document.fileName);
     const hasChanged = isTracked && (await vscProvider.hasChanged(document.fileName));
 
-    return !hasChanged && fileHashMemento.has(document);
+    return !hasChanged && this.fileHashMemento.has(document);
   }
 
   public async updateFileheader(
@@ -126,6 +132,7 @@ export class FileheaderManager {
 
     const editor = await vscode.window.showTextDocument(document);
     const fileheader = provider.getFileheader(fileheaderVariable);
+    output.info('🚀 ~ file: FileheaderManager.ts:129 ~ fileheader:', fileheader);
 
     const shouldSkipReplace =
       originFileheaderInfo.start !== -1 &&
@@ -157,12 +164,12 @@ export class FileheaderManager {
       await document.save();
     }
 
-    fileHashMemento.set(document);
+    this.fileHashMemento.set(document);
   }
 
   public recordOriginFileHash(documents: readonly vscode.TextDocument[]) {
     for (const document of documents) {
-      fileHashMemento.set(document);
+      this.fileHashMemento.set(document);
     }
   }
 }

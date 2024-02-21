@@ -2,7 +2,7 @@ import vscode from 'vscode';
 import { difference } from 'lodash';
 import { getStringHash } from '../utils/utils';
 
-class FileHashMemento {
+export class FileHashMemento {
   records: Map<string, string> = new Map();
 
   private calculate(source: string) {
@@ -38,5 +38,3 @@ class FileHashMemento {
     return skipCheckHash || this.calculate(document.getText()) === originHash;
   }
 }
-
-export const fileHashMemento = new FileHashMemento();

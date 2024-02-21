@@ -9,6 +9,7 @@ export class GitVCSProvider implements BaseVCSProvider {
   async validate(repoPath: string): Promise<void> {
     try {
       await exec('git status', { cwd: repoPath });
+      // output.info('git status 执行成功');
     } catch (error) {
       errorHandler.handle(new CustomError(ErrorCode.GitNotInit, error));
     }
