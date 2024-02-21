@@ -7,7 +7,7 @@ import { vscProvider } from '../vsc-provider';
 import { stat } from 'fs/promises';
 import { ConfigSection, TEMPLATE_VARIABLE_KEYS } from '../constants';
 import { difference } from 'lodash';
-import { FileheaderLanguageProvider } from '../fileheader-language-providers';
+import { FileheaderLanguageProvider } from '../language-providers';
 import upath from 'upath';
 
 /**

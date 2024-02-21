@@ -1,10 +1,9 @@
 import * as vscode from 'vscode';
 import { languageManager } from '@/extension';
 import { IFileheaderVariables, ITemplateFunction } from '../typings/types';
-import { FileheaderLanguageProvider } from './FileheaderLanguageProvider';
-import output from '@/error/output';
+import { LanguageProvider } from './LanguageProvider';
 
-export class VscodeInternalLanguageProvider extends FileheaderLanguageProvider {
+export class VscodeInternalProvider extends LanguageProvider {
   readonly languages: string[] = [];
   private comments: vscode.CommentRule | undefined;
   public blockCommentStart: string = '';
@@ -29,21 +28,13 @@ export class VscodeInternalLanguageProvider extends FileheaderLanguageProvider {
 
     const hasAuthor = variables.authorName;
     const authorEmailPart = !!variables.authorEmail && tpl`<${variables.authorEmail}>`;
-
     const authorLine =
       hasAuthor && tpl` * @author        ${variables.authorName} ${authorEmailPart}\n`;
-
     const ctimeLine = variables.ctime && tpl` * @date          ${variables.ctime}\n`;
-
     const lastModifiedLine = variables.mtime && tpl` * @lastModified  ${variables.mtime}\n`;
-
     const companyNameLine =
       variables.companyName && tpl` * Copyright © ${variables.companyName} All rights reserved\n`;
 
-    output.info(
-      '🚀 ~ file: VscodeInternalLanguageProvider.ts:45 ~ this.blockCommentStart:',
-      this.blockCommentStart,
-    );
     return tpl`${this.blockCommentStart}\n${authorLine}${ctimeLine}${lastModifiedLine}${companyNameLine}${this.blockCommentEnd}`;
 
     // like this:

@@ -9,6 +9,7 @@ import { ConfigEvent } from '@/configuration/ConfigEvent';
 import { LanguageEvent } from '@/languages/LanguageEvent';
 
 export class ExtensionActivator {
+  private static _context: vscode.ExtensionContext;
   private configEvent: ConfigEvent;
   private languageEvent: LanguageEvent;
   private disposers: vscode.Disposable[] = [];
@@ -41,8 +42,8 @@ export class ExtensionActivator {
     const commands: Array<Command> = getAllCommands();
     // 遍历所有命令，注册命令
     for (const { name, handler } of commands) {
-      vscode.commands.registerCommand(name, (args: unknown[]) => {
-        handler(args);
+      vscode.commands.registerCommand(name, (...args: unknown[]) => {
+        handler(args, context);
       });
     }
 
@@ -97,5 +98,9 @@ export class ExtensionActivator {
     for (const disposer of this.disposers) {
       disposer.dispose();
     }
+  };
+
+  getExtensionContext = (): vscode.ExtensionContext => {
+    return _context;
   };
 }

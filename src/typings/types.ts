@@ -1,3 +1,4 @@
+import * as vscode from 'vscode';
 import { TEMPLATE_SYMBOL_KEY } from '../constants';
 
 export type TemplateInterpolation = string | number | null | undefined | boolean | Template;
@@ -79,5 +80,5 @@ export type IFileheaderVariables = {
 
 export type Command = {
   name: string;
-  handler: (args?: unknown[]) => Promise<void>;
+  handler: (args?: unknown[] | undefined, context?: vscode.ExtensionContext) => Promise<void>;
 };

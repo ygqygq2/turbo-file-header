@@ -1,8 +1,8 @@
 import upath from 'upath';
 import { IFileheaderVariables, ITemplateFunction } from '../typings/types';
-import { FileheaderLanguageProvider } from './FileheaderLanguageProvider';
+import { LanguageProvider } from './LanguageProvider';
 
-export class VueTurboFileHeadervider extends FileheaderLanguageProvider {
+export class VueProvider extends LanguageProvider {
   readonly languages: string[] = ['vue'];
 
   blockCommentStart: string = '<!--';
@@ -11,18 +11,15 @@ export class VueTurboFileHeadervider extends FileheaderLanguageProvider {
   override getTemplate(tpl: ITemplateFunction, variables: IFileheaderVariables) {
     const authorEmailPart = variables.authorEmail && `<${variables.authorEmail}>`;
     const authorLine =
-      variables.authorName && `\nauthor:        ${variables.authorName} ${authorEmailPart}`;
-    const ctimeLine = variables.ctime && `\ndate:          ${variables.ctime}`;
-    const lastModifiedLine = variables.mtime && `\nlastModified  ${variables.mtime}`;
+      variables.authorName && `author:        ${variables.authorName} ${authorEmailPart}\n`;
+    const ctimeLine = variables.ctime && `date:          ${variables.ctime}\n`;
+    const lastModifiedLine = variables.mtime && `lastModified  ${variables.mtime}\n`;
     const companyNameLine =
-      variables.companyName && `\nCopyright © ${variables.companyName} All rights reserved`;
-
+      variables.companyName && `Copyright © ${variables.companyName} All rights reserved\n`;
     const componentLine =
-      variables.fileName && tpl`\ncomponent:     ${upath.trimExt(variables.fileName)}`;
-    // prettier-ignore
-    return tpl
-`<!--${authorLine}${ctimeLine}${lastModifiedLine}${componentLine}${companyNameLine}
--->`;
+      variables.fileName && tpl`component:     ${upath.trimExt(variables.fileName)}\n`;
+
+    return tpl`${this.blockCommentStart}\n${authorLine}${ctimeLine}${lastModifiedLine}${componentLine}${companyNameLine}${this.blockCommentEnd}`;
 
     // like this:
     /*

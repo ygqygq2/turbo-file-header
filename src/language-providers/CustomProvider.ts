@@ -1,7 +1,7 @@
 import { IFileheaderVariables, ITemplateFunction } from '@/typings/types';
-import { FileheaderLanguageProvider } from './FileheaderLanguageProvider';
+import { LanguageProvider } from './LanguageProvider';
 
-export class CustomLanguageProvider extends FileheaderLanguageProvider {
+export class CustomProvider extends LanguageProvider {
   /**
    * @type {string[]}
    */

@@ -1,7 +1,7 @@
 import { IFileheaderVariables, ITemplateFunction } from '../typings/types';
-import { FileheaderLanguageProvider } from './FileheaderLanguageProvider';
+import { LanguageProvider } from './LanguageProvider';
 
-export class CSSLanguageProvider extends FileheaderLanguageProvider {
+export class CSSProvider extends LanguageProvider {
   readonly languages: string[] = ['css', 'less', 'scss'];
   blockCommentStart: string = '/*';
   blockCommentEnd: string = '*/';
@@ -9,21 +9,15 @@ export class CSSLanguageProvider extends FileheaderLanguageProvider {
   override getTemplate(tpl: ITemplateFunction, variables: IFileheaderVariables) {
     const hasAuthor = variables.authorName;
     const authorEmailPart = !!variables.authorEmail && tpl`<${variables.authorEmail}>`;
-
     const authorLine =
-      hasAuthor && tpl`\n * @author        ${variables.authorName} ${authorEmailPart}`;
-
-    const ctimeLine = variables.ctime && tpl`\n * @date          ${variables.ctime}`;
-
-    const lastModifiedLine = variables.mtime && tpl`\n * @lastModified  ${variables.mtime}`;
-
+      hasAuthor && tpl` * @author        ${variables.authorName} ${authorEmailPart}\n`;
+    const ctimeLine = variables.ctime && tpl` * @date          ${variables.ctime}\n`;
+    const lastModifiedLine = variables.mtime && tpl` * @lastModified  ${variables.mtime}\n`;
     const companyNameLine =
-      variables.companyName && tpl`\n * Copyright © ${variables.companyName} All rights reserved`;
+      variables.companyName &&
+      tpl`\n * Copyright © ${variables.companyName} All rights reserved\n`;
 
-    // prettier-ignore
-    return tpl
-`/*${authorLine}${ctimeLine}${lastModifiedLine}${companyNameLine}
- */`;
+    return tpl`${this.blockCommentStart}\n${authorLine}${ctimeLine}${lastModifiedLine}${companyNameLine}${this.blockCommentEnd}`;
 
     // like this:
     /*

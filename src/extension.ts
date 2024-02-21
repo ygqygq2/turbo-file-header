@@ -9,6 +9,7 @@ import { LanguageManager } from './languages/LanguageManager';
 import { LanguageEvent } from './languages/LanguageEvent';
 import { FileHashMemento } from './fileheader/FileHashMemento';
 import { ErrorHandler } from './error/ErrorHandler';
+import { GenerateTemplateConfig } from './fileheader/GenerateTemplateConfig';
 
 export const errorHandler = ErrorHandler.getInstance();
 export const configManager = ConfigManager.getInstance();
@@ -21,6 +22,7 @@ const fileHashMemento = new FileHashMemento();
 export const fileheaderManager = new FileheaderManager(fileheaderProviderLoader, fileHashMemento);
 const fileWatcher = new FileWatcher(fileheaderManager);
 const documentHandler = new DocumentHandler(configManager, fileheaderManager);
+export const generateCustomTemplate = GenerateTemplateConfig.getInstance();
 export const extension = new ExtensionActivator(
   configEvent,
   languageEvent,

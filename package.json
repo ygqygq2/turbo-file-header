@@ -3,7 +3,7 @@
   "displayName": "Turbo File Header",
   "description": "Sets file header information globally or for a project.",
   "version": "0.0.1",
-  "icon": "icon.png",
+  "icon": "resources/icons/icon.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/ygqygq2/turbo-file-header"
@@ -45,8 +45,8 @@
         "title": "Turbo File Header: Add Fileheader"
       },
       {
-        "command": "turboFileHeader.generateCustomTemplate",
-        "title": "Turbo File Header: Generate Custom Fileheader Template"
+        "command": "turboFileHeader.generateTemplateConfig",
+        "title": "Turbo File Header: Generate Custom Template Config File"
       }
     ],
     "keybindings": [
@@ -342,7 +342,13 @@
           },
           "default": []
         }
-      }
+      },
+      "resources": [
+        {
+          "uri": "./resources/fileheader.config.yaml",
+          "path": "/fileheader.config.yaml"
+        }
+      ]
     }
   },
   "scripts": {

@@ -1,7 +1,7 @@
 import { IFileheaderVariables, ITemplateFunction } from '../typings/types';
-import { FileheaderLanguageProvider } from './FileheaderLanguageProvider';
+import { LanguageProvider } from './LanguageProvider';
 
-export class PythonTurboFileHeadervider extends FileheaderLanguageProvider {
+export class PythonProvider extends LanguageProvider {
   readonly languages: string[] = ['python'];
 
   blockCommentStart: string = "'''";
@@ -10,16 +10,13 @@ export class PythonTurboFileHeadervider extends FileheaderLanguageProvider {
   override getTemplate(tpl: ITemplateFunction, variables: IFileheaderVariables) {
     const authorEmailPart = variables.authorEmail && `<${variables.authorEmail}>`;
     const authorLine =
-      variables.authorName && `\nauthor:        ${variables.authorName} ${authorEmailPart}`;
-    const ctimeLine = variables.ctime && `\ndate:          ${variables.ctime}`;
-    const lastModifiedLine = variables.mtime && `\nlastModified:  ${variables.mtime}`;
+      variables.authorName && `author:        ${variables.authorName} ${authorEmailPart}\n`;
+    const ctimeLine = variables.ctime && `date:          ${variables.ctime}\n`;
+    const lastModifiedLine = variables.mtime && `lastModified:  ${variables.mtime}\n`;
     const companyNameLine =
-      variables.companyName && `\nCopyright © ${variables.companyName} All rights reserved`;
+      variables.companyName && `Copyright © ${variables.companyName} All rights reserved\n`;
 
-    // prettier-ignore
-    return tpl
-`'''${authorLine}${ctimeLine}${lastModifiedLine}${companyNameLine}
-'''`;
+    return tpl`${this.blockCommentStart}\n${authorLine}${ctimeLine}${lastModifiedLine}${companyNameLine}${this.blockCommentEnd}`;
     /*
     '''
     author:        ${variables.authorName} <${variables.authorEmail}>
