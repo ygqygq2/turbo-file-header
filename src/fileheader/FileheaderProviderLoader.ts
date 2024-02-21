@@ -1,4 +1,4 @@
-import { internalProviders, FileheaderLanguageProvider } from '../fileheader-language-providers';
+import { FileheaderLanguageProvider, internalProviders } from '@/fileheader-language-providers';
 
 export class FileheaderProviderLoader {
   public async loadProviders(): Promise<FileheaderLanguageProvider[]> {

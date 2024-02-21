@@ -1,9 +1,10 @@
 import * as vscode from 'vscode';
 import { escapeRegexString } from '@/utils/str';
 import { ErrorCode } from '@/error/ErrorCodeMessage.enum';
-import { CustomError, errorHandler } from '@/error/ErrorHandler';
+import { CustomError } from '@/error/ErrorHandler';
 import { ConfigSection } from '../constants';
 import { Configuration, ConfigurationFlatten, Tag, TagFlatten } from './types';
+import { errorHandler } from '@/extension';
 
 export class ConfigManager {
   private static instance: ConfigManager;
@@ -14,10 +15,7 @@ export class ConfigManager {
   }
 
   public static getInstance(): ConfigManager {
-    if (!ConfigManager.instance) {
-      ConfigManager.instance = new ConfigManager();
-    }
-    return ConfigManager.instance;
+    return ConfigManager.instance || new ConfigManager();
   }
 
   private get _config() {

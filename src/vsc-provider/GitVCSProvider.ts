@@ -3,7 +3,8 @@ import { dirname } from 'path';
 import { exec, getFirstLine } from '../utils/utils';
 import { BaseVCSProvider } from './types';
 import { ErrorCode } from '@/error/ErrorCodeMessage.enum';
-import { CustomError, errorHandler } from '@/error/ErrorHandler';
+import { CustomError } from '@/error/ErrorHandler';
+import { errorHandler } from '@/extension';
 
 export class GitVCSProvider implements BaseVCSProvider {
   async validate(repoPath: string): Promise<void> {

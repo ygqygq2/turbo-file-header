@@ -1,32 +1,32 @@
+import * as vscode from 'vscode';
 import { languageManager } from '@/extension';
 import { IFileheaderVariables, ITemplateFunction } from '../typings/types';
 import { FileheaderLanguageProvider } from './FileheaderLanguageProvider';
+import output from '@/error/output';
 
 export class VscodeInternalLanguageProvider extends FileheaderLanguageProvider {
   readonly languages: string[] = [];
-  private _blockCommentStart: string = '';
-  private _blockCommentEnd: string = '';
+  private comments: vscode.CommentRule | undefined;
+  public blockCommentStart: string = '';
+  public blockCommentEnd: string = '';
 
   public getBlockComment = async (languageId: string) => {
-    const comments = await languageManager.getAvailableCommentRules(languageId);
-    if (!comments.blockComments || !comments.blockComments.length) {
-      this._blockCommentStart = '';
-      this._blockCommentEnd = '';
-      return;
-    }
-    this._blockCommentStart = comments.blockComments[0][0];
-    this._blockCommentEnd = comments.blockComments[0][1];
+    const comments = await languageManager.useLanguage(languageId).getComments();
+    this.comments = comments;
   };
 
-  get blockCommentStart(): string {
-    return this._blockCommentStart;
-  }
-
-  get blockCommentEnd(): string {
-    return this._blockCommentEnd;
-  }
-
   override getTemplate(tpl: ITemplateFunction, variables: IFileheaderVariables) {
+    // 确保 this.comments 和 this.comments.blockComments 都不是 undefined
+    if (this.comments && this.comments.blockComment && this.comments.blockComment.length) {
+      // 当存在块注释时使用块注释
+      this.blockCommentStart = this.comments.blockComment[0];
+      this.blockCommentEnd = this.comments.blockComment[1];
+    } else if (this.comments && this.comments.lineComment) {
+      // 当不存在块注释但存在行注释时，使用行注释作为块注释的开始和结束
+      this.blockCommentStart = this.comments.lineComment;
+      this.blockCommentEnd = this.comments.lineComment;
+    }
+
     const hasAuthor = variables.authorName;
     const authorEmailPart = !!variables.authorEmail && tpl`<${variables.authorEmail}>`;
 
@@ -40,6 +40,10 @@ export class VscodeInternalLanguageProvider extends FileheaderLanguageProvider {
     const companyNameLine =
       variables.companyName && tpl` * Copyright © ${variables.companyName} All rights reserved\n`;
 
+    output.info(
+      '🚀 ~ file: VscodeInternalLanguageProvider.ts:45 ~ this.blockCommentStart:',
+      this.blockCommentStart,
+    );
     return tpl`${this.blockCommentStart}\n${authorLine}${ctimeLine}${lastModifiedLine}${companyNameLine}${this.blockCommentEnd}`;
 
     // like this:

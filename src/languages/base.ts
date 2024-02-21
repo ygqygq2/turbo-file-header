@@ -132,6 +132,6 @@ export function getBaseCommentRule(languageCode: string): vscode.CommentRule | u
     case 'razor':
       return { blockComment: ['@*', '*@'] };
     default:
-      return undefined;
+      return { lineComment: '//', blockComment: ['/*', '*/'] };
   }
 }

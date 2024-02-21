@@ -4,12 +4,13 @@ import { FileheaderVariableBuilder } from './FileheaderVariableBuilder';
 import { IFileheaderVariables } from '../typings/types';
 import { FileHashMemento } from './FileHashMemento';
 import { vscProvider } from '../vsc-provider';
-import { CustomError, errorHandler } from '@/error/ErrorHandler';
+import { CustomError } from '@/error/ErrorHandler';
 import { ErrorCode, errorCodeMessages } from '@/error/ErrorCodeMessage.enum';
-import { VscodeInternalLanguageProvider } from '@/fileheader-language-providers/VscodeInternalLanguageProvider';
 import { FileheaderProviderLoader } from './FileheaderProviderLoader';
-import { FileheaderLanguageProvider } from '@/fileheader-language-providers';
 import output from '@/error/output';
+import { errorHandler } from '@/extension';
+import { FileheaderLanguageProvider } from '@/fileheader-language-providers';
+import { VscodeInternalLanguageProvider } from '@/fileheader-language-providers/VscodeInternalLanguageProvider';
 
 type UpdateFileheaderManagerOptions = {
   silent?: boolean;
@@ -35,7 +36,7 @@ export class FileheaderManager {
 
   private findProvider(document: vscode.TextDocument) {
     const languageId = document.languageId;
-    return this.providers.find((provider) => {
+    const provider = this.providers.find(async (provider) => {
       if (
         provider.workspaceScopeUri &&
         vscode.workspace.getWorkspaceFolder(document.uri)?.uri.path !==
@@ -43,13 +44,19 @@ export class FileheaderManager {
       ) {
         return false;
       }
-      // provider.languages 是空数组时，使用 VscodeInternalLanguageProvider
-      if (provider.languages.length === 0 && provider instanceof VscodeInternalLanguageProvider) {
-        provider.getBlockComment(languageId);
-        return true;
-      }
-      return provider.languages.some((l) => l === languageId);
+      // // provider.languages 是空数组时，使用 VscodeInternalLanguageProvider
+      // if (provider.languages.length === 0 && provider instanceof VscodeInternalLanguageProvider) {
+      //   await provider.getBlockComment(languageId);
+      //   return true;
+      // }
+      return provider.languages.some((l: string) => l === languageId);
     });
+
+    if (!provider) {
+      throw new CustomError(ErrorCode.LanguageProviderNotFound);
+    }
+
+    return provider;
   }
 
   private getOriginFileheaderInfo(
@@ -97,7 +104,11 @@ export class FileheaderManager {
     document: vscode.TextDocument,
     { allowInsert = true, silent = false }: UpdateFileheaderManagerOptions = {},
   ) {
+    const languageId = document.languageId;
     const provider = this.findProvider(document);
+    if (provider instanceof VscodeInternalLanguageProvider) {
+      await provider.getBlockComment(languageId);
+    }
 
     if (!provider) {
       !silent &&

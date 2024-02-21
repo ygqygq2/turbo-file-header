@@ -17,6 +17,7 @@ export enum ErrorCode {
   WorkspaceFolderNotFound = 112,
   LanguageNotSupport = 113,
   GetConfigurationFail = 114,
+  LanguageProviderNotFound = 115,
 }
 
 const extensionPrefix = '';
@@ -36,4 +37,5 @@ export const errorCodeMessages: ErrorCodeMessage = {
   [ErrorCode.WorkspaceFolderNotFound]: `${extensionPrefix}Your workspace is not contain any folder.`,
   [ErrorCode.LanguageNotSupport]: `${extensionPrefix}This language is not supported.`,
   [ErrorCode.GetConfigurationFail]: `${extensionPrefix}Failed to get configuration.`,
+  [ErrorCode.LanguageProviderNotFound]: `${extensionPrefix}Language provider not found.`,
 };

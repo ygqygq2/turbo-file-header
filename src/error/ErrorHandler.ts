@@ -12,25 +12,23 @@ export class CustomError extends Error {
   }
 }
 
-class ErrorHandler {
+export class ErrorHandler {
   private static instance: ErrorHandler;
   private constructor() {
     // 私有构造函数
   }
 
   static getInstance(): ErrorHandler {
-    if (!ErrorHandler.instance) {
-      ErrorHandler.instance = new ErrorHandler();
-    }
-    return ErrorHandler.instance;
+    return ErrorHandler.instance || (ErrorHandler.instance = new ErrorHandler());
   }
 
   public handle(error: CustomError) {
-    if (error.originalError) {
-      output.error(error.originalError);
-    }
-    output.error(error.message);
+    output.error?.(error.originalError);
+    output.error?.(error.message);
+  }
+
+  public throw(error: CustomError) {
+    output.error?.(error.originalError);
+    throw error.message;
   }
 }
-
-export const errorHandler = ErrorHandler.getInstance();

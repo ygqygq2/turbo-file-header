@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import Language from './Language';
+import { Language } from './Language';
 
 export interface AvailableCommentRules {
   lineComments: string[];

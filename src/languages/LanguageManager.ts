@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import Language from './Language';
+import { Language } from './Language';
 import { AvailableCommentRules } from './types';
 
 export class LanguageManager {
@@ -11,10 +11,7 @@ export class LanguageManager {
   }
 
   public static getInstance(): LanguageManager {
-    if (!LanguageManager.instance) {
-      LanguageManager.instance = new LanguageManager();
-    }
-    return LanguageManager.instance;
+    return LanguageManager.instance || new LanguageManager();
   }
 
   public useLanguage = (languageId: string, autoUpdateDefinition = true) => {

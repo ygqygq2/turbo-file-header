@@ -2,7 +2,7 @@ import type * as vscode from 'vscode';
 import { getBaseCommentRule, loadCommentRuleFromFile } from './base';
 import { AvailableComments } from './types';
 
-export default class Language {
+export class Language {
   public readonly languageId: string;
   private configUri: vscode.Uri | undefined;
   private embeddedLanguages = new Set<string>();
@@ -17,7 +17,7 @@ export default class Language {
   /**
    * Set configuration uri
    */
-  setConfigUri(configUri?: vscode.Uri) {
+  public setConfigUri(configUri?: vscode.Uri) {
     this.configUri = configUri;
     return this;
   }
@@ -33,7 +33,7 @@ export default class Language {
    * ! test
    * Get language comments rules
    */
-  async getComments(forceRefresh = false) {
+  public getComments = async (forceRefresh = false) => {
     if (!this.comments || forceRefresh) {
       // load comment rule from file
       let comments = await loadCommentRuleFromFile(this.configUri);
@@ -46,51 +46,51 @@ export default class Language {
     }
 
     return this.comments;
-  }
+  };
 
   /**
    * Get language line comment
    */
-  async getLineComment() {
+  public getLineComment = async () => {
     return (await this.getComments()).lineComment;
-  }
+  };
 
   /**
    * Get language block comment
    */
-  async getBlockComment() {
+  public getBlockComment = async () => {
     return (await this.getComments()).blockComment;
-  }
+  };
 
   /**
    * Add embedded language id
    */
-  addEmbeddedLanguage(languageId: string) {
+  public addEmbeddedLanguage = (languageId: string) => {
     this.embeddedLanguages.add(languageId);
     return this;
-  }
+  };
 
   /**
    * Get embedded language ids
    */
-  getEmbeddedLanguages() {
+  public getEmbeddedLanguages = () => {
     return Array.from(this.embeddedLanguages);
-  }
+  };
 
   /**
    * Replace embeddedLanguages
    */
-  setEmbeddedLanguages(embeddedLanguages: Set<string>) {
+  public setEmbeddedLanguages = (embeddedLanguages: Set<string>) => {
     this.embeddedLanguages = embeddedLanguages;
     return this;
-  }
+  };
 
   /**
    * Get available comments
    */
-  getAvailableComments() {
+  public getAvailableComments = () => {
     return this.availableComments;
-  }
+  };
 
   /**
    * Set available comments

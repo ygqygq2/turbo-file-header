@@ -1,6 +1,6 @@
 import { IFileheaderVariables, ITemplateFunction } from '../typings/types';
 import { FileheaderLanguageProvider } from './FileheaderLanguageProvider';
-export class TypescriptTurboFileHeadervider extends FileheaderLanguageProvider {
+export class TypescriptProvider extends FileheaderLanguageProvider {
   readonly languages: string[] = ['typescript', 'javascript', 'javascriptreact', 'typescriptreact'];
 
   blockCommentStart: string = '/**';

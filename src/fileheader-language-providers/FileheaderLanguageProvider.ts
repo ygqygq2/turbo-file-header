@@ -9,8 +9,9 @@ import {
   TEMPLATE_OPTIONAL_GROUP_PLACEHOLDER,
   WILDCARD_ACCESS_VARIABLES,
 } from '../constants';
-import { CustomError, errorHandler } from '@/error/ErrorHandler';
+import { CustomError } from '@/error/ErrorHandler';
 import { ErrorCode, errorCodeMessages } from '@/error/ErrorCodeMessage.enum';
+import { errorHandler } from '@/extension';
 
 export abstract class FileheaderLanguageProvider {
   // 自定义 fileheader.config.yaml 模板

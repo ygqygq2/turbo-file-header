@@ -8,7 +8,9 @@ import { ConfigEvent } from './configuration/ConfigEvent';
 import { LanguageManager } from './languages/LanguageManager';
 import { LanguageEvent } from './languages/LanguageEvent';
 import { FileHashMemento } from './fileheader/FileHashMemento';
+import { ErrorHandler } from './error/ErrorHandler';
 
+export const errorHandler = ErrorHandler.getInstance();
 export const configManager = ConfigManager.getInstance();
 export const configEvent = new ConfigEvent(configManager);
 export const languageManager = LanguageManager.getInstance();
