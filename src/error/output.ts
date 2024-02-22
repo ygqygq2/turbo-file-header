@@ -1,11 +1,7 @@
 import * as vscode from 'vscode';
+import { log } from '@/utils/log';
 
 const channel = vscode.window.createOutputChannel('Turbo File Header', { log: true });
-
-const log = (...args: any[]) => {
-  const line = args.map((obj) => (typeof obj === 'object' ? JSON.stringify(obj) : obj)).join(' ');
-  return line;
-};
 
 const output = {
   info: (...args: any[]) => {

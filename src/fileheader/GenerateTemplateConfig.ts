@@ -50,14 +50,22 @@ export class GenerateTemplateConfig {
     try {
       // 确保目标目录存在
       if (!fs.existsSync(configDir)) {
-        fs.mkdirSync(configDir, { recursive: true });
+        try {
+          fs.mkdirSync(configDir, { recursive: true });
+        } catch (error) {
+          errorHandler.handle(new CustomError(ErrorCode.CreateDirFail, configDir, error));
+        }
       }
 
       if (!fs.existsSync(configPath)) {
-        // 读取fileheader.config.yaml文件内容
-        const content = fs.readFileSync(uri.path, 'utf8');
-        // 将文件内容写入目标文件
-        fs.writeFileSync(configPath, content);
+        try {
+          // 读取fileheader.config.yaml文件内容
+          const content = fs.readFileSync(uri.path, 'utf8');
+          // 将文件内容写入目标文件
+          fs.writeFileSync(configPath, content);
+        } catch (error) {
+          errorHandler.handle(new CustomError(ErrorCode.CreateFileFail, configPath, error));
+        }
       }
 
       // 打开新创建的文件

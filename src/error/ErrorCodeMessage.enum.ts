@@ -20,6 +20,8 @@ export enum ErrorCode {
   LanguageProviderNotFound = 115,
   GenerateTemplateConfigFail = 116,
   NeedExtensionContext = 117,
+  CreateDirFail = 118,
+  CreateFileFail = 119,
 }
 
 const extensionPrefix = '';
@@ -42,4 +44,6 @@ export const errorCodeMessages: ErrorCodeMessage = {
   [ErrorCode.LanguageProviderNotFound]: `${extensionPrefix}Language provider not found.`,
   [ErrorCode.GenerateTemplateConfigFail]: `${extensionPrefix}Failed to generate template config.`,
   [ErrorCode.NeedExtensionContext]: `${extensionPrefix}Need extension context.`,
+  [ErrorCode.CreateDirFail]: `${extensionPrefix}Failed to create directory: `,
+  [ErrorCode.CreateFileFail]: `${extensionPrefix}Failed to create file: `,
 };
