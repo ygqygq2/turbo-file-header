@@ -8,12 +8,12 @@ import { VueProvider } from './VueProvider';
 import { TypescriptProvider } from './TypescriptProvider';
 
 export const internalProviders: LanguageProvider[] = [
+  new TypescriptProvider(),
   new CSSProvider(),
   new HTMLProvider(),
   new JavaProvider(),
   new PythonProvider(),
   new VueProvider(),
-  new TypescriptProvider(),
   new VscodeInternalProvider(),
 ];
 

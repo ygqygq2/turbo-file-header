@@ -99,8 +99,4 @@ export class ExtensionActivator {
       disposer.dispose();
     }
   };
-
-  getExtensionContext = (): vscode.ExtensionContext => {
-    return _context;
-  };
 }

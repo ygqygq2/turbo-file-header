@@ -1,4 +1,5 @@
 import vscode from 'vscode';
+import output from '@/error/output';
 import { hasShebang } from '../utils/utils';
 import { FileheaderVariableBuilder } from './FileheaderVariableBuilder';
 import { FileHashMemento } from './FileHashMemento';
@@ -41,10 +42,15 @@ export class FileheaderManager {
   private async findProvider(document: vscode.TextDocument) {
     const languageId = document.languageId;
     for (const provider of this.providers) {
-      const isWorkspaceMatch =
-        !provider.workspaceScopeUri ||
-        vscode.workspace.getWorkspaceFolder(document.uri)?.uri.path ===
-          provider.workspaceScopeUri?.path;
+      // 只有自定义 provider 有 provider.workspaceScopeUri
+      let isWorkspaceMatch: boolean;
+      if (!provider.workspaceScopeUri) {
+        isWorkspaceMatch = true;
+      } else {
+        const documentWorkspace = vscode.workspace.getWorkspaceFolder(document.uri)?.uri.path;
+        const providerWorkspace = provider.workspaceScopeUri?.path;
+        isWorkspaceMatch = documentWorkspace === providerWorkspace;
+      }
       if (!isWorkspaceMatch) {
         continue;
       }
@@ -54,6 +60,12 @@ export class FileheaderManager {
           await provider.getBlockComment(languageId);
           return true;
         }
+        const isInclude = provider.languages.includes(languageId);
+        console.log(
+          '🚀 ~ file: FileheaderManager.ts:64 ~ isInclude:',
+          isInclude,
+          provider.languages,
+        );
         return provider.languages.includes(languageId);
       })();
 
@@ -61,7 +73,7 @@ export class FileheaderManager {
         return provider;
       }
     }
-    throw new CustomError(ErrorCode.LanguageProviderNotFound);
+    output.info(new CustomError(ErrorCode.LanguageProviderNotFound));
   }
 
   private getOriginFileheaderInfo(document: vscode.TextDocument, provider: LanguageProvider) {
@@ -112,6 +124,7 @@ export class FileheaderManager {
     const config = this.configManager.getConfiguration();
     const languageId = document?.languageId;
     const provider = await this.findProvider(document);
+    console.log('🚀 ~ file: FileheaderManager.ts:127 ~ provider:', provider);
     if (provider instanceof VscodeInternalProvider) {
       await provider.getBlockComment(languageId);
     }

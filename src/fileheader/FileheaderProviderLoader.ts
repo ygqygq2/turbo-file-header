@@ -51,7 +51,7 @@ export class FileheaderProviderLoader {
       const providers = (await Promise.all(providersPromises)).filter(
         (provider) => provider !== undefined,
       ) as LanguageProvider[];
-      return providers; // 这里的 providers 已经被断言为 LanguageProvider[] 类型
+      return providers;
     } catch (error) {
       output.error(`Failed to load custom providers: ${error}`);
       return [];

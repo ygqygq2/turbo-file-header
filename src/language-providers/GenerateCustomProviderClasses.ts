@@ -8,6 +8,7 @@ import { getActiveDocumentWorkspace } from '@/utils/vscode-utils';
 import { ConfigYaml, IFileheaderVariables, ITemplateFunction, Provider } from '@/typings/types';
 import { LanguageProvider } from './LanguageProvider';
 import { CUSTOM_CONFIG_FILE_NAME } from '@/constants';
+import output from '@/error/output';
 
 export class GenerateCustomProviderClasses {
   constructor() {}
@@ -73,7 +74,7 @@ export class GenerateCustomProviderClasses {
   public generateProviderClasses = async () => {
     const config = await this.getCustomProvidersConfig();
     if (!config || !config.providers) {
-      console.error('No providers found in the configuration.');
+      output.info('No custom providers.');
       return;
     }
     const dynamicProviderClasses = config.providers.map((provider: Provider) => {

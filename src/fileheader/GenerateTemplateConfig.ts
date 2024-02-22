@@ -62,7 +62,7 @@ export class GenerateTemplateConfig {
       const document = await vscode.workspace.openTextDocument(configPath);
       vscode.window.showTextDocument(document);
     } catch (error) {
-      errorHandler.handle(new CustomError(ErrorCode.GitGetCtimeFail, error));
+      errorHandler.handle(new CustomError(ErrorCode.GenerateTemplateConfigFail, error));
     }
 
     const document = await vscode.workspace.openTextDocument(path.resolve(configPath));
