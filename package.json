@@ -124,6 +124,11 @@
           ],
           "markdownDescription": "Disable some fields in default fileheader. This properties can not affect the custom fileheader"
         },
+        "TurboFileHeader.dirtyFileSupport": {
+          "type": "boolean",
+          "description": "Only dirty file to support update file header",
+          "default": true
+        },
         "TurboFileHeader.language": {
           "type": "array",
           "description": "Custom language to support",

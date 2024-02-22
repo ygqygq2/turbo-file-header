@@ -1,17 +1,23 @@
 import { IFileheaderVariables } from './typings/types';
 
-export enum ConfigSection {
-  userName = 'TurboFileHeader.userName',
-  userEmail = 'TurboFileHeader.userEmail',
-  companyName = 'TurboFileHeader.companyName',
-  dateFormat = 'TurboFileHeader.dateFormat',
-  autoInsertOnCreateFile = 'TurboFileHeader.autoInsertOnCreateFile',
-  autoUpdateOnSave = 'TurboFileHeader.autoUpdateOnSave',
-  disableFields = 'TurboFileHeader.disableFields',
-  language = 'TurboFileHeader.language',
-}
-
 export const ConfigTag = 'TurboFileHeader';
+
+export enum ConfigSection {
+  userName = ConfigTag + '.' + 'userName',
+  userEmail = ConfigTag + '.' + 'userEmail',
+  companyName = ConfigTag + '.' + 'companyName',
+  dateFormat = ConfigTag + '.' + 'dateFormat',
+  autoInsertOnCreateFile = ConfigTag + '.' + 'autoInsertOnCreateFile',
+  autoUpdateOnSave = ConfigTag + '.' + 'autoUpdateOnSave',
+  disableFields = ConfigTag + '.' + 'disableFields',
+  language = ConfigTag + '.' + 'language',
+  dirtyFileSupport = ConfigTag + '.' + 'dirtyFileSupport',
+  multilineComments = ConfigTag + '.' + 'multilineComments',
+  highlightPlainText = ConfigTag + '.' + 'highlightPlainText',
+  tags = ConfigTag + '.' + 'tags',
+  tagsLight = ConfigTag + '.' + 'tagsLight',
+  tagsDark = ConfigTag + '.' + 'tagsDark',
+}
 
 export const TEMPLATE_SYMBOL_KEY = Symbol.for('template');
 

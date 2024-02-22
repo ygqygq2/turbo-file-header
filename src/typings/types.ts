@@ -81,3 +81,13 @@ export type Command = {
   name: string;
   handler: (args?: unknown[] | undefined) => Promise<void>;
 };
+
+export interface Provider {
+  name: string;
+  languages: string[];
+  template: string;
+}
+
+export type ConfigYaml = {
+  providers: Provider[];
+};

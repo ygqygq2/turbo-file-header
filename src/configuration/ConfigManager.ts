@@ -8,14 +8,16 @@ import { errorHandler } from '@/extension';
 
 export class ConfigManager {
   private static instance: ConfigManager;
+  private configuration: Configuration & vscode.WorkspaceConfiguration;
   private configFlatten: ConfigurationFlatten;
 
   private constructor() {
+    this.configuration = this.getConfiguration();
     this.configFlatten = this.getConfigurationFlatten();
   }
 
   public static getInstance(): ConfigManager {
-    return ConfigManager.instance || new ConfigManager();
+    return ConfigManager?.instance || new ConfigManager();
   }
 
   private get _config() {
@@ -30,13 +32,18 @@ export class ConfigManager {
     await this._config.update(section, value);
   }
 
-  private getConfiguration(): Configuration {
+  public getConfiguration(forceRefresh = false): Configuration & vscode.WorkspaceConfiguration {
+    if (this.configuration && !forceRefresh) {
+      return this.configuration;
+    }
+
     const config = vscode.workspace.getConfiguration(ConfigTag) as Configuration &
       vscode.WorkspaceConfiguration;
     if (!config) {
       errorHandler.handle(new CustomError(ErrorCode.GetConfigurationFail));
     }
-    return config;
+    this.configuration = config;
+    return this.configuration;
   }
 
   public getConfigurationFlatten(forceRefresh = false): ConfigurationFlatten {
@@ -46,6 +53,15 @@ export class ConfigManager {
     const orig = this.getConfiguration();
 
     this.configFlatten = {
+      userName: orig.userName || '',
+      userEmail: orig.userEmail || '',
+      companyName: orig.companyName || '',
+      dateFormat: orig.dateFormat || 'YYYY-MM-DD HH:mm:ss',
+      autoInsertOnCreateFile: orig.autoInsertOnCreateFile || true,
+      autoUpdateOnSave: orig.autoUpdateOnSave || true,
+      disableFields: orig.disableFields || [],
+      language: orig.language || {},
+      dirtyFileSupport: orig.dirtyFileSupport || true,
       multilineComments: orig.multilineComments || true,
       useJSDocStyle: orig.useJSDocStyle || true,
       highlightPlainText: orig.highlightPlainText || true,

@@ -1,15 +1,17 @@
 import vscode from 'vscode';
 import { hasShebang } from '../utils/utils';
 import { FileheaderVariableBuilder } from './FileheaderVariableBuilder';
-import { IFileheaderVariables } from '../typings/types';
 import { FileHashMemento } from './FileHashMemento';
 import { vscProvider } from '../vsc-provider';
 import { CustomError } from '@/error/ErrorHandler';
 import { ErrorCode, errorCodeMessages } from '@/error/ErrorCodeMessage.enum';
 import { FileheaderProviderLoader } from './FileheaderProviderLoader';
 import { errorHandler } from '@/extension';
-import { FileheaderLanguageProvider } from '@/language-providers';
+import { LanguageProvider } from '@/language-providers';
 import { VscodeInternalProvider } from '@/language-providers/VscodeInternalProvider';
+import { IFileheaderVariables } from '../typings/types';
+import { ConfigManager } from '@/configuration/ConfigManager';
+import { Configuration } from '@/configuration/types';
 
 type UpdateFileheaderManagerOptions = {
   silent?: boolean;
@@ -17,14 +19,17 @@ type UpdateFileheaderManagerOptions = {
 };
 
 export class FileheaderManager {
-  private providers: FileheaderLanguageProvider[] = [];
+  private configManager: ConfigManager;
+  private providers: LanguageProvider[] = [];
   private fileheaderProviderLoader: FileheaderProviderLoader;
   private fileHashMemento: FileHashMemento;
 
   constructor(
+    configManager: ConfigManager,
     fileheaderProviderLoader: FileheaderProviderLoader,
     fileHashMemento: FileHashMemento,
   ) {
+    this.configManager = configManager;
     this.fileheaderProviderLoader = fileheaderProviderLoader;
     this.fileHashMemento = fileHashMemento;
   }
@@ -59,10 +64,7 @@ export class FileheaderManager {
     throw new CustomError(ErrorCode.LanguageProviderNotFound);
   }
 
-  private getOriginFileheaderInfo(
-    document: vscode.TextDocument,
-    provider: FileheaderLanguageProvider,
-  ) {
+  private getOriginFileheaderInfo(document: vscode.TextDocument, provider: LanguageProvider) {
     const source = document.getText();
     const pattern = provider.getOriginFileheaderRegExp(document.eol);
     const range: {
@@ -87,9 +89,12 @@ export class FileheaderManager {
     return range;
   }
 
-  private async shouldSkipReplace(document: vscode.TextDocument) {
+  private async shouldSkipReplace(
+    config: Configuration & vscode.WorkspaceConfiguration,
+    document: vscode.TextDocument,
+  ) {
     // if the file in vscode editor not dirty, we should skip the replace
-    if (!document.isDirty) {
+    if (config.dirtyFileSupport || !document.isDirty) {
       return true;
     }
 
@@ -104,7 +109,8 @@ export class FileheaderManager {
     document: vscode.TextDocument,
     { allowInsert = true, silent = false }: UpdateFileheaderManagerOptions = {},
   ) {
-    const languageId = document.languageId;
+    const config = this.configManager.getConfiguration();
+    const languageId = document?.languageId;
     const provider = await this.findProvider(document);
     if (provider instanceof VscodeInternalProvider) {
       await provider.getBlockComment(languageId);
@@ -125,7 +131,6 @@ export class FileheaderManager {
     const startLine = provider.startLineOffset + (hasShebang(document.getText()) ? 1 : 0);
 
     const originFileheaderInfo = this.getOriginFileheaderInfo(document, provider);
-    const config = vscode.workspace.getConfiguration();
 
     let fileheaderVariable: IFileheaderVariables;
 
@@ -147,7 +152,7 @@ export class FileheaderManager {
     const shouldSkipReplace =
       originFileheaderInfo.start !== -1 &&
       (originFileheaderInfo.content?.replace(/\r\n/g, '\n') === fileheader ||
-        (await this.shouldSkipReplace(document)));
+        (await this.shouldSkipReplace(config, document)));
 
     if (shouldSkipReplace) {
       return;

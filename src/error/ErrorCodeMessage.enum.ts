@@ -22,6 +22,8 @@ export enum ErrorCode {
   NeedExtensionContext = 117,
   CreateDirFail = 118,
   CreateFileFail = 119,
+  GenerateCustomProviderFail = 120,
+  CustomProviderInstanceFail = 121,
 }
 
 const extensionPrefix = '';
@@ -46,4 +48,6 @@ export const errorCodeMessages: ErrorCodeMessage = {
   [ErrorCode.NeedExtensionContext]: `${extensionPrefix}Need extension context.`,
   [ErrorCode.CreateDirFail]: `${extensionPrefix}Failed to create directory: `,
   [ErrorCode.CreateFileFail]: `${extensionPrefix}Failed to create file: `,
+  [ErrorCode.GenerateCustomProviderFail]: `${extensionPrefix}Failed to generate custom provider classes.`,
+  [ErrorCode.CustomProviderInstanceFail]: `${extensionPrefix}Failed to instance custom provider: `,
 };

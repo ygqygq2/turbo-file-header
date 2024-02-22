@@ -5,6 +5,7 @@ import { CUSTOM_CONFIG_FILE_NAME } from '../constants';
 import { CustomError } from '@/error/ErrorHandler';
 import { ErrorCode, errorCodeMessages } from '@/error/ErrorCodeMessage.enum';
 import { errorHandler } from '@/extension';
+import { getActiveDocumentWorkspace } from '@/utils/vscode-utils';
 
 export class GenerateTemplateConfig {
   private static instance: GenerateTemplateConfig;
@@ -26,18 +27,7 @@ export class GenerateTemplateConfig {
       return;
     }
 
-    const activeDocumentUri = vscode.window.activeTextEditor?.document.uri;
-    let targetWorkspace: vscode.WorkspaceFolder | undefined = undefined;
-    if (activeDocumentUri) {
-      targetWorkspace = vscode.workspace.getWorkspaceFolder(activeDocumentUri);
-    } else {
-      const picked = await vscode.window.showQuickPick(
-        workspaces.map((workspace) => ({ label: workspace.name, workspace })),
-        { title: 'Select which workspace for add custom fileheader template' },
-      );
-
-      targetWorkspace = picked?.workspace;
-    }
+    const targetWorkspace = await getActiveDocumentWorkspace();
 
     if (!targetWorkspace) {
       return;

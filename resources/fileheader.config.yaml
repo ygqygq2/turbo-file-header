@@ -16,7 +16,11 @@
 # @property {string} fileName filename with extension
 
 providers:
-  - languages: ['javascript', 'typescript', 'javascriptreact', 'typescriptreact']
+  - name: 'provider1'
+    languages: ['javascript', 'typescript', 'javascriptreact', 'typescriptreact']
+    # 内容模板，不必包含块注释符号
     template: |
-      author: {{ authorName }}
-      email: {{ authorEmail }}
+     * @author        {{authorName}} <{{authorEmail}}>
+     * @date          {{ctime}}
+     * @lastModified  {{mtime}}
+     * Copyright © {{companyName}} All rights reserved

@@ -17,4 +17,4 @@ export const internalProviders: LanguageProvider[] = [
   new VscodeInternalProvider(),
 ];
 
-export { LanguageProvider as FileheaderLanguageProvider };
+export { LanguageProvider };

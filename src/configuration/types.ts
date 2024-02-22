@@ -14,6 +14,15 @@ export interface TagFlatten extends Tag {
 }
 
 export interface Configuration {
+  userName: string;
+  userEmail: string;
+  companyName: string;
+  dateFormat: string;
+  autoInsertOnCreateFile: boolean;
+  autoUpdateOnSave: boolean;
+  disableFields: string[];
+  language: object;
+  dirtyFileSupport: boolean;
   multilineComments: boolean;
   useJSDocStyle: boolean;
   highlightPlainText: boolean;
