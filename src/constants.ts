@@ -11,6 +11,8 @@ export enum ConfigSection {
   language = 'TurboFileHeader.language',
 }
 
+export const ConfigTag = 'TurboFileHeader';
+
 export const TEMPLATE_SYMBOL_KEY = Symbol.for('template');
 
 export const TEMPLATE_OPTIONAL_GROUP_PLACEHOLDER = {
@@ -34,7 +36,7 @@ export const WILDCARD_ACCESS_VARIABLES: Readonly<Required<IFileheaderVariables>>
   fileName: `${TEMPLATE_NAMED_GROUP_WILDCARD_PLACEHOLDER}_fileName_${TEMPLATE_NAMED_GROUP_WILDCARD_PLACEHOLDER}`,
 };
 
-export const CUSTOM_TEMPLATE_FILE_NAME = 'fileheader.config.yaml';
+export const CUSTOM_CONFIG_FILE_NAME = 'fileheader.config.yaml';
 
 export const UPDATE_FILEHEADER_THRESHOLD = 10;
 

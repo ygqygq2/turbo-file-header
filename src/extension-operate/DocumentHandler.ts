@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { ConfigManager } from '../configuration/ConfigManager';
 import { FileheaderManager } from '../fileheader/FileheaderManager';
-import { CUSTOM_TEMPLATE_FILE_NAME, ConfigSection } from '@/constants';
+import { CUSTOM_CONFIG_FILE_NAME, ConfigSection } from '@/constants';
 
 export class DocumentHandler {
   private configManager: ConfigManager;
@@ -36,7 +36,7 @@ export class DocumentHandler {
       return;
     }
 
-    if (e.document.uri.path.includes(`.vscode/${CUSTOM_TEMPLATE_FILE_NAME}`)) {
+    if (e.document.uri.path.includes(`.vscode/${CUSTOM_CONFIG_FILE_NAME}`)) {
       return;
     }
 

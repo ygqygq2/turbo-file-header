@@ -43,7 +43,7 @@ export class ExtensionActivator {
     // 遍历所有命令，注册命令
     for (const { name, handler } of commands) {
       vscode.commands.registerCommand(name, (...args: unknown[]) => {
-        handler(args, context);
+        handler([context, ...args]);
       });
     }
 

@@ -75,7 +75,6 @@ function _pick(options: _BlockPickOptions) {
 
   // Find the multiline comment block
   let block: RegExpExecArray | null;
-  // eslint-disable-next-line no-cond-assign
   while ((block = picker.blockPicker.exec(options.text))) {
     blockRanges.push([block.index, block.index + block[0].length]);
 
@@ -100,7 +99,6 @@ function _pick(options: _BlockPickOptions) {
 
     // Find the matched line
     let line: RegExpExecArray | null;
-    // eslint-disable-next-line no-cond-assign
     while ((line = linePicker.exec(comment))) {
       const startIdx = block.index + markStart.length + space.length + line.index + line[1].length;
       const startPos = editor.document.positionAt(startIdx);

@@ -1,4 +1,3 @@
-import { GenerateTemplateConfig } from '../fileheader/GenerateTemplateConfig';
 type ErrorCodeMessage = {
   [key in ErrorCode]: string;
 };
@@ -20,6 +19,7 @@ export enum ErrorCode {
   GetConfigurationFail = 114,
   LanguageProviderNotFound = 115,
   GenerateTemplateConfigFail = 116,
+  NeedExtensionContext = 117,
 }
 
 const extensionPrefix = '';
@@ -41,4 +41,5 @@ export const errorCodeMessages: ErrorCodeMessage = {
   [ErrorCode.GetConfigurationFail]: `${extensionPrefix}Failed to get configuration.`,
   [ErrorCode.LanguageProviderNotFound]: `${extensionPrefix}Language provider not found.`,
   [ErrorCode.GenerateTemplateConfigFail]: `${extensionPrefix}Failed to generate template config.`,
+  [ErrorCode.NeedExtensionContext]: `${extensionPrefix}Need extension context.`,
 };

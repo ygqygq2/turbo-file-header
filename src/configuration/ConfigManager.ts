@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { escapeRegexString } from '@/utils/str';
 import { ErrorCode } from '@/error/ErrorCodeMessage.enum';
 import { CustomError } from '@/error/ErrorHandler';
-import { ConfigSection } from '../constants';
+import { ConfigSection, ConfigTag } from '../constants';
 import { Configuration, ConfigurationFlatten, Tag, TagFlatten } from './types';
 import { errorHandler } from '@/extension';
 
@@ -31,7 +31,7 @@ export class ConfigManager {
   }
 
   private getConfiguration(): Configuration {
-    const config = vscode.workspace.getConfiguration('TurboFileHeader') as Configuration &
+    const config = vscode.workspace.getConfiguration(ConfigTag) as Configuration &
       vscode.WorkspaceConfiguration;
     if (!config) {
       errorHandler.handle(new CustomError(ErrorCode.GetConfigurationFail));

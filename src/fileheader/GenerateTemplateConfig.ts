@@ -1,7 +1,7 @@
 import vscode, { Uri } from 'vscode';
 import * as fs from 'fs';
 import path from 'path';
-import { CUSTOM_TEMPLATE_FILE_NAME } from '../constants';
+import { CUSTOM_CONFIG_FILE_NAME } from '../constants';
 import { CustomError } from '@/error/ErrorHandler';
 import { ErrorCode, errorCodeMessages } from '@/error/ErrorCodeMessage.enum';
 import { errorHandler } from '@/extension';
@@ -43,31 +43,31 @@ export class GenerateTemplateConfig {
       return;
     }
 
-    const uri = (Uri as any).joinPath(context.extensionUri, 'resources', 'fileheader.config.yaml');
-    const templateDir = path.join(targetWorkspace.uri.fsPath, '.vscode');
-    const templatePath = path.join(templateDir, CUSTOM_TEMPLATE_FILE_NAME);
+    const uri = (Uri as any).joinPath(context.extensionUri, 'resources', CUSTOM_CONFIG_FILE_NAME);
+    const configDir = path.join(targetWorkspace.uri.fsPath, '.vscode');
+    const configPath = path.join(configDir, CUSTOM_CONFIG_FILE_NAME);
 
     try {
       // 确保目标目录存在
-      if (!fs.existsSync(templateDir)) {
-        fs.mkdirSync(templateDir, { recursive: true });
+      if (!fs.existsSync(configDir)) {
+        fs.mkdirSync(configDir, { recursive: true });
       }
 
-      if (!fs.existsSync(templatePath)) {
+      if (!fs.existsSync(configPath)) {
         // 读取fileheader.config.yaml文件内容
-        const content = fs.readFileSync(uri, 'utf8');
+        const content = fs.readFileSync(uri.path, 'utf8');
         // 将文件内容写入目标文件
-        fs.writeFileSync(templatePath, content);
+        fs.writeFileSync(configPath, content);
       }
 
       // 打开新创建的文件
-      const document = await vscode.workspace.openTextDocument(templatePath);
+      const document = await vscode.workspace.openTextDocument(configPath);
       vscode.window.showTextDocument(document);
     } catch (error) {
       errorHandler.handle(new CustomError(ErrorCode.GitGetCtimeFail, error));
     }
 
-    const document = await vscode.workspace.openTextDocument(path.resolve(templatePath));
+    const document = await vscode.workspace.openTextDocument(path.resolve(configPath));
 
     vscode.window.showTextDocument(document);
   }
