@@ -35,8 +35,8 @@ export class FileheaderManager {
     this.fileHashMemento = fileHashMemento;
   }
 
-  public async loadProviders() {
-    this.providers = await this.fileheaderProviderLoader.loadProviders();
+  public async loadProviders(forceRefresh = false) {
+    this.providers = await this.fileheaderProviderLoader.loadProviders(forceRefresh);
   }
 
   private async findProvider(document: vscode.TextDocument) {
@@ -60,12 +60,6 @@ export class FileheaderManager {
           await provider.getBlockComment(languageId);
           return true;
         }
-        const isInclude = provider.languages.includes(languageId);
-        console.log(
-          '🚀 ~ file: FileheaderManager.ts:64 ~ isInclude:',
-          isInclude,
-          provider.languages,
-        );
         return provider.languages.includes(languageId);
       })();
 
@@ -124,7 +118,6 @@ export class FileheaderManager {
     const config = this.configManager.getConfiguration();
     const languageId = document?.languageId;
     const provider = await this.findProvider(document);
-    console.log('🚀 ~ file: FileheaderManager.ts:127 ~ provider:', provider);
     if (provider instanceof VscodeInternalProvider) {
       await provider.getBlockComment(languageId);
     }

@@ -3,12 +3,12 @@ import fs from 'fs';
 import YAML from 'yaml';
 import * as vscode from 'vscode';
 import Handlebars from 'handlebars';
-import { languageManager } from '@/extension';
 import { getActiveDocumentWorkspace } from '@/utils/vscode-utils';
 import { ConfigYaml, IFileheaderVariables, ITemplateFunction, Provider } from '@/typings/types';
 import { LanguageProvider } from './LanguageProvider';
 import { CUSTOM_CONFIG_FILE_NAME } from '@/constants';
 import output from '@/error/output';
+import { LanguageManager } from '@/languages/LanguageManager';
 
 export class GenerateCustomProviderClasses {
   constructor() {}
@@ -37,17 +37,19 @@ export class GenerateCustomProviderClasses {
     const template = provider?.template || '';
 
     return class extends LanguageProvider {
+      private languageManager: LanguageManager;
       private comments: vscode.CommentRule | undefined;
-      public languages = languages;
+      public readonly languages = languages;
       public blockCommentStart: string = '/*';
       public blockCommentEnd: string = '*/';
 
-      constructor(workspaceScopeUri?: vscode.Uri | undefined) {
+      constructor(languageManager: LanguageManager, workspaceScopeUri?: vscode.Uri | undefined) {
         super(workspaceScopeUri);
+        this.languageManager = languageManager;
       }
 
       public getBlockComment = async () => {
-        const comments = await languageManager.useLanguage(languageId).getComments();
+        const comments = await this.languageManager?.useLanguage(languageId).getComments();
         this.comments = comments;
       };
 

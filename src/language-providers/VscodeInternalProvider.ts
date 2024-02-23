@@ -1,16 +1,22 @@
 import * as vscode from 'vscode';
-import { languageManager } from '@/extension';
 import { IFileheaderVariables, ITemplateFunction } from '../typings/types';
 import { LanguageProvider } from './LanguageProvider';
+import { LanguageManager } from '@/languages/LanguageManager';
 
 export class VscodeInternalProvider extends LanguageProvider {
-  readonly languages: string[] = [];
+  private languageManager: LanguageManager;
+  public readonly languages: string[] = [];
   private comments: vscode.CommentRule | undefined;
   public blockCommentStart: string = '';
   public blockCommentEnd: string = '';
 
+  constructor(languageManager: LanguageManager) {
+    super();
+    this.languageManager = languageManager;
+  }
+
   public getBlockComment = async (languageId: string) => {
-    const comments = await languageManager.useLanguage(languageId).getComments();
+    const comments = await this.languageManager?.useLanguage(languageId).getComments();
     this.comments = comments;
   };
 

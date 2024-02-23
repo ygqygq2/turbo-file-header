@@ -6,18 +6,30 @@ import { errorHandler } from '@/extension';
 import { CustomError, ErrorCode } from '@/error';
 import { getActiveDocumentWorkspace } from '@/utils/vscode-utils';
 import { CUSTOM_CONFIG_FILE_NAME } from '@/constants';
+import { LanguageManager } from '@/languages/LanguageManager';
 
 export class FileheaderProviderLoader {
+  private languageManager: LanguageManager;
   private generateCustomProviderClasses: GenerateCustomProviderClasses;
+  // 存储已加载 provider 的缓存
+  private providersCache: LanguageProvider[] | null = null;
 
-  constructor(generateCustomProviderClasses: GenerateCustomProviderClasses) {
+  constructor(
+    languageManager: LanguageManager,
+    generateCustomProviderClasses: GenerateCustomProviderClasses,
+  ) {
+    this.languageManager = languageManager;
     this.generateCustomProviderClasses = generateCustomProviderClasses;
   }
 
-  public async loadProviders(): Promise<LanguageProvider[]> {
-    const customProviders = await this.loadCustomProvers();
+  public async loadProviders(forceRefresh = false): Promise<LanguageProvider[]> {
+    if (this.providersCache && !forceRefresh) {
+      return this.providersCache;
+    }
 
-    return [...internalProviders, ...customProviders];
+    const customProviders = await this.loadCustomProvers();
+    this.providersCache = [...customProviders, ...internalProviders];
+    return this.providersCache;
   }
 
   private async loadCustomProvers(): Promise<LanguageProvider[]> {
@@ -35,7 +47,7 @@ export class FileheaderProviderLoader {
           try {
             const defaultUri = vscode.Uri.file('.vscode' + CUSTOM_CONFIG_FILE_NAME);
             const uriToUse = activeWorkspace?.uri || defaultUri;
-            return new ProviderClass(uriToUse);
+            return new ProviderClass(this.languageManager, uriToUse);
           } catch (error) {
             output.error(
               errorHandler.handle(

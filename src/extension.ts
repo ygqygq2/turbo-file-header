@@ -19,7 +19,10 @@ export const languageManager = LanguageManager.getInstance();
 export const languageEvent = new LanguageEvent(languageManager);
 // export const configuration = configManager.getConfigurationFlatten();
 const generateCustomProviderClasses = new GenerateCustomProviderClasses();
-const fileheaderProviderLoader = new FileheaderProviderLoader(generateCustomProviderClasses);
+const fileheaderProviderLoader = new FileheaderProviderLoader(
+  languageManager,
+  generateCustomProviderClasses,
+);
 const fileHashMemento = new FileHashMemento();
 export const fileheaderManager = new FileheaderManager(
   configManager,

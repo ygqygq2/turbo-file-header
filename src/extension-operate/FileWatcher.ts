@@ -10,7 +10,7 @@ export class FileWatcher {
   }
 
   private reloadProviders = () => {
-    this.fileheaderManager.loadProviders();
+    this.fileheaderManager.loadProviders(true);
   };
 
   public createWatcher = () => {
