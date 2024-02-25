@@ -11,6 +11,7 @@ import { FileHashMemento } from './fileheader/FileHashMemento';
 import { ErrorHandler } from './error/ErrorHandler';
 import { GenerateTemplateConfig } from './fileheader/GenerateTemplateConfig';
 import { GenerateCustomProviderClasses } from './language-providers/GenerateCustomProviderClasses';
+import { FileheaderVariableBuilder } from './fileheader/FileheaderVariableBuilder';
 
 export const errorHandler = ErrorHandler.getInstance();
 export const configManager = ConfigManager.getInstance();
@@ -24,10 +25,12 @@ const fileheaderProviderLoader = new FileheaderProviderLoader(
   generateCustomProviderClasses,
 );
 const fileHashMemento = new FileHashMemento();
+const fileheaderVariableBuilder = new FileheaderVariableBuilder();
 export const fileheaderManager = new FileheaderManager(
   configManager,
   fileheaderProviderLoader,
   fileHashMemento,
+  fileheaderVariableBuilder,
 );
 const fileWatcher = new FileWatcher(fileheaderManager);
 const documentHandler = new DocumentHandler(configManager, fileheaderManager);

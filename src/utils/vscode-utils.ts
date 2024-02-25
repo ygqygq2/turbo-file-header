@@ -1,3 +1,5 @@
+import { CustomError, ErrorCode } from '@/error';
+import { errorHandler } from '@/extension';
 import * as vscode from 'vscode';
 
 export async function getActiveDocumentWorkspace(): Promise<vscode.WorkspaceFolder | undefined> {
@@ -15,7 +17,7 @@ export async function getActiveDocumentWorkspace(): Promise<vscode.WorkspaceFold
       );
       activeWorkspace = picked?.workspace;
     } else {
-      vscode.window.showErrorMessage('No workspace found.');
+      errorHandler.handle(new CustomError(ErrorCode.WorkspaceFolderNotFound));
     }
   }
 

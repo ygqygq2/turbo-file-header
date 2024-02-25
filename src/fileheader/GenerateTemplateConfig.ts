@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import path from 'path';
 import { CUSTOM_CONFIG_FILE_NAME } from '../constants';
 import { CustomError } from '@/error/ErrorHandler';
-import { ErrorCode, errorCodeMessages } from '@/error/ErrorCodeMessage.enum';
+import { ErrorCode } from '@/error/ErrorCodeMessage.enum';
 import { errorHandler } from '@/extension';
 import { getActiveDocumentWorkspace } from '@/utils/vscode-utils';
 
@@ -18,12 +18,7 @@ export class GenerateTemplateConfig {
   public async createCustomTemplate(context: vscode.ExtensionContext) {
     const workspaces = vscode.workspace.workspaceFolders;
     if (!workspaces) {
-      errorHandler.handle(
-        new CustomError(
-          ErrorCode.WorkspaceFolderNotFound,
-          errorCodeMessages[ErrorCode.WorkspaceFolderNotFound],
-        ),
-      );
+      errorHandler.handle(new CustomError(ErrorCode.WorkspaceFolderNotFound));
       return;
     }
 

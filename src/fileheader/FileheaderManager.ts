@@ -24,15 +24,18 @@ export class FileheaderManager {
   private providers: LanguageProvider[] = [];
   private fileheaderProviderLoader: FileheaderProviderLoader;
   private fileHashMemento: FileHashMemento;
+  private fileheaderVariableBuilder: FileheaderVariableBuilder;
 
   constructor(
     configManager: ConfigManager,
     fileheaderProviderLoader: FileheaderProviderLoader,
     fileHashMemento: FileHashMemento,
+    fileheaderVariableBuilder: FileheaderVariableBuilder,
   ) {
     this.configManager = configManager;
     this.fileheaderProviderLoader = fileheaderProviderLoader;
     this.fileHashMemento = fileHashMemento;
+    this.fileheaderVariableBuilder = fileheaderVariableBuilder;
   }
 
   public async loadProviders(forceRefresh = false) {
@@ -106,7 +109,9 @@ export class FileheaderManager {
 
     // if there is a change in VCS provider, we should replace the fileheader
     const isTracked = await vscProvider.isTracked(document.fileName);
+    console.log('🚀 ~ file: FileheaderManager.ts:109 ~ isTracked:', isTracked);
     const hasChanged = isTracked && (await vscProvider.hasChanged(document.fileName));
+    console.log('🚀 ~ file: FileheaderManager.ts:111 ~ hasChanged:', hasChanged);
 
     return !hasChanged && this.fileHashMemento.has(document);
   }
@@ -141,7 +146,7 @@ export class FileheaderManager {
     let fileheaderVariable: IFileheaderVariables;
 
     try {
-      fileheaderVariable = await new FileheaderVariableBuilder().build(
+      fileheaderVariable = await this.fileheaderVariableBuilder?.build(
         config,
         document.uri,
         provider,
