@@ -103,7 +103,7 @@ export class FileheaderManager {
     document: vscode.TextDocument,
   ) {
     // if the file in vscode editor not dirty, we should skip the replace
-    if (config.dirtyFileSupport || !document.isDirty) {
+    if (config.updateHeaderForModifiedFilesOnly || !document.isDirty) {
       return true;
     }
 

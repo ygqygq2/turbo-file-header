@@ -11,7 +11,7 @@ export enum ConfigSection {
   autoUpdateOnSave = ConfigTag + '.' + 'autoUpdateOnSave',
   disableFields = ConfigTag + '.' + 'disableFields',
   language = ConfigTag + '.' + 'language',
-  dirtyFileSupport = ConfigTag + '.' + 'dirtyFileSupport',
+  updateHeaderForModifiedFilesOnly = ConfigTag + '.' + 'updateHeaderForModifiedFilesOnly',
   multilineComments = ConfigTag + '.' + 'multilineComments',
   highlightPlainText = ConfigTag + '.' + 'highlightPlainText',
   tags = ConfigTag + '.' + 'tags',

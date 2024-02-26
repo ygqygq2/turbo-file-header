@@ -22,7 +22,7 @@ export interface Configuration {
   autoUpdateOnSave: boolean;
   disableFields: string[];
   language: object;
-  dirtyFileSupport: boolean;
+  updateHeaderForModifiedFilesOnly: boolean;
   multilineComments: boolean;
   useJSDocStyle: boolean;
   highlightPlainText: boolean;

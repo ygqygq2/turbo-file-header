@@ -61,7 +61,7 @@ export class ConfigManager {
       autoUpdateOnSave: orig.autoUpdateOnSave || true,
       disableFields: orig.disableFields || [],
       language: orig.language || {},
-      dirtyFileSupport: orig.dirtyFileSupport || true,
+      updateHeaderForModifiedFilesOnly: orig.updateHeaderForModifiedFilesOnly || true,
       multilineComments: orig.multilineComments || true,
       useJSDocStyle: orig.useJSDocStyle || true,
       highlightPlainText: orig.highlightPlainText || true,
