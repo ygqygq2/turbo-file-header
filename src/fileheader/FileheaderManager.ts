@@ -102,8 +102,8 @@ export class FileheaderManager {
     config: Configuration & vscode.WorkspaceConfiguration,
     document: vscode.TextDocument,
   ) {
-    // if the file in vscode editor not dirty, we should skip the replace
-    if (config.updateHeaderForModifiedFilesOnly || !document.isDirty) {
+    // 只支持脏文档时，如果当前文档不是脏文档，则标记跳过
+    if (config.updateHeaderForModifiedFilesOnly && !document.isDirty) {
       return true;
     }
 
