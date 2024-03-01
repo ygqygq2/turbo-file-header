@@ -33,13 +33,15 @@ export class GenerateCustomProviderClasses {
   private createProviderClass = (provider: Provider) => {
     // 为每个 provider 生成一个类
     const languages = provider?.languages || ['javascript'];
+    const startLineOffsetConfig = provider?.startLineOffset || 0;
     const languageId = languages[0];
     const template = provider?.template || '';
 
     return class extends LanguageProvider {
       private languageManager: LanguageManager;
-      private comments: vscode.CommentRule | undefined;
+      comments: vscode.CommentRule = { lineComment: '//', blockComment: ['/**', '*/'] };
       public readonly languages = languages;
+      readonly startLineOffset = startLineOffsetConfig;
       public blockCommentStart: string = '/*';
       public blockCommentEnd: string = '*/';
 
@@ -48,7 +50,7 @@ export class GenerateCustomProviderClasses {
         this.languageManager = languageManager;
       }
 
-      public getBlockComment = async () => {
+      public getBlockCommentFromVscode = async () => {
         const comments = await this.languageManager?.useLanguage(languageId).getComments();
         this.comments = comments;
       };

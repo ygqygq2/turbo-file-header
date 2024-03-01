@@ -3,7 +3,7 @@
 # Tips:
 # These comments can help you write your own template with type hint
 # @typedef {Object} FileheaderVariable  Fileheader variables
-# @property {string} ctime file create time. will get it from VCS or fallback to filesystem when it is not available
+# @property {string} birthtime file create time. will get it from VCS or fallback to filesystem when it is not available
 # @property {string} mtime file modification time. will get it from VCS or fallback to filesystem when it is not available
 # @property {string} authorName if the file is tracked by VCS, it will get the author name from VCS. else it will get it from current user name
 # @property {string} authorEmail if the file is tracked by VCS, it will get the author email from VCS. else it will get it from current user email
@@ -20,7 +20,7 @@ providers:
     languages: ['javascript', 'typescript', 'javascriptreact', 'typescriptreact']
     # 内容模板，不必包含块注释符号
     template: |
-     * @author        {{authorName}} <{{authorEmail}}>
-     * @date          {{ctime}}
-     * @lastModified  {{mtime}}
-     * Copyright © {{companyName}} All rights reserved
+      * @author        {{authorName}} <{{authorEmail}}>
+      * @date          {{birthtime}}
+      * @lastModified  {{mtime}}
+      * Copyright © {{companyName}} All rights reserved

@@ -1,4 +1,5 @@
 import dayjs, { Dayjs } from 'dayjs';
+import { stat } from 'fs/promises';
 import { dirname } from 'path';
 import { exec, getFirstLine } from '../utils/utils';
 import { BaseVCSProvider } from './types';
@@ -58,7 +59,7 @@ export class GitVCSProvider implements BaseVCSProvider {
     }
     return '';
   }
-  async getCtime(filePath: string): Promise<Dayjs> {
+  async getBirthtime(filePath: string): Promise<Dayjs> {
     try {
       const isoTimes = await exec(
         `git --no-pager log --format='%ai' --follow --reverse ${filePath}`,
@@ -70,8 +71,9 @@ export class GitVCSProvider implements BaseVCSProvider {
       return dayjs(ctimeISO);
     } catch (error) {
       errorHandler.handle(new CustomError(ErrorCode.GitGetCtimeFail, error));
+      const fileStat = await stat(filePath);
+      return dayjs(fileStat.birthtime);
     }
-    return dayjs(new Date());
   }
 
   async isTracked(filePath: string): Promise<boolean> {

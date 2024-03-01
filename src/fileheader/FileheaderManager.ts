@@ -19,6 +19,13 @@ type UpdateFileheaderManagerOptions = {
   allowInsert?: boolean;
 };
 
+type OriginFileheaderInfo = {
+  start: number;
+  end: number;
+  content?: string | undefined;
+  variables?: IFileheaderVariables | undefined;
+};
+
 export class FileheaderManager {
   private configManager: ConfigManager;
   private providers: LanguageProvider[] = [];
@@ -60,7 +67,7 @@ export class FileheaderManager {
 
       const isLanguageMatch = await (async () => {
         if (provider.languages.length === 0 && provider instanceof VscodeInternalProvider) {
-          await provider.getBlockComment(languageId);
+          await provider.getBlockCommentFromVscode(languageId);
           return true;
         }
         return provider.languages.includes(languageId);
@@ -109,11 +116,91 @@ export class FileheaderManager {
 
     // if there is a change in VCS provider, we should replace the fileheader
     const isTracked = await vscProvider.isTracked(document.fileName);
-    console.log('🚀 ~ file: FileheaderManager.ts:109 ~ isTracked:', isTracked);
     const hasChanged = isTracked && (await vscProvider.hasChanged(document.fileName));
-    console.log('🚀 ~ file: FileheaderManager.ts:111 ~ hasChanged:', hasChanged);
 
     return !hasChanged && this.fileHashMemento.has(document);
+  }
+
+  private async processFileheaderInsertionOrReplacement(
+    document: vscode.TextDocument,
+    provider: LanguageProvider,
+    originFileheaderInfo: OriginFileheaderInfo,
+    fileheaderVariable: IFileheaderVariables,
+    config: Configuration & vscode.WorkspaceConfiguration,
+    allowInsert: boolean,
+    _silent: boolean,
+  ) {
+    const editor = await vscode.window.showTextDocument(document);
+    const fileheader = provider.generateFileheader(fileheaderVariable);
+    const startLine = provider.startLineOffset + (hasShebang(document.getText()) ? 1 : 0);
+
+    const shouldSkipReplace =
+      originFileheaderInfo.start !== -1 &&
+      (originFileheaderInfo.content?.replace(/\r\n/g, '\n') === fileheader ||
+        (await this.shouldSkipReplace(config, document)));
+
+    if (shouldSkipReplace) {
+      return;
+    }
+
+    // 替换文件头信息
+    const originStart = document.positionAt(originFileheaderInfo.start);
+    const originEnd = document.positionAt(originFileheaderInfo.end);
+    const newStart = new vscode.Position(startLine, 0);
+    const newFileHeaderLines = fileheader.split('\n').length - 1;
+    if (originFileheaderInfo.start !== -1) {
+      await editor.edit((editBuilder) => {
+        editBuilder.replace(new vscode.Range(newStart, originEnd), fileheader);
+      });
+
+      // 更新起始位置和结束位置
+      originFileheaderInfo.start = document.offsetAt(newStart);
+      originFileheaderInfo.end = document.offsetAt(newStart.translate(newFileHeaderLines, 0));
+    } else if (allowInsert) {
+      const onlyHasSingleLine = document.lineCount === 1;
+      const isLeadingLineEmpty = document.lineAt(startLine).isEmptyOrWhitespace;
+      const shouldInsertLineBreak = !isLeadingLineEmpty || onlyHasSingleLine;
+      const value = shouldInsertLineBreak ? fileheader + '\n' : fileheader;
+      await editor.edit((editBuilder) => {
+        editBuilder.insert(newStart, value);
+      });
+    }
+
+    await document.save();
+    // 确保文件头信息后只有一行空行
+    await this.ensureSingleLineSpacingAfterHeader(document, editor, originFileheaderInfo);
+  }
+
+  private async ensureSingleLineSpacingAfterHeader(
+    document: vscode.TextDocument,
+    editor: vscode.TextEditor,
+    originFileheaderInfo: OriginFileheaderInfo,
+  ) {
+    const endLineOfHeader = document.positionAt(originFileheaderInfo.end).line;
+    const nextLine = endLineOfHeader + 1;
+    const secondNextLine = endLineOfHeader + 2;
+
+    // 检查文件头信息后的行是否超过文档总行数
+    if (document.lineCount <= nextLine) {
+      // 如果文件只有文件头信息，确保在文件末尾添加一个空行
+      await editor.edit((editBuilder) => {
+        editBuilder.insert(new vscode.Position(endLineOfHeader + 1, 0), '\n');
+      });
+    } else if (
+      document.lineCount > secondNextLine &&
+      document.lineAt(secondNextLine).isEmptyOrWhitespace
+    ) {
+      // 如果文件头信息后有多于一个的空行，删除多余的空行
+      await editor.edit((editBuilder) => {
+        for (
+          let i = secondNextLine;
+          i < document.lineCount && document.lineAt(i).isEmptyOrWhitespace;
+          i++
+        ) {
+          editBuilder.delete(document.lineAt(i).rangeIncludingLineBreak);
+        }
+      });
+    }
   }
 
   public async updateFileheader(
@@ -124,7 +211,7 @@ export class FileheaderManager {
     const languageId = document?.languageId;
     const provider = await this.findProvider(document);
     if (provider instanceof VscodeInternalProvider) {
-      await provider.getBlockComment(languageId);
+      await provider.getBlockCommentFromVscode(languageId);
     }
 
     if (!provider) {
@@ -139,12 +226,9 @@ export class FileheaderManager {
       return;
     }
 
-    const startLine = provider.startLineOffset + (hasShebang(document.getText()) ? 1 : 0);
-
     const originFileheaderInfo = this.getOriginFileheaderInfo(document, provider);
 
     let fileheaderVariable: IFileheaderVariables;
-
     try {
       fileheaderVariable = await this.fileheaderVariableBuilder?.build(
         config,
@@ -157,38 +241,15 @@ export class FileheaderManager {
       return;
     }
 
-    const editor = await vscode.window.showTextDocument(document);
-    const fileheader = provider.getFileheader(fileheaderVariable);
-
-    const shouldSkipReplace =
-      originFileheaderInfo.start !== -1 &&
-      (originFileheaderInfo.content?.replace(/\r\n/g, '\n') === fileheader ||
-        (await this.shouldSkipReplace(config, document)));
-
-    if (shouldSkipReplace) {
-      return;
-    }
-
-    let originStart: vscode.Position;
-    if (
-      originFileheaderInfo.start !== -1 &&
-      (originStart = document.positionAt(originFileheaderInfo.start)) &&
-      originStart.line === startLine
-    ) {
-      const originEnd = document.positionAt(originFileheaderInfo.end);
-      await editor.edit((editBuilder) => {
-        editBuilder.replace(new vscode.Range(originStart, originEnd), fileheader);
-      });
-    } else if (allowInsert) {
-      const onlyHasSingleLine = document.lineCount === 1;
-      const isLeadingLineEmpty = document.lineAt(startLine).isEmptyOrWhitespace;
-      const shouldInsertLineBreak = !isLeadingLineEmpty || onlyHasSingleLine;
-      const value = shouldInsertLineBreak ? fileheader + '\n' : fileheader;
-      await editor.edit((editBuilder) => {
-        editBuilder.insert(new vscode.Position(startLine, 0), value);
-      });
-      await document.save();
-    }
+    this.processFileheaderInsertionOrReplacement(
+      document,
+      provider,
+      originFileheaderInfo,
+      fileheaderVariable,
+      config,
+      allowInsert,
+      silent,
+    );
 
     this.fileHashMemento.set(document);
   }

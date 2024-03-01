@@ -22,7 +22,7 @@ export type IFileheaderVariables = {
    * file create time
    * will get it from VCS or fallback to filesystem when it is not available
    */
-  ctime?: string;
+  birthtime?: string;
 
   /**
    * file modified time
@@ -84,6 +84,7 @@ export type Command = {
 
 export interface Provider {
   name: string;
+  startLineOffset?: number;
   languages: string[];
   template: string;
 }

@@ -90,13 +90,11 @@
         },
         "TurboFileHeader.disableFields": {
           "type": "array",
-          "default": [
-            "mtime"
-          ],
+          "default": [],
           "items": {
             "type": "string",
             "enum": [
-              "createTime",
+              "birthtime",
               "mtime",
               "authorName",
               "authorEmail",
@@ -127,7 +125,7 @@
         "TurboFileHeader.updateHeaderForModifiedFilesOnly": {
           "type": "boolean",
           "description": "Only dirty file to support update file header",
-          "default": true
+          "default": false
         },
         "TurboFileHeader.language": {
           "type": "array",

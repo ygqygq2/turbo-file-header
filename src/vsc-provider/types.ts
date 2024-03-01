@@ -29,7 +29,7 @@ export interface BaseVCSProvider {
    * get file create time from the VCS
    * @param filePath the file path
    */
-  getCtime(filePath: string): Promise<Dayjs>;
+  getBirthtime(filePath: string): Promise<Dayjs>;
 
   /**
    * get the result whether the file is tracked by VCS

@@ -1,11 +1,7 @@
 import vscode from 'vscode';
 import { evaluateTemplate, getTaggedTemplateInputs } from '../utils/utils';
 import { IFileheaderVariables, ITemplateFunction, Template } from '../typings/types';
-import {
-  TEMPLATE_NAMED_GROUP_WILDCARD_PLACEHOLDER,
-  TEMPLATE_OPTIONAL_GROUP_PLACEHOLDER,
-  WILDCARD_ACCESS_VARIABLES,
-} from '../constants';
+import { WILDCARD_ACCESS_VARIABLES } from '../constants';
 
 export abstract class LanguageProvider {
   /**
@@ -21,11 +17,25 @@ export abstract class LanguageProvider {
   }
 
   abstract readonly languages: string[];
+  abstract comments: vscode.CommentRule;
+  // 文件头偏移量，即文件头从这行开始插入或更新
+  readonly startLineOffset: number = 0;
 
-  readonly startLineOffset = 0;
-
-  abstract blockCommentStart: string;
-  abstract blockCommentEnd: string;
+  public getBlockComment(): { blockCommentStart: string; blockCommentEnd: string } {
+    let blockCommentStart: string = '';
+    let blockCommentEnd: string = '';
+    // 确保 this.comments 和 this.comments.blockComments 都不是 undefined
+    if (this.comments && this.comments.blockComment && this.comments.blockComment.length) {
+      // 当存在块注释时使用块注释
+      blockCommentStart = this.comments.blockComment[0];
+      blockCommentEnd = this.comments.blockComment[1];
+    } else if (this.comments && this.comments.lineComment) {
+      // 当不存在块注释但存在行注释时，使用行注释作为块注释的开始和结束
+      blockCommentStart = this.comments.lineComment;
+      blockCommentEnd = this.comments.lineComment;
+    }
+    return { blockCommentStart, blockCommentEnd };
+  }
 
   protected abstract getTemplate(tpl: ITemplateFunction, variables: IFileheaderVariables): Template;
 
@@ -33,33 +43,37 @@ export abstract class LanguageProvider {
     return this.getTemplate(getTaggedTemplateInputs, variables);
   }
 
-  public getFileheader(variables: IFileheaderVariables): string {
-    const { strings: _strings, interpolations } = this.getTemplateInternal(variables);
-    const strings = Array.from(_strings);
+  public generateFileheader(variables: IFileheaderVariables): string {
+    const { strings, interpolations } = this.getTemplateInternal(variables);
+    const copiedStrings = Array.from(strings);
 
-    return evaluateTemplate(strings, interpolations);
+    const r = evaluateTemplate(copiedStrings, interpolations);
+    console.log('🚀 ~ file: LanguageProvider.ts:53 ~ r:', r);
+    return r;
+    // return evaluateTemplate(copiedStrings, interpolations);
   }
 
   public getOriginFileheaderRegExp(eol: vscode.EndOfLine): RegExp {
-    const template = this.getTemplateInternal(WILDCARD_ACCESS_VARIABLES as IFileheaderVariables);
+    const { blockCommentStart, blockCommentEnd } = this.getBlockComment();
+    const eolPattern = eol === vscode.EndOfLine.CRLF ? '\\r\\n' : '\\n';
 
-    const templateValue = evaluateTemplate(template.strings, template.interpolations, true);
-    const pattern = templateValue
-      .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    // 转义注释符号，以便在正则表达式中使用
+    const blockCommentStartEscaped = blockCommentStart.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const blockCommentEndEscaped = blockCommentEnd.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-      // may have `\r\n`, for example, read a file in Windows.
-      // We should normalize it to `\n`
-      .replace(/\r\n/g, '\n')
-      .replace(new RegExp(`${TEMPLATE_OPTIONAL_GROUP_PLACEHOLDER.start}`, 'g'), '(?:')
-      .replace(new RegExp(`${TEMPLATE_OPTIONAL_GROUP_PLACEHOLDER.end}`, 'g'), ')?')
-      .replace(
-        new RegExp(
-          `${TEMPLATE_NAMED_GROUP_WILDCARD_PLACEHOLDER}_(\\w+)_${TEMPLATE_NAMED_GROUP_WILDCARD_PLACEHOLDER}`,
-          'g',
-        ),
-        '(?<$1>.*)',
-      )
-      .replace(/\n/g, eol === vscode.EndOfLine.CRLF ? '\r\n' : '\n');
+    let commentPattern;
+
+    // 判断是块注释还是单行注释
+    if (blockCommentStart === blockCommentEnd) {
+      // 单行注释
+      commentPattern = `${blockCommentStartEscaped}.*(?:${eolPattern}|$)`;
+    } else {
+      // 块注释
+      commentPattern = `${blockCommentStartEscaped}[^]*?${blockCommentEndEscaped}(?:${eolPattern}|$)`;
+    }
+
+    // 构建最终的正则表达式，匹配文件开头的注释段
+    const pattern = `^${commentPattern}`;
 
     return new RegExp(pattern, 'm');
   }

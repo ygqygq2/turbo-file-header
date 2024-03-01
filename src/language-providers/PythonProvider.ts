@@ -1,28 +1,29 @@
+import * as vscode from 'vscode';
 import { IFileheaderVariables, ITemplateFunction } from '../typings/types';
 import { LanguageProvider } from './LanguageProvider';
 
 export class PythonProvider extends LanguageProvider {
   readonly languages: string[] = ['python'];
 
-  blockCommentStart: string = "'''";
-  blockCommentEnd: string = "'''";
-
+  readonly comments: vscode.CommentRule = { blockComment: ["'''", "'''"] };
   override getTemplate(tpl: ITemplateFunction, variables: IFileheaderVariables) {
+    const { blockCommentStart, blockCommentEnd } = this.getBlockComment();
+
     const authorEmailPart = variables.authorEmail && `<${variables.authorEmail}>`;
     const authorLine =
       variables.authorName && `author:        ${variables.authorName} ${authorEmailPart}\n`;
-    const ctimeLine = variables.ctime && `date:          ${variables.ctime}\n`;
+    const ctimeLine = variables.birthtime && `date:          ${variables.birthtime}\n`;
     const lastModifiedLine = variables.mtime && `lastModified:  ${variables.mtime}\n`;
     const companyNameLine =
-      variables.companyName && `Copyright © ${variables.companyName} All rights reserved\n`;
+      variables.companyName && `Copyright©${variables.companyName} All rights reserved\n`;
 
-    return tpl`${this.blockCommentStart}\n${authorLine}${ctimeLine}${lastModifiedLine}${companyNameLine}${this.blockCommentEnd}`;
+    return tpl`${blockCommentStart}\n${authorLine}${ctimeLine}${lastModifiedLine}${companyNameLine}${blockCommentEnd}`;
     /*
     '''
     author:        ${variables.authorName} <${variables.authorEmail}>
-    date:          ${variables.ctime}
+    date:          ${variables.birthtime}
     lastModified:  ${variables.mtime}
-    Copyright © ${variables.companyName} All rights reserved
+    Copyright©${variables.companyName} All rights reserved
     '''
      */
   }

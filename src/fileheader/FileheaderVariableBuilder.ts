@@ -65,14 +65,9 @@ export class FileheaderVariableBuilder {
 
     const fixedUserName = config.get<string | null>(ConfigSection.userName, null);
     const fixedUserEmail = config.get<string | null>(ConfigSection.userEmail, null);
-    const currentTime = dayjs();
     if (!fixedUserEmail || !fixedUserName) {
       await vscProvider.validate(dirname(fsPath));
     }
-
-    const deferredCompanyName = queryFieldsExceptDisable(disableFieldSet.has('companyName'), () => {
-      return config.get<string>(ConfigSection.companyName)!;
-    });
 
     const fileStat = await stat(fsPath);
     const isTracked = await vscProvider.isTracked(fsPath);
@@ -90,20 +85,26 @@ export class FileheaderVariableBuilder {
       fixedUserEmail!,
     );
 
-    const deferredCtime = queryFieldsExceptDisable(
-      disableFieldSet.has('ctime'),
+    const deferredBirthtime = queryFieldsExceptDisable(
+      disableFieldSet.has('birthtime'),
       () => {
-        return isTracked ? vscProvider.getCtime(fsPath) : dayjs(fileStat.ctime);
+        return isTracked ? vscProvider.getBirthtime(fsPath) : dayjs(fileStat.birthtime);
       },
-      dayjs(fileStat.ctime),
+      dayjs(fileStat.birthtime),
     );
-    const deferredMtime = queryFieldsExceptDisable(disableFieldSet.has('mtime'), () => currentTime);
+    const deferredMtime = queryFieldsExceptDisable(disableFieldSet.has('mtime'), () =>
+      dayjs(fileStat.mtime),
+    );
 
-    const [companyName, userName, userEmail, _ctime, mtime] = await Promise.all([
+    const deferredCompanyName = queryFieldsExceptDisable(disableFieldSet.has('companyName'), () => {
+      return config.get<string>(ConfigSection.companyName)!;
+    });
+
+    const [companyName, userName, userEmail, birthtime, mtime] = await Promise.all([
       deferredCompanyName,
       deferredUserName,
       deferredUserEmail,
-      deferredCtime,
+      deferredBirthtime,
       deferredMtime,
     ] as const);
 
@@ -128,14 +129,14 @@ export class FileheaderVariableBuilder {
       deferredAuthorEmail,
     ] as const);
 
-    let ctime = _ctime;
+    let tmpBirthtime = birthtime;
 
-    let originCtime: Dayjs | undefined = dayjs(originVariable?.ctime, dateFormat);
-    if (!originCtime.isValid()) {
-      originCtime = undefined;
+    let originBirthtime: Dayjs | undefined = dayjs(originVariable?.birthtime, dateFormat);
+    if (!originBirthtime.isValid()) {
+      originBirthtime = undefined;
     } else {
-      if (originCtime.isBefore(ctime)) {
-        ctime = originCtime;
+      if (originBirthtime.isBefore(birthtime)) {
+        tmpBirthtime = originBirthtime;
       }
     }
 
@@ -160,13 +161,13 @@ export class FileheaderVariableBuilder {
     }
 
     return {
-      ctime: ctime?.format(dateFormat),
+      birthtime: tmpBirthtime?.format(dateFormat),
       mtime: mtime?.format(dateFormat),
       authorName,
       authorEmail,
       userName: !disableFieldSet.has('userName') ? userName : undefined,
       userEmail: !disableFieldSet.has('userEmail') ? userEmail : undefined,
-      companyName,
+      companyName: companyName ? companyName : userName ? userName : undefined,
 
       projectName,
       filePath,
