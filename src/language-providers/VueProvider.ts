@@ -16,7 +16,7 @@ export class VueProvider extends LanguageProvider {
     const ctimeLine = variables.birthtime && `date:          ${variables.birthtime}\n`;
     const lastModifiedLine = variables.mtime && `lastModified  ${variables.mtime}\n`;
     const companyNameLine =
-      variables.companyName && `Copyright©${variables.companyName} All rights reserved\n`;
+      variables.companyName && `Copyright ©${variables.companyName} All rights reserved\n`;
     const componentLine =
       variables.fileName && tpl`component:     ${upath.trimExt(variables.fileName)}\n`;
 
@@ -29,7 +29,7 @@ export class VueProvider extends LanguageProvider {
     date:          ${variables.birthtime}
     lastModified:  ${variables.mtime}
     component: ${upath.trimExt(variables.fileName)}
-    Copyright©${variables.companyName} All rights reserved
+    Copyright ©${variables.companyName} All rights reserved
     -->
     */
   }

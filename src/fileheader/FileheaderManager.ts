@@ -81,26 +81,37 @@ export class FileheaderManager {
   }
 
   private getOriginFileheaderInfo(document: vscode.TextDocument, provider: LanguageProvider) {
-    const source = document.getText();
+    // 获取文档的全部文本
+    let source = document.getText();
+    // 检查并获取起始行，如果有shebang则为1，否则为0
+    const startLine = hasShebang(source) ? 1 : 0;
+    // 如果有shebang，从文档文本中移除shebang行
+    if (startLine === 1) {
+      // 分割文本为行，移除第一行（shebang），然后再次拼接
+      source = source.split(/\r?\n/).slice(1).join('\n');
+    }
     const pattern = provider.getOriginFileheaderRegExp(document.eol);
+    // const sourceContent = provider.getSourceFileWithoutFileheader(document);
+    // console.log('🚀 ~ file: FileheaderManager.ts:95 ~ sourceContent:', sourceContent);
     const range: {
       start: number;
       end: number;
       content?: string;
       variables?: IFileheaderVariables;
     } = {
-      start: -1,
-      end: -1,
+      start: startLine, // 这里的startLine应保持原值，代表原始文档中注释的起始位置
+      end: startLine, // 初始结束行同为startLine，后续根据匹配结果调整
       content: undefined,
       variables: undefined,
     };
     const result = source.match(pattern);
+    console.log('🚀 ~ file: FileheaderManager.ts:109 ~ result:', result);
     if (result) {
       const match = result[0];
       range.content = match;
-      range.start = result.index!;
+      range.start = result.index! + startLine; // 调整start，加上shebang行的可能存在
       range.variables = result.groups;
-      range.end = range.start + match.length;
+      range.end = range.start + match.split(/\r?\n/).length - 1; // 计算结束行，考虑到多行注释的情况
     }
     return range;
   }
@@ -116,9 +127,9 @@ export class FileheaderManager {
 
     // if there is a change in VCS provider, we should replace the fileheader
     const isTracked = await vscProvider.isTracked(document.fileName);
-    const hasChanged = isTracked && (await vscProvider.hasChanged(document.fileName));
+    const hasChanged = isTracked ? await vscProvider.hasChanged(document.fileName) : false;
 
-    return !hasChanged && this.fileHashMemento.has(document);
+    return isTracked && !hasChanged && this.fileHashMemento.has(document);
   }
 
   private async processFileheaderInsertionOrReplacement(
@@ -134,73 +145,50 @@ export class FileheaderManager {
     const fileheader = provider.generateFileheader(fileheaderVariable);
     const startLine = provider.startLineOffset + (hasShebang(document.getText()) ? 1 : 0);
 
+    // 没有文件头，又不允许插入，直接返回
     const shouldSkipReplace =
-      originFileheaderInfo.start !== -1 &&
-      (originFileheaderInfo.content?.replace(/\r\n/g, '\n') === fileheader ||
-        (await this.shouldSkipReplace(config, document)));
+      (!allowInsert && originFileheaderInfo.start === originFileheaderInfo.end) ||
+      // 有文件头，但文件头内容相同，或者根据设置判断是否应该跳过更新
+      (originFileheaderInfo.start !== originFileheaderInfo.end &&
+        (originFileheaderInfo.content?.replace(/\r\n/g, '\n') === fileheader ||
+          (await this.shouldSkipReplace(config, document))));
 
     if (shouldSkipReplace) {
       return;
     }
 
-    // 替换文件头信息
-    const originStart = document.positionAt(originFileheaderInfo.start);
-    const originEnd = document.positionAt(originFileheaderInfo.end);
-    const newStart = new vscode.Position(startLine, 0);
-    const newFileHeaderLines = fileheader.split('\n').length - 1;
-    if (originFileheaderInfo.start !== -1) {
-      await editor.edit((editBuilder) => {
-        editBuilder.replace(new vscode.Range(newStart, originEnd), fileheader);
-      });
-
-      // 更新起始位置和结束位置
-      originFileheaderInfo.start = document.offsetAt(newStart);
-      originFileheaderInfo.end = document.offsetAt(newStart.translate(newFileHeaderLines, 0));
-    } else if (allowInsert) {
-      const onlyHasSingleLine = document.lineCount === 1;
-      const isLeadingLineEmpty = document.lineAt(startLine).isEmptyOrWhitespace;
-      const shouldInsertLineBreak = !isLeadingLineEmpty || onlyHasSingleLine;
-      const value = shouldInsertLineBreak ? fileheader + '\n' : fileheader;
-      await editor.edit((editBuilder) => {
-        editBuilder.insert(newStart, value);
-      });
+    // 确保文件头信息后只有一行空行
+    let lineAfterHeader = originFileheaderInfo.end + 1;
+    while (
+      lineAfterHeader < document.lineCount &&
+      document.lineAt(lineAfterHeader).isEmptyOrWhitespace
+    ) {
+      lineAfterHeader++;
     }
+
+    // 哪个位置在前面，则为替换开始位置
+    const replaceStart =
+      originFileheaderInfo.start >= startLine ? startLine : originFileheaderInfo.start;
+    const newStart = new vscode.Position(replaceStart, 0);
+    // 当文件头信息开始位置在后面些时，则使用空行补上，以达到文件头往后移的效果
+    const emptyLines = '\n'.repeat(startLine - originFileheaderInfo.start);
+    const replaceFileheader =
+      originFileheaderInfo.start <= startLine ? emptyLines + fileheader : fileheader;
+
+    // 原来有文件头（文件开头的注释都当作文件头信息）
+    // 原来没有文件头
+    // 都可以用 replace
+    const rangeToReplace = new vscode.Range(
+      newStart,
+      document.lineAt(lineAfterHeader - 1).range.end,
+    );
+    await editor.edit((editBuilder) => {
+      editBuilder.replace(rangeToReplace, replaceFileheader + '\n');
+    });
+
+    // 将文件头开始及往后的内容移到 startLine 行开始，如果往后移动，则前面用空行补齐
 
     await document.save();
-    // 确保文件头信息后只有一行空行
-    await this.ensureSingleLineSpacingAfterHeader(document, editor, originFileheaderInfo);
-  }
-
-  private async ensureSingleLineSpacingAfterHeader(
-    document: vscode.TextDocument,
-    editor: vscode.TextEditor,
-    originFileheaderInfo: OriginFileheaderInfo,
-  ) {
-    const endLineOfHeader = document.positionAt(originFileheaderInfo.end).line;
-    const nextLine = endLineOfHeader + 1;
-    const secondNextLine = endLineOfHeader + 2;
-
-    // 检查文件头信息后的行是否超过文档总行数
-    if (document.lineCount <= nextLine) {
-      // 如果文件只有文件头信息，确保在文件末尾添加一个空行
-      await editor.edit((editBuilder) => {
-        editBuilder.insert(new vscode.Position(endLineOfHeader + 1, 0), '\n');
-      });
-    } else if (
-      document.lineCount > secondNextLine &&
-      document.lineAt(secondNextLine).isEmptyOrWhitespace
-    ) {
-      // 如果文件头信息后有多于一个的空行，删除多余的空行
-      await editor.edit((editBuilder) => {
-        for (
-          let i = secondNextLine;
-          i < document.lineCount && document.lineAt(i).isEmptyOrWhitespace;
-          i++
-        ) {
-          editBuilder.delete(document.lineAt(i).rangeIncludingLineBreak);
-        }
-      });
-    }
   }
 
   public async updateFileheader(
@@ -227,6 +215,10 @@ export class FileheaderManager {
     }
 
     const originFileheaderInfo = this.getOriginFileheaderInfo(document, provider);
+    console.log(
+      '🚀 ~ file: FileheaderManager.ts:220 ~ originFileheaderInfo:',
+      originFileheaderInfo,
+    );
 
     let fileheaderVariable: IFileheaderVariables;
     try {

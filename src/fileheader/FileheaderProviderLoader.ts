@@ -7,6 +7,7 @@ import { CustomError, ErrorCode } from '@/error';
 import { getActiveDocumentWorkspace } from '@/utils/vscode-utils';
 import { CUSTOM_CONFIG_FILE_NAME } from '@/constants';
 import { LanguageManager } from '@/languages/LanguageManager';
+import { VscodeInternalProvider } from '../language-providers/VscodeInternalProvider';
 
 export class FileheaderProviderLoader {
   private languageManager: LanguageManager;
@@ -28,7 +29,11 @@ export class FileheaderProviderLoader {
     }
 
     const customProviders = await this.loadCustomProvers();
-    this.providersCache = [...customProviders, ...internalProviders];
+    this.providersCache = [
+      ...customProviders,
+      ...internalProviders,
+      new VscodeInternalProvider(this.languageManager),
+    ];
     return this.providersCache;
   }
 

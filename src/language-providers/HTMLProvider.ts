@@ -15,7 +15,7 @@ export class HTMLProvider extends LanguageProvider {
     const ctimeLine = variables.birthtime && `date:          ${variables.birthtime}\n`;
     const lastModifiedLine = variables.mtime && `lastModified  ${variables.mtime}\n`;
     const companyNameLine =
-      variables.companyName && `Copyright©${variables.companyName} All rights reserved\n`;
+      variables.companyName && `Copyright ©${variables.companyName} All rights reserved\n`;
 
     return tpl`${blockCommentStart}\n${authorLine}${ctimeLine}${lastModifiedLine}${companyNameLine}${blockCommentEnd}`;
 
@@ -25,7 +25,7 @@ export class HTMLProvider extends LanguageProvider {
     author:        ${variables.authorName} <${variables.authorEmail}>
     date:          ${variables.birthtime}
     lastModified:  ${variables.mtime}
-    Copyright©${variables.companyName} All rights reserved
+    Copyright ©${variables.companyName} All rights reserved
     -->
     */
   }

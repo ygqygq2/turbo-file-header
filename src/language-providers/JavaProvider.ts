@@ -13,7 +13,7 @@ export class JavaProvider extends LanguageProvider {
     const ctimeLine = variables.birthtime && tpl` * @date          ${variables.birthtime}\n`;
     const lastModifiedLine = variables.mtime && tpl` * @lastModified  ${variables.mtime}\n`;
     const companyNameLine =
-      variables.companyName && tpl` * Copyright©${variables.companyName} All rights reserved\n`;
+      variables.companyName && tpl` * Copyright ©${variables.companyName} All rights reserved\n`;
 
     return tpl`${blockCommentStart}\n${authorLine}${ctimeLine}${lastModifiedLine}${companyNameLine}${blockCommentEnd}`;
 
@@ -22,7 +22,7 @@ export class JavaProvider extends LanguageProvider {
      * @author        ${variables.authorName}
      * @date          ${variables.birthtime}
      * @lastModified  ${variables.mtime}
-     * Copyright©${variables.companyName} All rights reserved
+     * Copyright ©${variables.companyName} All rights reserved
      */
   }
 }

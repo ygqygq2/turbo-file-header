@@ -1,7 +1,11 @@
 import vscode from 'vscode';
-import { evaluateTemplate, getTaggedTemplateInputs } from '../utils/utils';
+import { evaluateTemplate, getTaggedTemplateInputs, hasShebang } from '../utils/utils';
 import { IFileheaderVariables, ITemplateFunction, Template } from '../typings/types';
-import { WILDCARD_ACCESS_VARIABLES } from '../constants';
+import {
+  TEMPLATE_NAMED_GROUP_WILDCARD_PLACEHOLDER,
+  TEMPLATE_OPTIONAL_GROUP_PLACEHOLDER,
+  WILDCARD_ACCESS_VARIABLES,
+} from '../constants';
 
 export abstract class LanguageProvider {
   /**
@@ -54,34 +58,40 @@ export abstract class LanguageProvider {
   }
 
   public getOriginFileheaderRegExp(eol: vscode.EndOfLine): RegExp {
-    const { blockCommentStart, blockCommentEnd } = this.getBlockComment();
-    const eolPattern = eol === vscode.EndOfLine.CRLF ? '\\r\\n' : '\\n';
+    const template = this.getTemplateInternal(WILDCARD_ACCESS_VARIABLES as IFileheaderVariables);
+    const templateValue = evaluateTemplate(template.strings, template.interpolations, true);
 
-    // 转义注释符号，以便在正则表达式中使用
-    const blockCommentStartEscaped = blockCommentStart.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const blockCommentEndEscaped = blockCommentEnd.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-    let commentPattern;
-
-    // 判断是块注释还是单行注释
-    if (blockCommentStart === blockCommentEnd) {
-      // 单行注释
-      commentPattern = `${blockCommentStartEscaped}.*(?:${eolPattern}|$)`;
-    } else {
-      // 块注释
-      commentPattern = `${blockCommentStartEscaped}[^]*?${blockCommentEndEscaped}(?:${eolPattern}|$)`;
-    }
-
-    // 构建最终的正则表达式，匹配文件开头的注释段
-    const pattern = `^${commentPattern}`;
+    const pattern = templateValue
+      .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      .replace(/\r\n/g, '\n')
+      .replace(new RegExp(`${TEMPLATE_OPTIONAL_GROUP_PLACEHOLDER.start}`, 'g'), '(?:')
+      .replace(new RegExp(`${TEMPLATE_OPTIONAL_GROUP_PLACEHOLDER.end}`, 'g'), ')?')
+      .replace(
+        new RegExp(
+          `${TEMPLATE_NAMED_GROUP_WILDCARD_PLACEHOLDER}_(\\w+)_${TEMPLATE_NAMED_GROUP_WILDCARD_PLACEHOLDER}`,
+          'g',
+        ),
+        '(?<$1>.*)',
+      )
+      .replace(/\n/g, eol === vscode.EndOfLine.CRLF ? '\r\n' : '\n');
 
     return new RegExp(pattern, 'm');
   }
 
-  public getSourcefileWithoutFileheader(document: vscode.TextDocument): string {
+  public getSourceFileWithoutFileheader(document: vscode.TextDocument): string {
+    const startLine = hasShebang(document.getText()) ? 1 : 0;
+    // 获取整个文档的文本，然后按行分割
+    const lines = document.getText().split(/\r?\n/);
+    // 从startLine开始获取文本
+    const textFromStartLine = lines.slice(startLine).join('\n');
+    // 用于匹配文件头的正则表达式
     const regexp = new RegExp(this.getOriginFileheaderRegExp(document.eol), 'mg');
-    const source = document.getText();
-    return source.replace(regexp, '');
+    // 只替换从startLine开始的部分
+    const sourceWithoutHeader = textFromStartLine.replace(regexp, '');
+    // 如果有shebang，需要将它加回到文本的开始处
+    const shebang = startLine > 0 ? lines.slice(0, startLine).join('\n') + '\n' : '';
+    // 返回去掉文件头的文本，如果有shebang，它会被加回
+    return shebang + sourceWithoutHeader;
   }
 
   public readonly accessVariableFields = new Set<keyof IFileheaderVariables>();

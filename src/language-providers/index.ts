@@ -1,7 +1,6 @@
 import { LanguageProvider } from './LanguageProvider';
 import { CSSProvider } from './CSSProvider';
 import { JavaProvider } from './JavaProvider';
-import { VscodeInternalProvider } from './VscodeInternalProvider';
 import { HTMLProvider } from './HTMLProvider';
 import { PythonProvider } from './PythonProvider';
 import { VueProvider } from './VueProvider';
@@ -14,7 +13,6 @@ export const internalProviders: LanguageProvider[] = [
   new JavaProvider(),
   new PythonProvider(),
   new VueProvider(),
-  new VscodeInternalProvider(),
 ];
 
 export { LanguageProvider };

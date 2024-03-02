@@ -28,16 +28,19 @@ export class VscodeInternalProvider extends LanguageProvider {
     const ctimeLine = variables.birthtime && tpl` * @date          ${variables.birthtime}\n`;
     const lastModifiedLine = variables.mtime && tpl` * @lastModified  ${variables.mtime}\n`;
     const companyNameLine =
-      variables.companyName && tpl` * Copyright©${variables.companyName} All rights reserved\n`;
+      variables.companyName && tpl` * Copyright ©${variables.companyName} All rights reserved\n`;
 
-    return tpl`${blockCommentStart}\n${authorLine}${ctimeLine}${lastModifiedLine}${companyNameLine}${blockCommentEnd}`;
+    if (this.comments && this.comments.blockComment && this.comments.blockComment.length) {
+      return tpl`${blockCommentStart}\n${authorLine}${ctimeLine}${lastModifiedLine}${companyNameLine}${blockCommentEnd}`;
+    }
+    return tpl`${blockCommentStart}\n${blockCommentStart}${authorLine}${blockCommentStart}${ctimeLine}${blockCommentStart}${lastModifiedLine}${blockCommentStart}${companyNameLine}${blockCommentEnd}`;
 
     // like this:
     /**
      * @author        ${variables.authorName} <${variables.authorEmail}>
      * @date          ${variables.birthtime}
      * @lastModified  ${variables.mtime}
-     * Copyright©${variables.companyName} All rights reserved
+     * Copyright ©${variables.companyName} All rights reserved
      */
   }
 }
