@@ -1,14 +1,15 @@
-import vscode from 'vscode';
 import { ChildProcess, exec as _exec, ExecOptions } from 'child_process';
 import { CommandExecError } from '../error/CommandExecError';
 import { Template, TemplateInterpolation } from '../typings/types';
 import { TEMPLATE_OPTIONAL_GROUP_PLACEHOLDER, TEMPLATE_SYMBOL_KEY } from '../constants';
 import crypto from 'crypto';
+
 /**
  * whether text starts with `'#!'`
  */
 export function hasShebang(text: string): boolean {
-  return text.startsWith('#!');
+  const shebangPattern = /^#!\S/;
+  return shebangPattern.test(text);
 }
 
 export function getTaggedTemplateInputs(
@@ -46,18 +47,6 @@ export function exec(
 
 export function getFirstLine(input: string) {
   return input.split('\n', 1)[0];
-}
-
-export function offsetSelection(selection: vscode.Selection, offsetLine: number) {
-  const newAnchor = new vscode.Position(
-    selection.anchor.line + offsetLine,
-    selection.anchor.character,
-  );
-  const newActive = new vscode.Position(
-    selection.active.line + offsetLine,
-    selection.active.character,
-  );
-  return new vscode.Selection(newAnchor, newActive);
 }
 
 export function delayUntil(

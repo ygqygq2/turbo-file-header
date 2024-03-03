@@ -51,10 +51,7 @@ export abstract class LanguageProvider {
     const { strings, interpolations } = this.getTemplateInternal(variables);
     const copiedStrings = Array.from(strings);
 
-    const r = evaluateTemplate(copiedStrings, interpolations);
-    console.log('🚀 ~ file: LanguageProvider.ts:53 ~ r:', r);
-    return r;
-    // return evaluateTemplate(copiedStrings, interpolations);
+    return evaluateTemplate(copiedStrings, interpolations);
   }
 
   public getOriginFileheaderRegExp(eol: vscode.EndOfLine): RegExp {
@@ -76,6 +73,86 @@ export abstract class LanguageProvider {
       .replace(/\n/g, eol === vscode.EndOfLine.CRLF ? '\r\n' : '\n');
 
     return new RegExp(pattern, 'm');
+  }
+
+  public getOriginFileheaderRange(document: vscode.TextDocument) {
+    const startLine = hasShebang(document.lineAt(0).text) ? 1 : 0;
+    const endLine = startLine;
+
+    const startPosition = new vscode.Position(startLine, 0);
+    let endPosition = new vscode.Position(endLine, 0);
+
+    // 用于标记是否处于块注释内部
+    let isInsideBlockComment = false;
+
+    for (let i = startLine; i < document.lineCount; i++) {
+      const line = document.lineAt(i);
+      const lineText = line.text;
+
+      // 更新块注释的开始和结束状态
+      isInsideBlockComment = this.updateBlockCommentState(lineText, isInsideBlockComment);
+      // 判断当前行是否是注释行
+      if (this.isCommentLine(lineText, isInsideBlockComment)) {
+        // endLine = i;
+        endPosition = document.lineAt(i).range.end;
+      } else {
+        // 遇到非注释行且不在块注释中，且不是空行，结束循环
+        if (!isInsideBlockComment && !line.isEmptyOrWhitespace) {
+          break;
+        }
+        // 如果不在注释中，又是空行，则归在注释范围中
+        // if (!isInsideBlockComment && line.isEmptyOrWhitespace) {
+        //   endLine = i;
+        // }
+      }
+    }
+
+    const range = new vscode.Range(startPosition, endPosition);
+    return range;
+  }
+
+  private isCommentLine(lineText: string, isInsideBlockComment: boolean): boolean {
+    const { blockCommentStart, blockCommentEnd } = this.getBlockComment();
+    const { lineComment } = this.comments;
+
+    // 块注释
+    if (this.comments && this.comments.blockComment && this.comments.blockComment.length) {
+      // 处于块注释中，不管有没有结束，则为注释行
+      if (isInsideBlockComment) {
+        return true;
+      }
+
+      // 块注释开始、结束都属于注释行
+      return lineText.includes(blockCommentStart) || lineText.includes(blockCommentEnd);
+    } else if (lineComment) {
+      return lineText.trim().startsWith(lineComment);
+    }
+    return false;
+  }
+
+  private updateBlockCommentState(lineText: string, isInsideBlockComment: boolean): boolean {
+    const { blockCommentStart, blockCommentEnd } = this.getBlockComment();
+
+    // 检查是否为Python或其他使用相同标记作为块注释开始和结束的语言
+    if (blockCommentStart === blockCommentEnd) {
+      // 如果找到块注释标记，并且我们当前不在块注释内，那么这表示块注释的开始
+      if (lineText.includes(blockCommentStart) && !isInsideBlockComment) {
+        isInsideBlockComment = true;
+      } else if (lineText.includes(blockCommentEnd) && isInsideBlockComment) {
+        // 如果我们已经在块注释内，并且再次遇到块注释标记，那么这表示块注释的结束
+        isInsideBlockComment = false;
+      }
+    } else {
+      // 对于开始和结束标记不同的常规情况
+      if (lineText.includes(blockCommentStart)) {
+        isInsideBlockComment = true;
+      }
+      if (lineText.includes(blockCommentEnd)) {
+        isInsideBlockComment = false;
+      }
+    }
+
+    return isInsideBlockComment;
   }
 
   public getSourceFileWithoutFileheader(document: vscode.TextDocument): string {
