@@ -6,6 +6,7 @@ import { CUSTOM_CONFIG_FILE_NAME, ConfigSection } from '@/constants';
 export class DocumentHandler {
   private configManager: ConfigManager;
   private fileheaderManager: FileheaderManager;
+  private saveDocumentTimeoutId: NodeJS.Timeout | null = null;
 
   constructor(configManager: ConfigManager, fileheaderManager: FileheaderManager) {
     this.configManager = configManager;
@@ -25,12 +26,13 @@ export class DocumentHandler {
       }
 
       await this.fileheaderManager.updateFileheader(document, {
+        allowInsert: true,
         silent: true,
       });
     }
   };
 
-  public onSaveDocument = (e: vscode.TextDocumentWillSaveEvent) => {
+  public onSaveDocument = async (e: vscode.TextDocumentWillSaveEvent) => {
     const enabled = this.configManager.get<boolean>(ConfigSection.autoUpdateOnSave);
     if (!enabled) {
       return;
@@ -40,11 +42,22 @@ export class DocumentHandler {
       return;
     }
 
-    const updatePromise = this.fileheaderManager.updateFileheader(e.document, {
-      allowInsert: false,
-      silent: true,
-    });
-    e.waitUntil(updatePromise);
+    // 检查是否已经存在一个定时器，如果存在，则清除它
+    if (this.saveDocumentTimeoutId) {
+      clearTimeout(this.saveDocumentTimeoutId);
+      this.saveDocumentTimeoutId = null;
+    }
+
+    // 设置新的定时器，并保存定时器标识
+    this.saveDocumentTimeoutId = setTimeout(async () => {
+      await this.fileheaderManager.updateFileheader(e.document, {
+        allowInsert: false,
+        silent: true,
+      });
+
+      // 定时器执行完毕后，清除定时器标识
+      this.saveDocumentTimeoutId = null;
+    }, 2000); // 2000毫秒后执行
   };
 
   public onDidChangeVisibleTextEditors = (e: readonly vscode.TextEditor[]) => {

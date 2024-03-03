@@ -126,9 +126,11 @@ export class FileheaderManager {
   ) {
     const editor = await vscode.window.showTextDocument(document);
     const fileheader = provider.generateFileheader(fileheaderVariable);
+    console.log('🚀 ~ file: FileheaderManager.ts:129 ~ fileheader:', fileheader);
     const startLine = provider.startLineOffset + (hasShebang(document.getText()) ? 1 : 0);
     const { range } = originFileheaderInfo;
     const content = document.getText(range);
+    console.log('🚀 ~ file: FileheaderManager.ts:133 ~ content:', content);
     // const originContent = provider.getSourceFileWithoutFileheader(document);
 
     const shouldSkipReplace =
@@ -147,7 +149,7 @@ export class FileheaderManager {
     const endIsLinePosition = isLineStartOrEnd(document, range);
     let lineAfterHeader = endIsLinePosition === 0 ? range.end.line : range.end.line + 1;
     while (
-      lineAfterHeader < document.lineCount &&
+      lineAfterHeader < document.lineCount - 1 &&
       document.lineAt(lineAfterHeader).isEmptyOrWhitespace
     ) {
       lineAfterHeader++;
@@ -178,6 +180,7 @@ export class FileheaderManager {
     document: vscode.TextDocument,
     { allowInsert = true, silent = false }: UpdateFileheaderManagerOptions = {},
   ) {
+    // console.log("🚀 ~ file: FileheaderManager.ts:180 ~ allowInsert:", allowInsert);
     const config = this.configManager.getConfiguration();
     const languageId = document?.languageId;
     const provider = await this.findProvider(document);

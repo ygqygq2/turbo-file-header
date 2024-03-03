@@ -1,4 +1,4 @@
-import type * as vscode from 'vscode';
+import * as vscode from 'vscode';
 import { getBaseCommentRule, loadCommentRuleFromFile } from './base';
 import { AvailableComments } from './types';
 

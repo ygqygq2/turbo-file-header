@@ -80,16 +80,20 @@ export class ExtensionActivator {
     // 监控配置文件变化
     this.watcher.createWatcher();
 
-    this.disposers.push(vscode.workspace.onDidChangeWorkspaceFolders(this.watcher.createWatcher));
-
-    this.disposers.push(vscode.workspace.onDidCreateFiles(this.documentHandler.onCreateDocument));
     this.disposers.push(
-      vscode.workspace.onWillSaveTextDocument(this.documentHandler.onSaveDocument),
+      vscode.workspace.onDidChangeWorkspaceFolders(() => this.watcher.createWatcher()),
+    );
+
+    this.disposers.push(
+      vscode.workspace.onDidCreateFiles((e) => this.documentHandler.onCreateDocument(e)),
+    );
+    this.disposers.push(
+      vscode.workspace.onWillSaveTextDocument((e) => this.documentHandler.onSaveDocument(e)),
     );
     this.documentHandler.onDidChangeVisibleTextEditors(vscode.window.visibleTextEditors);
     this.disposers.push(
-      vscode.window.onDidChangeVisibleTextEditors(
-        this.documentHandler.onDidChangeVisibleTextEditors,
+      vscode.window.onDidChangeVisibleTextEditors((editors) =>
+        this.documentHandler.onDidChangeVisibleTextEditors(editors),
       ),
     );
   };

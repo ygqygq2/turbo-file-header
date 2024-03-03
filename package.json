@@ -60,11 +60,11 @@
     "configuration": {
       "title": "Turbo File Header",
       "properties": {
-        "TurboFileHeader.currentUserName": {
+        "TurboFileHeader.userName": {
           "type": "string",
           "description": "The fixed current user. The default is from your VCS"
         },
-        "TurboFileHeader.currentUserEmail": {
+        "TurboFileHeader.userEmail": {
           "type": "string",
           "description": "The fixed current user email. the default is from your VCS"
         },
@@ -127,7 +127,7 @@
           "description": "Only dirty file to support update file header",
           "default": false
         },
-        "TurboFileHeader.language": {
+        "TurboFileHeader.languages": {
           "type": "array",
           "description": "Custom language to support",
           "default": [

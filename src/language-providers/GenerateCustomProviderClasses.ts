@@ -42,8 +42,6 @@ export class GenerateCustomProviderClasses {
       comments: vscode.CommentRule = { lineComment: '//', blockComment: ['/**', '*/'] };
       public readonly languages = languages;
       readonly startLineOffset = startLineOffsetConfig;
-      public blockCommentStart: string = '/*';
-      public blockCommentEnd: string = '*/';
 
       constructor(languageManager: LanguageManager, workspaceScopeUri?: vscode.Uri | undefined) {
         super(workspaceScopeUri);
@@ -56,21 +54,16 @@ export class GenerateCustomProviderClasses {
       };
 
       override getTemplate(tpl: ITemplateFunction, variables: IFileheaderVariables) {
-        // 确保 this.comments 和 this.comments.blockComments 都不是 undefined
-        if (this.comments && this.comments.blockComment && this.comments.blockComment.length) {
-          // 当存在块注释时使用块注释
-          this.blockCommentStart = this.comments.blockComment[0];
-          this.blockCommentEnd = this.comments.blockComment[1];
-        } else if (this.comments && this.comments.lineComment) {
-          // 当不存在块注释但存在行注释时，使用行注释作为块注释的开始和结束
-          this.blockCommentStart = this.comments.lineComment;
-          this.blockCommentEnd = this.comments.lineComment;
-        }
+        const { blockCommentStart, blockCommentEnd } = this.getBlockComment();
 
         const compiledTemplate = Handlebars.compile(template);
         const result = compiledTemplate(variables);
-
-        return tpl`${this.blockCommentStart}\n${result}${this.blockCommentEnd}`;
+        if (this.comments && this.comments.blockComment && this.comments.blockComment.length) {
+          return tpl`${blockCommentStart}\n${result}${blockCommentEnd}`;
+        }
+        const resultLines = result.split('\n');
+        const commentedResult = resultLines.map((line) => blockCommentStart + line).join('\n');
+        return tpl`${blockCommentStart}\n${commentedResult}${blockCommentEnd}`;
       }
     };
   };
