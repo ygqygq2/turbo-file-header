@@ -15,7 +15,9 @@ export async function getActiveDocumentWorkspace(): Promise<vscode.WorkspaceFold
     activeWorkspace = vscode.workspace.getWorkspaceFolder(activeDocumentUri);
   } else {
     const workspaces = vscode.workspace.workspaceFolders;
-    if (workspaces && workspaces.length > 0) {
+    if (workspaces && workspaces.length === 1) {
+      activeWorkspace = workspaces[0];
+    } else if (workspaces && workspaces.length > 0) {
       const picked = await vscode.window.showQuickPick(
         workspaces.map((workspace) => ({ label: workspace.name, workspace })),
         { title: 'Select which workspace for add custom fileheader template' },

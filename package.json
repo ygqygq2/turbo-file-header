@@ -2,7 +2,7 @@
   "name": "turbo-file-header",
   "displayName": "Turbo File Header",
   "description": "Sets file header information globally or for a project.",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "icon": "resources/icons/icon.png",
   "repository": {
     "type": "git",
@@ -80,12 +80,12 @@
         },
         "TurboFileHeader.autoInsertOnCreateFile": {
           "type": "boolean",
-          "default": true,
+          "default": false,
           "description": "Auto insert fileheader when create file"
         },
         "TurboFileHeader.autoUpdateOnSave": {
           "type": "boolean",
-          "default": true,
+          "default": false,
           "description": "Auto update fileheader when save file"
         },
         "TurboFileHeader.disableFields": {
