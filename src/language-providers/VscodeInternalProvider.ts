@@ -33,7 +33,7 @@ export class VscodeInternalProvider extends LanguageProvider {
     if (this.comments && this.comments.blockComment && this.comments.blockComment.length) {
       return tpl`${blockCommentStart}\n${authorLine}${ctimeLine}${lastModifiedLine}${companyNameLine}${blockCommentEnd}`;
     }
-    return tpl`${blockCommentStart}\n${blockCommentStart}${authorLine}${blockCommentStart}${ctimeLine}${blockCommentStart}${lastModifiedLine}${blockCommentStart}${companyNameLine}${blockCommentEnd}`;
+    return tpl`${blockCommentStart}\n${blockCommentStart}${authorLine}${blockCommentStart}${ctimeLine}${blockCommentStart}${lastModifiedLine}${blockCommentStart}${companyNameLine} ${blockCommentEnd}`;
 
     // like this:
     /**

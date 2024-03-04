@@ -15,7 +15,7 @@ export class JavaProvider extends LanguageProvider {
     const companyNameLine =
       variables.companyName && tpl` * Copyright ©${variables.companyName} All rights reserved\n`;
 
-    return tpl`${blockCommentStart}\n${authorLine}${ctimeLine}${lastModifiedLine}${companyNameLine}${blockCommentEnd}`;
+    return tpl`${blockCommentStart}\n${authorLine}${ctimeLine}${lastModifiedLine}${companyNameLine} ${blockCommentEnd}`;
 
     // like this:
     /**

@@ -1,19 +1,20 @@
 import vscode from 'vscode';
 import output from '@/error/output';
-import { hasShebang } from '../utils/utils';
+import { errorHandler } from '@/extension';
+import { convertDateFormatToRegex, hasShebang } from '@/utils/utils';
+import { isLineStartOrEnd } from '@/utils/vscode-utils';
 import { FileheaderVariableBuilder } from './FileheaderVariableBuilder';
 import { FileHashMemento } from './FileHashMemento';
 import { vscProvider } from '../vsc-provider';
 import { CustomError } from '@/error/ErrorHandler';
 import { ErrorCode, errorCodeMessages } from '@/error/ErrorCodeMessage.enum';
 import { FileheaderProviderLoader } from './FileheaderProviderLoader';
-import { errorHandler } from '@/extension';
 import { LanguageProvider } from '@/language-providers';
 import { VscodeInternalProvider } from '@/language-providers/VscodeInternalProvider';
 import { IFileheaderVariables } from '../typings/types';
 import { ConfigManager } from '@/configuration/ConfigManager';
 import { Configuration } from '@/configuration/types';
-import { isLineStartOrEnd } from '@/utils/vscode-utils';
+import { ConfigSection } from '@/constants';
 
 type UpdateFileheaderManagerOptions = {
   silent?: boolean;
@@ -115,6 +116,54 @@ export class FileheaderManager {
     return isTracked && !hasChanged && this.fileHashMemento.has(document);
   }
 
+  private removeDateString(fileHeaderContent: string, regex: RegExp): string {
+    // 将匹配到的时间行替换为空字符串
+    return fileHeaderContent.replace(regex, '');
+  }
+
+  private async shouldSkipReplacement(
+    document: vscode.TextDocument,
+    fileheaderRange: vscode.Range,
+    newFileheader: string,
+    config: Configuration & vscode.WorkspaceConfiguration,
+    allowInsert: boolean,
+  ) {
+    const originContent = document.getText(fileheaderRange)?.replace(/\r\n/g, '\n');
+    const originContentLineCount = originContent.split('\n').length;
+    const dateformat = config.get(ConfigSection.dateFormat, 'YYYY-MM-DD HH:mm:ss');
+    const dateRegex = new RegExp(convertDateFormatToRegex(dateformat), 'g');
+
+    // 避免 prettier 这类格式后处理空格，导致文件头内容变化影响判断
+    let contentSame: boolean = false;
+    if (originContentLineCount > 1) {
+      const originContentLines = originContent.split('\n').map((line) => line.trim());
+      const originContentProcessed = this.removeDateString(
+        originContentLines.join('\n'),
+        dateRegex,
+      );
+
+      const newFileheaderLines = newFileheader.split('\n').map((line) => line.trim());
+      const newFileheaderProcessed = this.removeDateString(
+        newFileheaderLines.join('\n'),
+        dateRegex,
+      );
+
+      contentSame = originContentProcessed === newFileheaderProcessed;
+    } else {
+      const originContentProcessed = this.removeDateString(originContent, dateRegex);
+      const newFileheaderProcessed = this.removeDateString(newFileheader, dateRegex);
+      contentSame = originContentProcessed === newFileheaderProcessed;
+    }
+
+    // 不允许插入，且范围开始和结束相同（没有文件头的空间）
+    return (
+      (!allowInsert && fileheaderRange.start.isEqual(fileheaderRange.end)) ||
+      // 范围开始和结束不相同（有文件头），且文件头内容相同，或者根据设置判断是否应该跳过更新
+      (!fileheaderRange.start.isEqual(fileheaderRange.end) &&
+        (contentSame || (await this.shouldSkipReplace(config, document))))
+    );
+  }
+
   private async processFileheaderInsertionOrReplacement(
     document: vscode.TextDocument,
     provider: LanguageProvider,
@@ -126,21 +175,17 @@ export class FileheaderManager {
   ) {
     const editor = await vscode.window.showTextDocument(document);
     const fileheader = provider.generateFileheader(fileheaderVariable);
-    console.log('🚀 ~ file: FileheaderManager.ts:129 ~ fileheader:', fileheader);
     const startLine = provider.startLineOffset + (hasShebang(document.getText()) ? 1 : 0);
     const { range } = originFileheaderInfo;
-    const content = document.getText(range);
-    console.log('🚀 ~ file: FileheaderManager.ts:133 ~ content:', content);
     // const originContent = provider.getSourceFileWithoutFileheader(document);
 
-    const shouldSkipReplace =
-      // 不允许插入，且范围开始和结束相同（没有文件头的空间）
-      (!allowInsert && range.start.isEqual(range.end)) ||
-      // 范围开始和结束不相同（有文件头），且文件头内容相同，或者根据设置判断是否应该跳过更新
-      (!range.start.isEqual(range.end) &&
-        (content?.replace(/\r\n/g, '\n') === fileheader ||
-          (await this.shouldSkipReplace(config, document))));
-
+    const shouldSkipReplace = await this.shouldSkipReplacement(
+      document,
+      range,
+      fileheader,
+      config,
+      allowInsert,
+    );
     if (shouldSkipReplace) {
       return;
     }

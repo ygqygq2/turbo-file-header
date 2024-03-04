@@ -122,3 +122,31 @@ export function getStringHash(input: string) {
 export function sleep(ms: number) {
   return new Promise<void>((resolve) => setTimeout(resolve, ms));
 }
+
+/**
+ * convert dateformat string to regex
+ * @param dateFormat
+ * @returns
+ */
+export function convertDateFormatToRegex(dateFormat: string): string {
+  // 定义时间格式字符到正则表达式的映射
+  const formatToRegexMap: { [key: string]: string } = {
+    YYYY: '\\d{4}',
+    MM: '\\d{2}',
+    DD: '\\d{2}',
+    HH: '\\d{2}',
+    mm: '\\d{2}',
+    ss: '\\d{2}',
+  };
+
+  // 转义可能会干扰正则表达式的特殊字符
+  const specialCharsRegex = /[.*+?^${}()|[\]\\]/g;
+  dateFormat = dateFormat.replace(specialCharsRegex, '\\$&');
+
+  // 替换所有时间格式字符为对应的正则表达式
+  Object.keys(formatToRegexMap).forEach((format) => {
+    dateFormat = dateFormat.replace(new RegExp(format, 'g'), formatToRegexMap[format]);
+  });
+
+  return dateFormat;
+}
