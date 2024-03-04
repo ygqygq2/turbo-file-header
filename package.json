@@ -130,15 +130,60 @@
         "TurboFileHeader.languages": {
           "type": "array",
           "description": "Custom language to support",
+          "items": {
+            "type": "object",
+            "title": "language item",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "language id"
+              },
+              "extensions": {
+                "type": "array",
+                "description": "language file extensions",
+                "items": {
+                  "type": "string",
+                  "description": "file extension"
+                }
+              },
+              "aliases": {
+                "type": "array",
+                "description": "language aliases",
+                "items": {
+                  "type": "string",
+                  "description": "language alias"
+                }
+              },
+              "configuration": {
+                "type": "object",
+                "description": "language configuration",
+                "title": "language configuration",
+                "properties": {
+                  "comments": {
+                    "type": "object",
+                    "description": "language comments"
+                  }
+                }
+              }
+            }
+          },
           "default": [
             {
               "id": "astro",
               "extensions": [
                 ".astro"
               ],
-              "lineComment": "//",
-              "blockCommentStart": "<!--",
-              "blockCommentEnd": "-->"
+              "aliases": [
+                "astro"
+              ],
+              "configuration": {
+                "comments": {
+                  "blockComment": [
+                    "<!--",
+                    "-->"
+                  ]
+                }
+              }
             }
           ]
         },
