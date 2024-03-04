@@ -177,7 +177,6 @@ export class FileheaderManager {
     const fileheader = provider.generateFileheader(fileheaderVariable);
     const startLine = provider.startLineOffset + (hasShebang(document.getText()) ? 1 : 0);
     const { range } = originFileheaderInfo;
-    // const originContent = provider.getSourceFileWithoutFileheader(document);
 
     const shouldSkipReplace = await this.shouldSkipReplacement(
       document,

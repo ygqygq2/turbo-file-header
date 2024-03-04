@@ -46,7 +46,7 @@ export class FileheaderProviderLoader {
       }
 
       const providersPromises = dynamicProviderClasses.map(
-        async ({ name, class: ProviderClass }) => {
+        async ({ name, providerClass: ProviderClass }) => {
           output.info(`Generate custom provider: ${name}`);
           const activeWorkspace = await getActiveDocumentWorkspace();
           try {

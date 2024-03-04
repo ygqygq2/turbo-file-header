@@ -100,10 +100,6 @@ export abstract class LanguageProvider {
         if (!isInsideBlockComment && !line.isEmptyOrWhitespace) {
           break;
         }
-        // 如果不在注释中，又是空行，则归在注释范围中
-        // if (!isInsideBlockComment && line.isEmptyOrWhitespace) {
-        //   endLine = i;
-        // }
       }
     }
 

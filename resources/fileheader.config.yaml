@@ -16,11 +16,17 @@
 # @property {string} fileName filename with extension
 
 providers:
+  # name * 必填
   - name: 'provider1'
-    languages: ['javascript', 'typescript', 'javascriptreact', 'typescriptreact']
+    # 文件检测到这里语言，则都使用下面 template
+    # * 必填
+    languages: ['javascript', 'typescript', 'java']
+    # 选填，注释开始行号，默认从 0 开始
+    # startLineOffset: 0
     # 内容模板，不必包含块注释符号
+    # * 必填
     template: |
       * @author        {{authorName}} <{{authorEmail}}>
       * @date          {{birthtime}}
       * @lastModified  {{mtime}}
-      * Copyright © {{companyName}} All rights reserved
+      * Copyright ©{{companyName}} All rights reserved
