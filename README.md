@@ -34,6 +34,7 @@ Properties:
 | Tags for light themes             | Overwrite tags options for light themes                          | tagsLight                        | `[]`                  |
 | Tags for dark themes              | Overwrite tags options for dark themes                           | tagsDark                         | `[]`                  |
 
+## Default settings list
 `languages` default settings:
 
 ```
