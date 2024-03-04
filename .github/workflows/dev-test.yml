@@ -1,6 +1,8 @@
 name: Development and Testing
 on:
   push:
+    branches:
+      - '*'
 jobs:
   build:
     strategy:
