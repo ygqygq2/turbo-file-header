@@ -2,6 +2,16 @@
 
 All notable changes to the "turbo-file-header" extension will be documented in this file.
 
+# [0.0.3]
+
+## 新增功能 🌱
+
+- feat: js/ts 支持 `useJSDocStyle` 配置控制文件头注释风格
+
+## 问题修复 🐛
+
+- fix: 修复 `/**` 和 `/*` 不统一引起的文件头匹配不正确的问题
+
 # [0.0.2]
 
 ## 功能优化 🚀

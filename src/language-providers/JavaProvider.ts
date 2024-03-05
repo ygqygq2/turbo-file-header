@@ -4,7 +4,7 @@ import { LanguageProvider } from './LanguageProvider';
 export class JavaProvider extends LanguageProvider {
   readonly languages: string[] = ['java'];
 
-  readonly comments: vscode.CommentRule = { blockComment: ['/**', '*/'] };
+  readonly comments: vscode.CommentRule = { blockComment: ['/*', '*/'] };
   override getTemplate(tpl: ITemplateFunction, variables: IFileheaderVariables) {
     const { blockCommentStart, blockCommentEnd } = this.getBlockComment();
 

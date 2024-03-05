@@ -41,14 +41,21 @@ export abstract class LanguageProvider {
     return { blockCommentStart, blockCommentEnd };
   }
 
-  protected abstract getTemplate(tpl: ITemplateFunction, variables: IFileheaderVariables): Template;
+  protected abstract getTemplate(
+    tpl: ITemplateFunction,
+    variables: IFileheaderVariables,
+    useJSDocStyle?: boolean,
+  ): Template;
 
-  private getTemplateInternal(variables: IFileheaderVariables) {
-    return this.getTemplate(getTaggedTemplateInputs, variables);
+  private getTemplateInternal(variables: IFileheaderVariables, useJSDocStyle: boolean = false) {
+    return this.getTemplate(getTaggedTemplateInputs, variables, useJSDocStyle);
   }
 
-  public generateFileheader(variables: IFileheaderVariables): string {
-    const { strings, interpolations } = this.getTemplateInternal(variables);
+  public generateFileheader(
+    variables: IFileheaderVariables,
+    useJSDocStyle: boolean = false,
+  ): string {
+    const { strings, interpolations } = this.getTemplateInternal(variables, useJSDocStyle);
     const copiedStrings = Array.from(strings);
 
     return evaluateTemplate(copiedStrings, interpolations);

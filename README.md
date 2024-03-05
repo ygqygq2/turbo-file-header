@@ -28,6 +28,7 @@ Properties:
 | Disable fields in file header     | The fields that you want to disable in file header               | disableFields                    | `[]`                  |
 | Only dirty file or not to support | Only dirty file to support update file header                    | updateHeaderForModifiedFilesOnly | `false`               |
 | Extra languages support           | To support new or unknown languages                              | languages                        | the below             |
+| JSDoc style for js/ts             | File header user JSDoc style comments                            | useJSDocStyle                    | `false`               |
 | Multiline comment highlighter     | Whether the multiline comment highlighter should be active       | multilineComments                | `true`                |
 | plaintext comment highlighter     | Whether the plaintext comment highlighter should be active       | highlightPlainText               | `false`               |
 | Use tags to color the comments    | Tags which are used to color the comments                        | tags                             | the below             |
@@ -35,6 +36,7 @@ Properties:
 | Tags for dark themes              | Overwrite tags options for dark themes                           | tagsDark                         | `[]`                  |
 
 ## Default settings list
+
 `languages` default settings:
 
 ```

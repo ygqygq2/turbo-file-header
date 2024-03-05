@@ -136,13 +136,27 @@ export class FileheaderManager {
     // 避免 prettier 这类格式后处理空格，导致文件头内容变化影响判断
     let contentSame: boolean = false;
     if (originContentLineCount > 1) {
-      const originContentLines = originContent.split('\n').map((line) => line.trim());
+      let originContentLines = originContent.split('\n').map((line) => line.trim());
+      if (
+        originContentLineCount > 3 &&
+        !originContentLines[0].match(/[a-zA-Z0-9]/) &&
+        !originContentLines[originContentLines.length - 1].match(/[a-zA-Z0-9]/)
+      ) {
+        originContentLines = originContentLines.slice(1, -1);
+      }
       const originContentProcessed = this.removeDateString(
         originContentLines.join('\n'),
         dateRegex,
       );
 
-      const newFileheaderLines = newFileheader.split('\n').map((line) => line.trim());
+      let newFileheaderLines = newFileheader.split('\n').map((line) => line.trim());
+      if (
+        newFileheaderLines.length > 3 &&
+        !newFileheaderLines[0].match(/[a-zA-Z0-9]/) &&
+        !newFileheaderLines[newFileheaderLines.length - 1].match(/[a-zA-Z0-9]/)
+      ) {
+        newFileheaderLines = newFileheaderLines.slice(1, -1);
+      }
       const newFileheaderProcessed = this.removeDateString(
         newFileheaderLines.join('\n'),
         dateRegex,
@@ -174,7 +188,12 @@ export class FileheaderManager {
     _silent: boolean,
   ) {
     const editor = await vscode.window.showTextDocument(document);
-    const fileheader = provider.generateFileheader(fileheaderVariable);
+    const { useJSDocStyle } = config;
+    const isJsTs = provider.languages.some((lang) =>
+      ['typescript', 'javascript', 'javascriptreact', 'typescriptreact'].includes(lang),
+    );
+    const useJSDocStyleParam = isJsTs && useJSDocStyle;
+    const fileheader = provider.generateFileheader(fileheaderVariable, useJSDocStyleParam);
     const startLine = provider.startLineOffset + (hasShebang(document.getText()) ? 1 : 0);
     const { range } = originFileheaderInfo;
 
@@ -224,7 +243,7 @@ export class FileheaderManager {
     document: vscode.TextDocument,
     { allowInsert = true, silent = false }: UpdateFileheaderManagerOptions = {},
   ) {
-    // console.log("🚀 ~ file: FileheaderManager.ts:180 ~ allowInsert:", allowInsert);
+    // console.log("🚀 ~ file: FileheaderManager.ts:243 ~ allowInsert:", allowInsert);
     const config = this.configManager.getConfiguration();
     const languageId = document?.languageId;
     const provider = await this.findProvider(document);

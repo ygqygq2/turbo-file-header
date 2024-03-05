@@ -4,9 +4,13 @@ import { LanguageProvider } from './LanguageProvider';
 export class TypescriptProvider extends LanguageProvider {
   readonly languages: string[] = ['typescript', 'javascript', 'javascriptreact', 'typescriptreact'];
 
-  readonly comments: vscode.CommentRule = { lineComment: '//', blockComment: ['/**', '*/'] };
+  readonly comments: vscode.CommentRule = { lineComment: '//', blockComment: ['/*', '*/'] };
 
-  override getTemplate(tpl: ITemplateFunction, variables: IFileheaderVariables) {
+  override getTemplate(
+    tpl: ITemplateFunction,
+    variables: IFileheaderVariables,
+    useJSDocStyle: boolean = false,
+  ) {
     const { blockCommentStart, blockCommentEnd } = this.getBlockComment();
 
     const hasAuthor = variables.authorName;
@@ -18,7 +22,7 @@ export class TypescriptProvider extends LanguageProvider {
     const companyNameLine =
       variables.companyName && tpl` * Copyright ©${variables.companyName} All rights reserved\n`;
 
-    return tpl`${blockCommentStart}\n${authorLine}${ctimeLine}${lastModifiedLine}${companyNameLine} ${blockCommentEnd}`;
+    return tpl`${blockCommentStart}${useJSDocStyle ? '*' : ''}\n${authorLine}${ctimeLine}${lastModifiedLine}${companyNameLine} ${blockCommentEnd}`;
 
     // like this:
     /**

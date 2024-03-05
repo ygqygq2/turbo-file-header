@@ -6,7 +6,7 @@ import { LanguageManager } from '@/languages/LanguageManager';
 export class VscodeInternalProvider extends LanguageProvider {
   private languageManager: LanguageManager;
   public readonly languages: string[] = [];
-  comments: vscode.CommentRule = { lineComment: '//', blockComment: ['/**', '*/'] };
+  comments: vscode.CommentRule = { lineComment: '//', blockComment: ['/*', '*/'] };
 
   constructor(languageManager: LanguageManager) {
     super();
@@ -18,7 +18,11 @@ export class VscodeInternalProvider extends LanguageProvider {
     this.comments = comments;
   };
 
-  override getTemplate(tpl: ITemplateFunction, variables: IFileheaderVariables) {
+  override getTemplate(
+    tpl: ITemplateFunction,
+    variables: IFileheaderVariables,
+    useJSDocStyle: boolean = false,
+  ) {
     const { blockCommentStart, blockCommentEnd } = this.getBlockComment();
 
     const hasAuthor = variables.authorName;
@@ -31,7 +35,7 @@ export class VscodeInternalProvider extends LanguageProvider {
       variables.companyName && tpl` * Copyright ©${variables.companyName} All rights reserved\n`;
 
     if (this.comments && this.comments.blockComment && this.comments.blockComment.length) {
-      return tpl`${blockCommentStart}\n${authorLine}${ctimeLine}${lastModifiedLine}${companyNameLine}${blockCommentEnd}`;
+      return tpl`${blockCommentStart}${useJSDocStyle ? '*' : ''}\n${authorLine}${ctimeLine}${lastModifiedLine}${companyNameLine}${blockCommentEnd}`;
     }
     return tpl`${blockCommentStart}\n${blockCommentStart}${authorLine}${blockCommentStart}${ctimeLine}${blockCommentStart}${lastModifiedLine}${blockCommentStart}${companyNameLine} ${blockCommentEnd}`;
 

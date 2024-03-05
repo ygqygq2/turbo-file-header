@@ -44,7 +44,7 @@ export class GenerateCustomProviderClasses {
       const className = `${provider.name}_${languageId}`;
       const ProviderClass = class extends LanguageProvider {
         private languageManager: LanguageManager;
-        comments: vscode.CommentRule = { lineComment: '//', blockComment: ['/**', '*/'] };
+        comments: vscode.CommentRule = { lineComment: '//', blockComment: ['/*', '*/'] };
         public readonly languages = [languageId];
         readonly startLineOffset = startLineOffset;
 
@@ -58,13 +58,17 @@ export class GenerateCustomProviderClasses {
           this.comments = comments;
         };
 
-        override getTemplate(tpl: ITemplateFunction, variables: IFileheaderVariables) {
+        override getTemplate(
+          tpl: ITemplateFunction,
+          variables: IFileheaderVariables,
+          useJSDocStyle: boolean = false,
+        ) {
           const { blockCommentStart, blockCommentEnd } = this.getBlockComment();
 
           const compiledTemplate = Handlebars.compile(template);
           const result = compiledTemplate(variables);
           if (this.comments && this.comments.blockComment && this.comments.blockComment.length) {
-            return tpl`${blockCommentStart}\n${result}${blockCommentEnd}`;
+            return tpl`${blockCommentStart}${useJSDocStyle ? '*' : ''}\n${result}${blockCommentEnd}`;
           }
           const resultLines = result.split('\n');
           const commentedResult = resultLines.map((line) => blockCommentStart + line).join('\n');
