@@ -5,19 +5,22 @@ import { CustomError } from '@/error/ErrorHandler';
 import { ConfigSection, ConfigTag } from '../constants';
 import { Configuration, ConfigurationFlatten, Tag, TagFlatten } from './types';
 import { errorHandler } from '@/extension';
+import { ConfigReader } from './ConfigReader';
 
 export class ConfigManager {
   private static instance: ConfigManager;
+  private configReader: ConfigReader;
   private configuration: Configuration & vscode.WorkspaceConfiguration;
   private configFlatten: ConfigurationFlatten;
 
-  private constructor() {
+  private constructor(configReader: ConfigReader) {
+    this.configReader = configReader;
     this.configuration = this.getConfiguration();
     this.configFlatten = this.getConfigurationFlatten();
   }
 
-  public static getInstance(): ConfigManager {
-    return ConfigManager?.instance || new ConfigManager();
+  public static getInstance(configReader: ConfigReader): ConfigManager {
+    return ConfigManager?.instance || new ConfigManager(configReader);
   }
 
   private get _config() {
@@ -88,5 +91,9 @@ export class ConfigManager {
       }
     }
     return flatTags;
+  }
+
+  public async getConfigurationFromCustomConfig() {
+    return this.configReader?.getConfigYaml();
   }
 }

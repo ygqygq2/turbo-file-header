@@ -5,16 +5,17 @@ import { convertDateFormatToRegex, hasShebang } from '@/utils/utils';
 import { isLineStartOrEnd } from '@/utils/vscode-utils';
 import { FileheaderVariableBuilder } from './FileheaderVariableBuilder';
 import { FileHashMemento } from './FileHashMemento';
-import { vscProvider } from '../vsc-provider';
 import { CustomError } from '@/error/ErrorHandler';
 import { ErrorCode, errorCodeMessages } from '@/error/ErrorCodeMessage.enum';
 import { FileheaderProviderLoader } from './FileheaderProviderLoader';
 import { LanguageProvider } from '@/language-providers';
 import { VscodeInternalProvider } from '@/language-providers/VscodeInternalProvider';
-import { IFileheaderVariables } from '../typings/types';
+import { ConfigYaml, IFileheaderVariables } from '../typings/types';
 import { ConfigManager } from '@/configuration/ConfigManager';
 import { Configuration } from '@/configuration/types';
 import { ConfigSection } from '@/constants';
+import { BaseVCSProvider } from '@/vsc-provider/BaseVCSProvider';
+import { FileMatcher } from '@/extension-operate/FileMatcher';
 
 type UpdateFileheaderManagerOptions = {
   silent?: boolean;
@@ -28,6 +29,7 @@ type OriginFileheaderInfo = {
 
 export class FileheaderManager {
   private configManager: ConfigManager;
+  private vscProvider: BaseVCSProvider;
   private providers: LanguageProvider[] = [];
   private fileheaderProviderLoader: FileheaderProviderLoader;
   private fileHashMemento: FileHashMemento;
@@ -35,11 +37,13 @@ export class FileheaderManager {
 
   constructor(
     configManager: ConfigManager,
+    vscProvider: BaseVCSProvider,
     fileheaderProviderLoader: FileheaderProviderLoader,
     fileHashMemento: FileHashMemento,
     fileheaderVariableBuilder: FileheaderVariableBuilder,
   ) {
     this.configManager = configManager;
+    this.vscProvider = vscProvider;
     this.fileheaderProviderLoader = fileheaderProviderLoader;
     this.fileHashMemento = fileHashMemento;
     this.fileheaderVariableBuilder = fileheaderVariableBuilder;
@@ -110,8 +114,8 @@ export class FileheaderManager {
     }
 
     // if there is a change in VCS provider, we should replace the fileheader
-    const isTracked = await vscProvider.isTracked(document.fileName);
-    const hasChanged = isTracked ? await vscProvider.hasChanged(document.fileName) : false;
+    const isTracked = await this.vscProvider.isTracked(document.fileName);
+    const hasChanged = isTracked ? await this.vscProvider.hasChanged(document.fileName) : false;
 
     return isTracked && !hasChanged && this.fileHashMemento.has(document);
   }
@@ -293,6 +297,30 @@ export class FileheaderManager {
   public recordOriginFileHash(documents: readonly vscode.TextDocument[]) {
     for (const document of documents) {
       this.fileHashMemento.set(document);
+    }
+  }
+
+  public async batchUpdateFileheader(fileMatcherClass: new (config: ConfigYaml) => FileMatcher) {
+    const config = await this.configManager.getConfigurationFromCustomConfig();
+    if (!config || !config.findFilesConfig) {
+      return;
+    }
+    const findFilesConfig = config?.findFilesConfig || {
+      include: '**/tmp/*.{ts,js}',
+      exclude: '**/{node_modules,dist}/**',
+    };
+    const fileMatcher = new fileMatcherClass(findFilesConfig);
+    const files = await fileMatcher.findFiles();
+
+    for (const file of files) {
+      try {
+        const document = await vscode.workspace.openTextDocument(file);
+        await this.updateFileheader(document);
+        await document.save();
+        await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
+      } catch (error) {
+        errorHandler.handle(new CustomError(ErrorCode.CreateFileFail, file.path, error));
+      }
     }
   }
 }

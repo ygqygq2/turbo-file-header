@@ -47,6 +47,10 @@
       {
         "command": "turboFileHeader.generateTemplateConfig",
         "title": "Turbo File Header: Generate Custom Template Config File"
+      },
+      {
+        "command": "turboFileHeader.batchUpdateFileheader",
+        "title": "Turbo File Header: Batch Update File Header(use custom template config file)"
       }
     ],
     "keybindings": [

@@ -89,6 +89,13 @@ export interface Provider {
   template: string;
 }
 
+export interface FindFilesConfig {
+  include: string;
+  exclude: string;
+  maxResults?: number;
+}
+
 export type ConfigYaml = {
   providers: Provider[];
+  findFilesConfig: FindFilesConfig;
 };

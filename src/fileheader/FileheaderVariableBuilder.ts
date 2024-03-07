@@ -3,13 +3,13 @@ import { basename, dirname } from 'path';
 import { relative } from 'path';
 import dayjs, { Dayjs } from 'dayjs';
 import { IFileheaderVariables } from '../typings/types';
-import { vscProvider } from '../vsc-provider';
 import { stat } from 'fs/promises';
 import { ConfigSection, TEMPLATE_VARIABLE_KEYS } from '../constants';
 import { difference } from 'lodash';
 import { LanguageProvider } from '../language-providers';
 import upath from 'upath';
 import { Configuration } from '@/configuration/types';
+import { BaseVCSProvider } from '@/vsc-provider/BaseVCSProvider';
 
 /**
  * query template variable fields when it is enabled
@@ -37,9 +37,12 @@ async function queryFieldsExceptDisable<T>(
 }
 
 export class FileheaderVariableBuilder {
-  constructor() {}
+  private vscProvider: BaseVCSProvider;
 
-  // TODO: slow code. need optimize performance
+  constructor(vscProvider: BaseVCSProvider) {
+    this.vscProvider = vscProvider;
+  }
+
   public async build(
     config: vscode.WorkspaceConfiguration & Configuration,
     fileUri: vscode.Uri,
@@ -66,29 +69,29 @@ export class FileheaderVariableBuilder {
     const fixedUserName = config.get<string | null>(ConfigSection.userName, null);
     const fixedUserEmail = config.get<string | null>(ConfigSection.userEmail, null);
     if (!fixedUserEmail || !fixedUserName) {
-      await vscProvider.validate(dirname(fsPath));
+      await this.vscProvider.validate(dirname(fsPath));
     }
 
     const fileStat = await stat(fsPath);
-    const isTracked = await vscProvider.isTracked(fsPath);
+    const isTracked = await this.vscProvider.isTracked(fsPath);
 
     // authorName and authorEmail depends on username and userEmail in VCS
     const deferredUserName = queryFieldsExceptDisable(
       disableFieldSet.has('userName') && disableFieldSet.has('authorName'),
-      () => vscProvider.getUserName(dirname(fsPath)),
+      () => this.vscProvider.getUserName(dirname(fsPath)),
       fixedUserName!,
     );
 
     const deferredUserEmail = queryFieldsExceptDisable(
       disableFieldSet.has('userEmail') && disableFieldSet.has('authorEmail'),
-      () => vscProvider.getUserEmail(dirname(fsPath)),
+      () => this.vscProvider.getUserEmail(dirname(fsPath)),
       fixedUserEmail!,
     );
 
     const deferredBirthtime = queryFieldsExceptDisable(
       disableFieldSet.has('birthtime'),
       () => {
-        return isTracked ? vscProvider.getBirthtime(fsPath) : dayjs(fileStat.birthtime);
+        return isTracked ? this.vscProvider.getBirthtime(fsPath) : dayjs(fileStat.birthtime);
       },
       dayjs(fileStat.birthtime),
     );
@@ -111,7 +114,7 @@ export class FileheaderVariableBuilder {
     const deferredAuthorName = queryFieldsExceptDisable(
       disableFieldSet.has('authorName'),
       () => {
-        return isTracked ? vscProvider.getAuthorName(fsPath) : userName;
+        return isTracked ? this.vscProvider.getAuthorName(fsPath) : userName;
       },
       userName,
     );
@@ -119,7 +122,7 @@ export class FileheaderVariableBuilder {
     const deferredAuthorEmail = queryFieldsExceptDisable(
       disableFieldSet.has('authorEmail'),
       () => {
-        return isTracked ? vscProvider.getAuthorEmail(fsPath) : userEmail;
+        return isTracked ? this.vscProvider.getAuthorEmail(fsPath) : userEmail;
       },
       userEmail,
     );

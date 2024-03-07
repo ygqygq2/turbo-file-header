@@ -1,17 +1,15 @@
-import * as vscode from 'vscode';
 import { Command } from '@/typings/types';
-import { fileheaderManager } from '@/extension';
+import { configManager, fileheaderManager } from '@/extension';
+import { FileMatcher } from '@/extension-operate/FileMatcher';
 
 export const batchUpdateFileheader = (): Command => {
   return {
     name: 'turboFileHeader.batchUpdateFileheader',
     handler: async (_args?: unknown[]) => {
-      const files = await vscode.workspace.findFiles('**/*.yourFileExtension');
-
-      files.forEach(async (file) => {
-        const document = await vscode.workspace.openTextDocument(file);
-        fileheaderManager.updateFileheader(document);
-      });
+      // const config = await configManager.getConfigurationFromCustomConfig();
+      // const { findFilesConfig = {} } = config ?? {};
+      // const fileMatcher = new FileMatcher(findFilesConfig);
+      await fileheaderManager.batchUpdateFileheader(FileMatcher);
     },
   };
 };

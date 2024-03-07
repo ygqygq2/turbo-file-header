@@ -1,14 +1,10 @@
-import path from 'path';
-import fs from 'fs';
-import YAML from 'yaml';
 import * as vscode from 'vscode';
 import Handlebars from 'handlebars';
-import { getActiveDocumentWorkspace } from '@/utils/vscode-utils';
-import { ConfigYaml, IFileheaderVariables, ITemplateFunction, Provider } from '@/typings/types';
+import { IFileheaderVariables, ITemplateFunction, Provider } from '@/typings/types';
 import { LanguageProvider } from './LanguageProvider';
-import { CUSTOM_CONFIG_FILE_NAME } from '@/constants';
 import output from '@/error/output';
 import { LanguageManager } from '@/languages/LanguageManager';
+import { ConfigReader } from '../configuration/ConfigReader';
 
 interface ProviderDyClass {
   name: string;
@@ -16,24 +12,11 @@ interface ProviderDyClass {
 }
 
 export class GenerateCustomProviderClasses {
-  constructor() {}
+  private configReader: ConfigReader;
 
-  private getCustomProvidersConfig = async (): Promise<ConfigYaml | undefined> => {
-    const activeWorkspace = await getActiveDocumentWorkspace();
-    if (!activeWorkspace) {
-      return;
-    }
-
-    const configPath = path.join(activeWorkspace.uri.fsPath, '.vscode', CUSTOM_CONFIG_FILE_NAME);
-    if (!fs.existsSync(configPath)) {
-      return;
-    }
-
-    // 读取 yaml 配置
-    const configContent = fs.readFileSync(configPath, 'utf8');
-    const config: ConfigYaml = YAML.parse(configContent);
-    return config;
-  };
+  constructor(configReader: ConfigReader) {
+    this.configReader = configReader;
+  }
 
   private createProviderClass = (provider: Provider) => {
     // 为每个 provider 中的每个 language 生成一个类
@@ -83,7 +66,7 @@ export class GenerateCustomProviderClasses {
   };
 
   public generateProviderClasses = async () => {
-    const config = await this.getCustomProvidersConfig();
+    const config = await this.configReader?.getConfigYaml();
     if (!config || !config.providers) {
       output.info('No custom providers.');
       return;

@@ -12,22 +12,28 @@ import { ErrorHandler } from './error/ErrorHandler';
 import { GenerateTemplateConfig } from './fileheader/GenerateTemplateConfig';
 import { GenerateCustomProviderClasses } from './language-providers/GenerateCustomProviderClasses';
 import { FileheaderVariableBuilder } from './fileheader/FileheaderVariableBuilder';
+import { createVCSProvider } from './vsc-provider';
+import { BaseVCSProvider } from './vsc-provider/BaseVCSProvider';
+import { ConfigReader } from './configuration/ConfigReader';
 
+export const vscProvider = createVCSProvider() as unknown as BaseVCSProvider;
 export const errorHandler = ErrorHandler.getInstance();
-export const configManager = ConfigManager.getInstance();
+const configReader = ConfigReader.getInstance();
+export const configManager = ConfigManager.getInstance(configReader);
 export const configEvent = new ConfigEvent(configManager);
 export const languageManager = LanguageManager.getInstance();
 export const languageEvent = new LanguageEvent(languageManager);
 // export const configuration = configManager.getConfigurationFlatten();
-const generateCustomProviderClasses = new GenerateCustomProviderClasses();
+const generateCustomProviderClasses = new GenerateCustomProviderClasses(configReader);
 const fileheaderProviderLoader = new FileheaderProviderLoader(
   languageManager,
   generateCustomProviderClasses,
 );
 const fileHashMemento = new FileHashMemento();
-const fileheaderVariableBuilder = new FileheaderVariableBuilder();
+const fileheaderVariableBuilder = new FileheaderVariableBuilder(vscProvider);
 export const fileheaderManager = new FileheaderManager(
   configManager,
+  vscProvider,
   fileheaderProviderLoader,
   fileHashMemento,
   fileheaderVariableBuilder,

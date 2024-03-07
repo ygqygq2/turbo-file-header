@@ -30,3 +30,13 @@ providers:
       * @date          {{birthtime}}
       * @lastModified  {{mtime}}
       * Copyright ©{{companyName}} All rights reserved
+
+# 文件查找配置
+findFilesConfig:
+  # * 必填，Glob 模式
+  include: '**/*.{js,ts,java}'
+  # * 必填，Glob 模式
+  exclude:
+    - '**/{node_modules,dist}/**'
+  # 选填
+  # maxResults: 1000

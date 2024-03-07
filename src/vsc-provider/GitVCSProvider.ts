@@ -2,13 +2,13 @@ import dayjs, { Dayjs } from 'dayjs';
 import { stat } from 'fs/promises';
 import { dirname } from 'path';
 import { exec, getFirstLine } from '../utils/utils';
-import { BaseVCSProvider } from './types';
+import { BaseVCSProvider } from './BaseVCSProvider';
 import { ErrorCode } from '@/error/ErrorCodeMessage.enum';
 import { CustomError } from '@/error/ErrorHandler';
 import { errorHandler } from '@/extension';
 
-export class GitVCSProvider implements BaseVCSProvider {
-  async validate(repoPath: string): Promise<void> {
+export class GitVCSProvider extends BaseVCSProvider {
+  public async validate(repoPath: string): Promise<void> {
     try {
       await exec('git status', { cwd: repoPath });
       // output.info('git status 执行成功');
@@ -16,7 +16,7 @@ export class GitVCSProvider implements BaseVCSProvider {
       errorHandler.handle(new CustomError(ErrorCode.GitNotInit, error));
     }
   }
-  async getAuthorName(filePath: string): Promise<string> {
+  public async getAuthorName(filePath: string): Promise<string> {
     try {
       const authors = await exec(
         `git --no-pager log --format='%aN' --follow --reverse ${filePath}`,
@@ -29,7 +29,7 @@ export class GitVCSProvider implements BaseVCSProvider {
     }
     return '';
   }
-  async getAuthorEmail(filePath: string): Promise<string> {
+  public async getAuthorEmail(filePath: string): Promise<string> {
     try {
       const emails = await exec(
         `git --no-pager log --format='%aE' --follow --reverse ${filePath}`,
@@ -41,7 +41,7 @@ export class GitVCSProvider implements BaseVCSProvider {
     }
     return '';
   }
-  async getUserName(repoPath: string): Promise<string> {
+  public async getUserName(repoPath: string): Promise<string> {
     try {
       const userName = await exec(`git config user.name`, { cwd: repoPath });
       return getFirstLine(userName);
@@ -50,7 +50,7 @@ export class GitVCSProvider implements BaseVCSProvider {
     }
     return '';
   }
-  async getUserEmail(repoPath: string): Promise<string> {
+  public async getUserEmail(repoPath: string): Promise<string> {
     try {
       const userEmail = await exec(`git config user.email`, { cwd: repoPath });
       return getFirstLine(userEmail);
@@ -59,7 +59,7 @@ export class GitVCSProvider implements BaseVCSProvider {
     }
     return '';
   }
-  async getBirthtime(filePath: string): Promise<Dayjs> {
+  public async getBirthtime(filePath: string): Promise<Dayjs> {
     try {
       const isoTimes = await exec(
         `git --no-pager log --format='%ai' --follow --reverse ${filePath}`,
@@ -70,13 +70,13 @@ export class GitVCSProvider implements BaseVCSProvider {
 
       return dayjs(ctimeISO);
     } catch (error) {
-      errorHandler.handle(new CustomError(ErrorCode.GitGetCtimeFail, error));
+      errorHandler.handle(new CustomError(ErrorCode.GitGetBirthtimeFail, error));
       const fileStat = await stat(filePath);
       return dayjs(fileStat.birthtime);
     }
   }
 
-  async isTracked(filePath: string): Promise<boolean> {
+  public async isTracked(filePath: string): Promise<boolean> {
     try {
       const [result, status] = await Promise.all([
         exec(`git ls-files ${filePath}`, {
@@ -99,7 +99,7 @@ export class GitVCSProvider implements BaseVCSProvider {
     }
   }
 
-  async hasChanged(filePath: string): Promise<boolean> {
+  public async hasChanged(filePath: string): Promise<boolean> {
     try {
       const result = await exec(`git status --porcelain ${filePath}`, {
         cwd: dirname(filePath),

@@ -27,9 +27,9 @@ jobs:
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
         run: pnpm i --frozen-lockfile --ignore-scripts
-      - run: xvfb-run -a pnpm test:suite
+      - run: xvfb-run -a pnpm test:suite:mocha
         if: runner.os == 'Linux'
-      - run: pnpm test:suite
+      - run: pnpm test:suite:mocha
         if: runner.os != 'Linux'
       - run: pnpm run test:coverage
       - run: vsce package --no-dependencies

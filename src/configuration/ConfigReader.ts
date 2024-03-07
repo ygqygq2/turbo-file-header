@@ -18,23 +18,28 @@ export class ConfigReader {
     return ConfigReader?.instance || new ConfigReader();
   }
 
-  public getConfigYaml = async (): Promise<ConfigYaml | undefined> => {
+  public getConfigYaml = async (): Promise<ConfigYaml> => {
+    const defaultConfig: ConfigYaml = {
+      providers: [],
+      findFilesConfig: {
+        include: '**/tmp/*.{ts,js}',
+        exclude: '**/{node_modules,dist}/**',
+      },
+    };
+
     const activeWorkspace = await getActiveDocumentWorkspace();
     if (!activeWorkspace) {
-      return;
+      return defaultConfig;
     }
 
     const configPath = path.join(activeWorkspace.uri.fsPath, '.vscode', CUSTOM_CONFIG_FILE_NAME);
     if (!fs.existsSync(configPath)) {
-      return;
+      return defaultConfig;
     }
 
     // 读取 yaml 配置
     const configContent = fs.readFileSync(configPath, 'utf8');
     const config: ConfigYaml = YAML.parse(configContent);
-    const defaultConfig: ConfigYaml = {
-      providers: [],
-    };
     return { ...defaultConfig, ...config };
   };
 

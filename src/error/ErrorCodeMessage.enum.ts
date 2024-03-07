@@ -11,7 +11,7 @@ export enum ErrorCode {
   GitGetUserEmailFail = 106,
   ShouldSetUserName = 107,
   ShouldSetUserEmail = 108,
-  GitGetCtimeFail = 109,
+  GitGetBirthtimeFail = 109,
   CustomFileheaderConfigFail = 110,
   VariableBuilderFail = 111,
   WorkspaceFolderNotFound = 112,
@@ -24,6 +24,13 @@ export enum ErrorCode {
   CreateFileFail = 119,
   GenerateCustomProviderFail = 120,
   CustomProviderInstanceFail = 121,
+  UpdateFilerheaderFail = 122,
+  SVNNotInit = 123,
+  SVNGetUserNameFail = 124,
+  SVNGetUserEmailFail = 125,
+  SVNInfoShowUserNameFail = 126,
+  SVNGetBirthtimeFail = 127,
+  SVNStatusFail = 128,
 }
 
 const extensionPrefix = '';
@@ -37,7 +44,7 @@ export const errorCodeMessages: ErrorCodeMessage = {
   [ErrorCode.GitGetUserEmailFail]: `${extensionPrefix}Git get commit user email fail.`,
   [ErrorCode.ShouldSetUserName]: `${extensionPrefix}You should set user.name in git config first. Set your username via 'git config user.name "your username"'.`,
   [ErrorCode.ShouldSetUserEmail]: `${extensionPrefix}You should set user.email in git config first. Set your email via 'git config user.email "your email"'.`,
-  [ErrorCode.GitGetCtimeFail]: `${extensionPrefix}Failed to get commit time.`,
+  [ErrorCode.GitGetBirthtimeFail]: `${extensionPrefix}Failed to get commit time.`,
   [ErrorCode.CustomFileheaderConfigFail]: `${extensionPrefix}Failed to generate custom fileheader config.`,
   [ErrorCode.VariableBuilderFail]: `${extensionPrefix}${extensionPrefix}Failed to build variable.`,
   [ErrorCode.WorkspaceFolderNotFound]: `${extensionPrefix}Your workspace is not contain any folder.`,
@@ -50,4 +57,11 @@ export const errorCodeMessages: ErrorCodeMessage = {
   [ErrorCode.CreateFileFail]: `${extensionPrefix}Failed to create file: `,
   [ErrorCode.GenerateCustomProviderFail]: `${extensionPrefix}Failed to generate custom provider classes.`,
   [ErrorCode.CustomProviderInstanceFail]: `${extensionPrefix}Failed to instance custom provider: `,
+  [ErrorCode.UpdateFilerheaderFail]: `${extensionPrefix}Failed to update file header: `,
+  [ErrorCode.SVNNotInit]: `${extensionPrefix}SVN repository not initialized, please init svn via 'svn checkout' first.`,
+  [ErrorCode.SVNGetUserNameFail]: `${extensionPrefix}Failed to get svn user name.`,
+  [ErrorCode.SVNGetUserEmailFail]: `${extensionPrefix}Failed to get svn user email.`,
+  [ErrorCode.SVNInfoShowUserNameFail]: `${extensionPrefix}Failed to show svn user name.`,
+  [ErrorCode.SVNGetBirthtimeFail]: `${extensionPrefix}Failed to get svn commit time.`,
+  [ErrorCode.SVNStatusFail]: `${extensionPrefix}Failed to get svn status.`,
 };
