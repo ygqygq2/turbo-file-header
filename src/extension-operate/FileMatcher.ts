@@ -21,7 +21,6 @@ export class FileMatcher implements Matcher {
     const cancellationTokenSource = new vscode.CancellationTokenSource();
     const token = cancellationTokenSource.token;
     const { include, exclude, maxResults } = this.config;
-    console.log("🚀 ~ file: FileMatcher.ts:24 ~ this.config:", this.config);
 
     const files = await vscode.workspace.findFiles(
       include,
@@ -29,7 +28,6 @@ export class FileMatcher implements Matcher {
       maxResults ? maxResults : undefined,
       token,
     );
-    console.log('🚀 ~ file: FileMatcher.ts:26 ~ files:', files);
     return files;
   }
 }

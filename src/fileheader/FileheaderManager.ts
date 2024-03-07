@@ -10,7 +10,7 @@ import { ErrorCode, errorCodeMessages } from '@/error/ErrorCodeMessage.enum';
 import { FileheaderProviderLoader } from './FileheaderProviderLoader';
 import { LanguageProvider } from '@/language-providers';
 import { VscodeInternalProvider } from '@/language-providers/VscodeInternalProvider';
-import { ConfigYaml, IFileheaderVariables } from '../typings/types';
+import { IFileheaderVariables } from '../typings/types';
 import { ConfigManager } from '@/configuration/ConfigManager';
 import { Configuration } from '@/configuration/types';
 import { ConfigSection } from '@/constants';
@@ -209,6 +209,7 @@ export class FileheaderManager {
       allowInsert,
     );
     if (shouldSkipReplace) {
+      output.info('Not need update filer header: ', document.uri);
       return;
     }
 
@@ -241,6 +242,7 @@ export class FileheaderManager {
     });
 
     await document.save();
+    output.info('File header updated: ', document.uri);
   }
 
   public async updateFileheader(
@@ -300,16 +302,17 @@ export class FileheaderManager {
     }
   }
 
-  public async batchUpdateFileheader(fileMatcherClass: new (config: ConfigYaml) => FileMatcher) {
+  public async batchUpdateFileheader() {
     const config = await this.configManager.getConfigurationFromCustomConfig();
     if (!config || !config.findFilesConfig) {
+      errorHandler.handle(new CustomError(ErrorCode.GetCustomConfigFail));
       return;
     }
     const findFilesConfig = config?.findFilesConfig || {
       include: '**/tmp/*.{ts,js}',
       exclude: '**/{node_modules,dist}/**',
     };
-    const fileMatcher = new fileMatcherClass(findFilesConfig);
+    const fileMatcher = new FileMatcher(findFilesConfig);
     const files = await fileMatcher.findFiles();
 
     for (const file of files) {

@@ -10,8 +10,9 @@ import { errorHandler } from '@/extension';
 export class GitVCSProvider extends BaseVCSProvider {
   public async validate(repoPath: string): Promise<void> {
     try {
+      console.log('git status 执行之前');
       await exec('git status', { cwd: repoPath });
-      // output.info('git status 执行成功');
+      console.log('git status 执行成功');
     } catch (error) {
       errorHandler.handle(new CustomError(ErrorCode.GitNotInit, error));
     }

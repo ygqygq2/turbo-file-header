@@ -1,13 +1,12 @@
 import vscode from 'vscode';
-import { basename, dirname } from 'path';
-import { relative } from 'path';
+import { basename, dirname, relative } from 'path';
 import dayjs, { Dayjs } from 'dayjs';
+import upath from 'upath';
 import { IFileheaderVariables } from '../typings/types';
 import { stat } from 'fs/promises';
 import { ConfigSection, TEMPLATE_VARIABLE_KEYS } from '../constants';
 import { difference } from 'lodash';
 import { LanguageProvider } from '../language-providers';
-import upath from 'upath';
 import { Configuration } from '@/configuration/types';
 import { BaseVCSProvider } from '@/vsc-provider/BaseVCSProvider';
 
@@ -52,9 +51,6 @@ export class FileheaderVariableBuilder {
     const workspace = vscode.workspace.getWorkspaceFolder(fileUri);
 
     const { isCustomProvider, accessVariableFields } = provider;
-    // disable fields should not works on custom provider.
-    // because it is meaningless
-
     const disableFieldSet = new Set(
       !isCustomProvider
         ? difference(config.get<(keyof IFileheaderVariables)[]>(ConfigSection.disableFields, []))
@@ -62,8 +58,6 @@ export class FileheaderVariableBuilder {
     );
 
     const dateFormat = config.get(ConfigSection.dateFormat, 'YYYY-MM-DD HH:mm:ss');
-
-    workspace?.uri.path;
     const fsPath = fileUri.fsPath;
 
     const fixedUserName = config.get<string | null>(ConfigSection.userName, null);

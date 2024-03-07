@@ -1,3 +1,4 @@
+import path from 'path';
 import { existsSync } from 'fs';
 import { BaseVCSProvider } from './BaseVCSProvider';
 import { GitVCSProvider } from './GitVCSProvider';
@@ -12,9 +13,10 @@ export async function createVCSProvider(): Promise<BaseVCSProvider | undefined> 
   if (!activeWorkspace) {
     errorHandler.throw(new CustomError(ErrorCode.WorkspaceFolderNotFound));
   }
+  const activePath = activeWorkspace?.uri.fsPath || '';
 
-  const gitDirectoryPath = `${activeWorkspace}/.git`;
-  const svnDirectoryPath = `${activeWorkspace}/.svn`;
+  const gitDirectoryPath = path.join(activePath, '.git');
+  const svnDirectoryPath = path.join(activePath, '.svn');
   const isGitRepository = existsSync(gitDirectoryPath);
   if (isGitRepository) {
     return new GitVCSProvider();

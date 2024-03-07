@@ -31,6 +31,7 @@ export enum ErrorCode {
   SVNInfoShowUserNameFail = 126,
   SVNGetBirthtimeFail = 127,
   SVNStatusFail = 128,
+  GetCustomConfigFail = 129,
 }
 
 const extensionPrefix = '';
@@ -64,4 +65,5 @@ export const errorCodeMessages: ErrorCodeMessage = {
   [ErrorCode.SVNInfoShowUserNameFail]: `${extensionPrefix}Failed to show svn user name.`,
   [ErrorCode.SVNGetBirthtimeFail]: `${extensionPrefix}Failed to get svn commit time.`,
   [ErrorCode.SVNStatusFail]: `${extensionPrefix}Failed to get svn status.`,
+  [ErrorCode.GetCustomConfigFail]: `${extensionPrefix}Failed to get custom config.`,
 };

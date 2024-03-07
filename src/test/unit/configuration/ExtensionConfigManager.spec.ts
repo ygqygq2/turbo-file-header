@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ConfigSection, ConfigTag } from '@/constants';
 import { ConfigManager } from '@/configuration/ConfigManager';
 import { WorkspaceConfiguration, workspace } from 'vscode';
+import { ConfigReader } from '@/configuration/ConfigReader';
 
 vi.mock('vscode');
 vi.mock('@/extension', () => ({
@@ -15,10 +16,14 @@ describe('ConfigManager Tests', () => {
   const mockConfigSection: { [key: string]: string } = {
     [ConfigSection.companyName]: 'mockValue',
   };
+  let configReader: ConfigReader;
+  let configManager: ConfigManager;
   let mockWorkspaceConfiguration: WorkspaceConfiguration;
 
   beforeEach(() => {
     vi.clearAllMocks();
+    configReader = ConfigReader.getInstance();
+    configManager = ConfigManager.getInstance(configReader);
     mockWorkspaceConfiguration = {
       get: (section: string) => mockConfigSection[section],
       update: (section: string, value: string) => {
@@ -39,13 +44,11 @@ describe('ConfigManager Tests', () => {
   });
 
   it('应该获取到正确配置', () => {
-    const configManager = ConfigManager.getInstance();
     const result = configManager.get(ConfigSection.companyName);
     expect(result).toBe('mockValue');
   });
 
   it('应该设置成功正确配置', async () => {
-    const configManager = ConfigManager.getInstance();
     await configManager.set(ConfigSection.userName, 'mockUsername');
     const result = configManager.get(ConfigSection.userName);
     expect(result).toBe('mockUsername');
