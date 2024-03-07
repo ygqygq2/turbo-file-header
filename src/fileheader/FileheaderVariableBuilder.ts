@@ -8,7 +8,7 @@ import { ConfigSection, TEMPLATE_VARIABLE_KEYS } from '../constants';
 import { difference } from 'lodash';
 import { LanguageProvider } from '../language-providers';
 import { Configuration } from '@/configuration/types';
-import { BaseVCSProvider } from '@/vsc-provider/BaseVCSProvider';
+import { BaseVCSProvider } from '@/vcs-provider/BaseVCSProvider';
 
 /**
  * query template variable fields when it is enabled
@@ -36,10 +36,10 @@ async function queryFieldsExceptDisable<T>(
 }
 
 export class FileheaderVariableBuilder {
-  private vscProvider: BaseVCSProvider;
+  private vcsProvider: BaseVCSProvider;
 
-  constructor(vscProvider: BaseVCSProvider) {
-    this.vscProvider = vscProvider;
+  constructor(vcsProvider: BaseVCSProvider) {
+    this.vcsProvider = vcsProvider;
   }
 
   public async build(
@@ -63,29 +63,33 @@ export class FileheaderVariableBuilder {
     const fixedUserName = config.get<string | null>(ConfigSection.userName, null);
     const fixedUserEmail = config.get<string | null>(ConfigSection.userEmail, null);
     if (!fixedUserEmail || !fixedUserName) {
-      await this.vscProvider.validate(dirname(fsPath));
+      try {
+        await this.vcsProvider.validate(dirname(fsPath));
+      } catch (error) {
+        console.log(error);
+      }
     }
 
     const fileStat = await stat(fsPath);
-    const isTracked = await this.vscProvider.isTracked(fsPath);
+    const isTracked = await this.vcsProvider.isTracked(fsPath);
 
     // authorName and authorEmail depends on username and userEmail in VCS
     const deferredUserName = queryFieldsExceptDisable(
       disableFieldSet.has('userName') && disableFieldSet.has('authorName'),
-      () => this.vscProvider.getUserName(dirname(fsPath)),
+      () => this.vcsProvider.getUserName(dirname(fsPath)),
       fixedUserName!,
     );
 
     const deferredUserEmail = queryFieldsExceptDisable(
       disableFieldSet.has('userEmail') && disableFieldSet.has('authorEmail'),
-      () => this.vscProvider.getUserEmail(dirname(fsPath)),
+      () => this.vcsProvider.getUserEmail(dirname(fsPath)),
       fixedUserEmail!,
     );
 
     const deferredBirthtime = queryFieldsExceptDisable(
       disableFieldSet.has('birthtime'),
       () => {
-        return isTracked ? this.vscProvider.getBirthtime(fsPath) : dayjs(fileStat.birthtime);
+        return isTracked ? this.vcsProvider.getBirthtime(fsPath) : dayjs(fileStat.birthtime);
       },
       dayjs(fileStat.birthtime),
     );
@@ -108,7 +112,7 @@ export class FileheaderVariableBuilder {
     const deferredAuthorName = queryFieldsExceptDisable(
       disableFieldSet.has('authorName'),
       () => {
-        return isTracked ? this.vscProvider.getAuthorName(fsPath) : userName;
+        return isTracked ? this.vcsProvider.getAuthorName(fsPath) : userName;
       },
       userName,
     );
@@ -116,7 +120,7 @@ export class FileheaderVariableBuilder {
     const deferredAuthorEmail = queryFieldsExceptDisable(
       disableFieldSet.has('authorEmail'),
       () => {
-        return isTracked ? this.vscProvider.getAuthorEmail(fsPath) : userEmail;
+        return isTracked ? this.vcsProvider.getAuthorEmail(fsPath) : userEmail;
       },
       userEmail,
     );

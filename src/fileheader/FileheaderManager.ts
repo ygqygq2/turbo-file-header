@@ -14,7 +14,7 @@ import { IFileheaderVariables } from '../typings/types';
 import { ConfigManager } from '@/configuration/ConfigManager';
 import { Configuration } from '@/configuration/types';
 import { ConfigSection } from '@/constants';
-import { BaseVCSProvider } from '@/vsc-provider/BaseVCSProvider';
+import { BaseVCSProvider } from '@/vcs-provider/BaseVCSProvider';
 import { FileMatcher } from '@/extension-operate/FileMatcher';
 
 type UpdateFileheaderManagerOptions = {
@@ -29,7 +29,7 @@ type OriginFileheaderInfo = {
 
 export class FileheaderManager {
   private configManager: ConfigManager;
-  private vscProvider: BaseVCSProvider;
+  private vcsProvider: BaseVCSProvider;
   private providers: LanguageProvider[] = [];
   private fileheaderProviderLoader: FileheaderProviderLoader;
   private fileHashMemento: FileHashMemento;
@@ -37,13 +37,13 @@ export class FileheaderManager {
 
   constructor(
     configManager: ConfigManager,
-    vscProvider: BaseVCSProvider,
+    vcsProvider: BaseVCSProvider,
     fileheaderProviderLoader: FileheaderProviderLoader,
     fileHashMemento: FileHashMemento,
     fileheaderVariableBuilder: FileheaderVariableBuilder,
   ) {
     this.configManager = configManager;
-    this.vscProvider = vscProvider;
+    this.vcsProvider = vcsProvider;
     this.fileheaderProviderLoader = fileheaderProviderLoader;
     this.fileHashMemento = fileHashMemento;
     this.fileheaderVariableBuilder = fileheaderVariableBuilder;
@@ -114,8 +114,8 @@ export class FileheaderManager {
     }
 
     // if there is a change in VCS provider, we should replace the fileheader
-    const isTracked = await this.vscProvider.isTracked(document.fileName);
-    const hasChanged = isTracked ? await this.vscProvider.hasChanged(document.fileName) : false;
+    const isTracked = await this.vcsProvider.isTracked(document.fileName);
+    const hasChanged = isTracked ? await this.vcsProvider.hasChanged(document.fileName) : false;
 
     return isTracked && !hasChanged && this.fileHashMemento.has(document);
   }
