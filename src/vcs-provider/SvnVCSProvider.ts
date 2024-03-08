@@ -10,8 +10,12 @@ import { errorHandler } from '@/extension';
 export class SVNProvider extends BaseVCSProvider {
   public async validate(repoPath: string): Promise<void> {
     try {
+      await exec('svn --version');
+    } catch (error) {
+      errorHandler.handle(new CustomError(ErrorCode.SVNCommandNotFound, error));
+    }
+    try {
       await exec('svn info', { cwd: repoPath });
-      // output.info('svn info 执行成功');
     } catch (error) {
       errorHandler.handle(new CustomError(ErrorCode.SVNNotInit, error));
     }
@@ -19,7 +23,7 @@ export class SVNProvider extends BaseVCSProvider {
 
   public async getAuthorName(filePath: string): Promise<string> {
     try {
-      const authors = await exec(`svn log --show-item=author -l 1 ${filePath}`, {
+      const authors = await exec(`svn log -l 1 --quiet ${filePath}|awk '/^r/ {print $3}'`, {
         cwd: dirname(filePath),
       });
       return getFirstLine(authors);
@@ -29,16 +33,9 @@ export class SVNProvider extends BaseVCSProvider {
     return '';
   }
 
-  public async getAuthorEmail(filePath: string): Promise<string> {
+  public async getAuthorEmail(_filePath: string): Promise<string> {
     try {
-      // SVN 不直接支持获取提交者的邮箱，通常需要从 log 输出中解析
-      const logOutput = await exec(`svn log -l 1 ${filePath}`, {
-        cwd: dirname(filePath),
-      });
-      // 这里假设邮箱在 log 输出的第二行，并且格式为 "author@example.com"
-      const emailLine = logOutput.split('\n')[1];
-      const emailMatch = emailLine.match(/<([^>]+)>/);
-      return emailMatch ? emailMatch[1] : '';
+      return '';
     } catch (error) {
       errorHandler.handle(new CustomError(ErrorCode.SVNGetUserEmailFail, error));
     }

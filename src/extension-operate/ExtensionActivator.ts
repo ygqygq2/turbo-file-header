@@ -7,59 +7,28 @@ import { Command } from '@/typings/types';
 import { useParser } from '@/parser';
 import { ConfigEvent } from '@/configuration/ConfigEvent';
 import { LanguageEvent } from '@/languages/LanguageEvent';
-import { ConfigManager } from '../configuration/ConfigManager';
-import { FileheaderProviderLoader } from '../fileheader/FileheaderProviderLoader';
-import { LanguageManager } from '../languages/LanguageManager';
-import { FileHashMemento } from '../fileheader/FileHashMemento';
-import { ErrorHandler } from '../error/ErrorHandler';
-import { GenerateTemplateConfig } from '../fileheader/GenerateTemplateConfig';
-import { GenerateCustomProviderClasses } from '../language-providers/GenerateCustomProviderClasses';
-import { FileheaderVariableBuilder } from '../fileheader/FileheaderVariableBuilder';
-import { ConfigReader } from '../configuration/ConfigReader';
-import { vcsProvider } from '../init';
 
 export class ExtensionActivator {
   private static _context: vscode.ExtensionContext;
-  public errorHandler: ErrorHandler;
-  public configManager: ConfigManager;
-  private configReader: ConfigReader;
-  public configEvent: ConfigEvent;
-  public languageEvent: LanguageEvent;
+  private configEvent: ConfigEvent;
+  private languageEvent: LanguageEvent;
   private disposers: vscode.Disposable[] = [];
   private fileWatcher: FileWatcher;
   private documentHandler: DocumentHandler;
-  public fileheaderManager: FileheaderManager;
-  private fileheaderProviderLoader: FileheaderProviderLoader;
-  private fileHashMemento: FileHashMemento;
-  public languageManager: LanguageManager;
-  private fileheaderVariableBuilder: FileheaderVariableBuilder;
-  public generateCustomTemplate: GenerateTemplateConfig;
-  private generateCustomProviderClasses: GenerateCustomProviderClasses;
+  private fileheaderManager: FileheaderManager;
 
-  constructor() {
-    this.errorHandler = ErrorHandler.getInstance();
-    this.configReader = ConfigReader.getInstance();
-    this.configManager = ConfigManager.getInstance(this.configReader);
-    this.configEvent = new ConfigEvent(this.configManager);
-    this.languageManager = LanguageManager.getInstance();
-    this.languageEvent = new LanguageEvent(this.languageManager);
-    this.generateCustomProviderClasses = new GenerateCustomProviderClasses(this.configReader);
-    this.fileheaderProviderLoader = new FileheaderProviderLoader(
-      this.languageManager,
-      this.generateCustomProviderClasses,
-    );
-    this.fileHashMemento = new FileHashMemento();
-    this.fileheaderVariableBuilder = new FileheaderVariableBuilder(vcsProvider);
-    this.fileheaderManager = new FileheaderManager(
-      this.configManager,
-      vcsProvider,
-      this.fileheaderProviderLoader,
-      this.fileHashMemento,
-      this.fileheaderVariableBuilder,
-    );
-    this.fileWatcher = new FileWatcher(this.fileheaderManager);
-    this.documentHandler = new DocumentHandler(this.configManager, this.fileheaderManager);
-    this.generateCustomTemplate = GenerateTemplateConfig.getInstance();
+  constructor(
+    configEvent: ConfigEvent,
+    languageEvent: LanguageEvent,
+    fileWatcher: FileWatcher,
+    documentHandler: DocumentHandler,
+    fileheaderManager: FileheaderManager,
+  ) {
+    this.configEvent = configEvent;
+    this.languageEvent = languageEvent;
+    this.fileWatcher = fileWatcher;
+    this.documentHandler = documentHandler;
+    this.fileheaderManager = fileheaderManager;
   }
 
   activate = async (context: vscode.ExtensionContext) => {

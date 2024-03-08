@@ -7,6 +7,7 @@ All notable changes to the "turbo-file-header" extension will be documented in t
 ## 新增功能 🌱
 
 - feat: js/ts 支持 `useJSDocStyle` 配置控制文件头注释风格
+- feat: 支持批量更新/插入文件头信息
 
 ## 问题修复 🐛
 

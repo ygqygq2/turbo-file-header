@@ -1,8 +1,11 @@
 import vscode from 'vscode';
 import output from '@/error/output';
+import path from 'path';
+import fs from 'fs';
+import { initVCSProvider } from '@/init';
 import { errorHandler } from '@/extension';
 import { convertDateFormatToRegex, hasShebang } from '@/utils/utils';
-import { isLineStartOrEnd } from '@/utils/vscode-utils';
+import { getActiveDocumentWorkspace, isLineStartOrEnd } from '@/utils/vscode-utils';
 import { FileheaderVariableBuilder } from './FileheaderVariableBuilder';
 import { FileHashMemento } from './FileHashMemento';
 import { CustomError } from '@/error/ErrorHandler';
@@ -14,8 +17,8 @@ import { IFileheaderVariables } from '../typings/types';
 import { ConfigManager } from '@/configuration/ConfigManager';
 import { Configuration } from '@/configuration/types';
 import { ConfigSection } from '@/constants';
-import { BaseVCSProvider } from '@/vcs-provider/BaseVCSProvider';
 import { FileMatcher } from '@/extension-operate/FileMatcher';
+import { withProgress } from '@/utils/with-progress';
 
 type UpdateFileheaderManagerOptions = {
   silent?: boolean;
@@ -29,7 +32,6 @@ type OriginFileheaderInfo = {
 
 export class FileheaderManager {
   private configManager: ConfigManager;
-  private vcsProvider: BaseVCSProvider;
   private providers: LanguageProvider[] = [];
   private fileheaderProviderLoader: FileheaderProviderLoader;
   private fileHashMemento: FileHashMemento;
@@ -37,13 +39,11 @@ export class FileheaderManager {
 
   constructor(
     configManager: ConfigManager,
-    vcsProvider: BaseVCSProvider,
     fileheaderProviderLoader: FileheaderProviderLoader,
     fileHashMemento: FileHashMemento,
     fileheaderVariableBuilder: FileheaderVariableBuilder,
   ) {
     this.configManager = configManager;
-    this.vcsProvider = vcsProvider;
     this.fileheaderProviderLoader = fileheaderProviderLoader;
     this.fileHashMemento = fileHashMemento;
     this.fileheaderVariableBuilder = fileheaderVariableBuilder;
@@ -113,9 +113,10 @@ export class FileheaderManager {
       return true;
     }
 
+    const vcsProvider = await initVCSProvider();
     // if there is a change in VCS provider, we should replace the fileheader
-    const isTracked = await this.vcsProvider.isTracked(document.fileName);
-    const hasChanged = isTracked ? await this.vcsProvider.hasChanged(document.fileName) : false;
+    const isTracked = await vcsProvider.isTracked(document.fileName);
+    const hasChanged = isTracked ? await vcsProvider.hasChanged(document.fileName) : false;
 
     return isTracked && !hasChanged && this.fileHashMemento.has(document);
   }
@@ -209,7 +210,7 @@ export class FileheaderManager {
       allowInsert,
     );
     if (shouldSkipReplace) {
-      output.info('Not need update filer header: ', document.uri);
+      output.info('Not need update filer header:', document.uri.fsPath);
       return;
     }
 
@@ -242,7 +243,7 @@ export class FileheaderManager {
     });
 
     await document.save();
-    output.info('File header updated: ', document.uri);
+    output.info('File header updated:', document.uri.fsPath);
   }
 
   public async updateFileheader(
@@ -302,28 +303,69 @@ export class FileheaderManager {
     }
   }
 
-  public async batchUpdateFileheader() {
+  private async findFiles() {
+    const activeWorkspace = await getActiveDocumentWorkspace();
+    if (!activeWorkspace) {
+      output.info('Please check your workspace');
+      return;
+    }
+
+    const configDir = path.join(activeWorkspace.uri.fsPath, '.vscode');
+    // 确保目标目录存在
+    if (!fs.existsSync(configDir)) {
+      try {
+        fs.mkdirSync(configDir, { recursive: true });
+      } catch (error) {
+        errorHandler.handle(new CustomError(ErrorCode.CreateDirFail, configDir, error));
+      }
+    }
+
     const config = await this.configManager.getConfigurationFromCustomConfig();
     if (!config || !config.findFilesConfig) {
       errorHandler.handle(new CustomError(ErrorCode.GetCustomConfigFail));
       return;
     }
+
     const findFilesConfig = config?.findFilesConfig || {
       include: '**/tmp/*.{ts,js}',
       exclude: '**/{node_modules,dist}/**',
     };
     const fileMatcher = new FileMatcher(findFilesConfig);
     const files = await fileMatcher.findFiles();
+    return files;
+  }
 
-    for (const file of files) {
-      try {
-        const document = await vscode.workspace.openTextDocument(file);
-        await this.updateFileheader(document);
-        await document.save();
-        await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
-      } catch (error) {
-        errorHandler.handle(new CustomError(ErrorCode.CreateFileFail, file.path, error));
-      }
-    }
+  public async batchUpdateFileheader() {
+    let failedFiles = (await this.findFiles()) || [];
+    let reprocessedFiles: vscode.Uri[] = [];
+
+    await withProgress(
+      'Processing schedule',
+      async () => {
+        while (failedFiles.length > 0) {
+          for (const file of failedFiles) {
+            try {
+              const document = await vscode.workspace.openTextDocument(file);
+              await this.updateFileheader(document);
+              await document.save();
+              vscode.commands.executeCommand('workbench.action.closeActiveEditor');
+            } catch (error) {
+              reprocessedFiles.push(file);
+              errorHandler.handle(
+                new CustomError(ErrorCode.UpdateFileHeaderFail, file.fsPath, error),
+              );
+            }
+          }
+
+          failedFiles = reprocessedFiles;
+          reprocessedFiles = [];
+
+          if (failedFiles.length === 0) {
+            break;
+          }
+        }
+      },
+      failedFiles.length,
+    );
   }
 }

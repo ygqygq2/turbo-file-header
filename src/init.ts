@@ -2,12 +2,10 @@ import { createVCSProvider } from './vcs-provider';
 import { BaseVCSProvider } from './vcs-provider/BaseVCSProvider';
 
 let vcsProvider: BaseVCSProvider;
-(async () => {
-  vcsProvider = (await createVCSProvider()) as BaseVCSProvider;
-  if (vcsProvider instanceof BaseVCSProvider) {
-    console.log('VCS Provider created');
-  } else {
-    console.log('VCS Provider not created');
+export async function initVCSProvider(): Promise<BaseVCSProvider> {
+  if (!vcsProvider) {
+    // createVCSProvider 中已经做了错误处理，这里肯定是成功的
+    vcsProvider = (await createVCSProvider()) as unknown as BaseVCSProvider;
   }
-})();
-export { vcsProvider };
+  return vcsProvider;
+}
