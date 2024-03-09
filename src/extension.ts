@@ -44,4 +44,6 @@ export const extension = new ExtensionActivator(
   documentHandler,
   fileheaderManager,
 );
-export const { activate, deactivate } = extension;
+
+export const activate = extension.activate;
+export const deactivate = extension.deactivate;

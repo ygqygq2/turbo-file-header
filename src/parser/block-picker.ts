@@ -12,16 +12,14 @@ export interface BlockPicker {
   docLinePrefix: string;
 }
 
-async function parseBlockPickers(languageId: string) {
+async function parseBlockPickers(languageId: string): Promise<BlockPicker[]> {
   const comments = await languageManager.getAvailableCommentRules(languageId);
-
-  if (!comments.blockComments || !comments.blockComments.length) {
+  if (!comments.blockComments || comments.blockComments.length === 0) {
     return [];
   }
 
   const configs = configManager.getConfigurationFlatten();
-
-  const escapedTags = configs.tags.map((tag) => tag.tagEscaped);
+  const escapedTags = configs.tags.map((tag) => escapeRegexString(tag.tagEscaped));
 
   const pickers: BlockPicker[] = comments.blockComments.map((marks) => {
     const start = escapeRegexString(marks[0]);
@@ -55,13 +53,9 @@ interface _BlockPickOptions {
 }
 
 function _pick(options: _BlockPickOptions) {
-  const { editor, picker, highlight: highlight = true } = options;
+  const { editor, picker, highlight = true, text = editor.document.getText() } = options;
 
-  if (!editor) {
-    return;
-  }
-
-  if (!picker) {
+  if (!editor || !picker) {
     return;
   }
 
@@ -75,7 +69,7 @@ function _pick(options: _BlockPickOptions) {
 
   // Find the multiline comment block
   let block: RegExpExecArray | null;
-  while ((block = picker.blockPicker.exec(options.text))) {
+  while ((block = picker.blockPicker.exec(text))) {
     blockRanges.push([block.index, block.index + block[0].length]);
 
     if (!highlight) {
@@ -122,25 +116,16 @@ interface _BlockPickManyOptions extends Omit<_BlockPickOptions, 'picker'> {
 }
 
 function _pickMany(options: _BlockPickManyOptions) {
-  const {
-    editor,
-    pickers,
-    text = editor.document.getText(),
-    highlight: highlight = true,
-  } = options;
-
-  let blockRanges: [number, number][] = [];
-  let decorationOptions: TagDecorationOptions[] = [];
+  const { editor, pickers, text = editor.document.getText(), highlight = true } = options;
+  const blockRanges: [number, number][] = [];
+  const decorationOptions: TagDecorationOptions[] = [];
 
   for (const picker of pickers) {
-    const picked = _pick({ editor, text, highlight: highlight, picker });
-
-    if (!picked) {
-      continue;
+    const picked = _pick({ editor, text, highlight, picker });
+    if (picked) {
+      blockRanges.push(...(picked.blockRanges || []));
+      decorationOptions.push(...(picked.decorationOptions || []));
     }
-
-    blockRanges = [...blockRanges, ...(picked.blockRanges || [])];
-    decorationOptions = [...decorationOptions, ...(picked.decorationOptions || [])];
   }
 
   return {

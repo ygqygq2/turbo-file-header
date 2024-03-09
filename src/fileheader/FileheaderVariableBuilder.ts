@@ -85,18 +85,17 @@ export class FileheaderVariableBuilder {
 
     const deferredBirthtime = queryFieldsExceptDisable(
       disableFieldSet.has('birthtime'),
-      () => {
-        return isTracked ? vcsProvider.getBirthtime(fsPath) : dayjs(fileStat.birthtime);
-      },
+      () => (isTracked ? vcsProvider.getBirthtime(fsPath) : dayjs(fileStat.birthtime)),
       dayjs(fileStat.birthtime),
     );
     const deferredMtime = queryFieldsExceptDisable(disableFieldSet.has('mtime'), () =>
       dayjs(fileStat.mtime),
     );
 
-    const deferredCompanyName = queryFieldsExceptDisable(disableFieldSet.has('companyName'), () => {
-      return config.get<string>(ConfigSection.companyName)!;
-    });
+    const deferredCompanyName = queryFieldsExceptDisable(
+      disableFieldSet.has('companyName'),
+      () => config.get<string>(ConfigSection.companyName)!,
+    );
 
     const [companyName, userName, userEmail, birthtime, mtime] = await Promise.all([
       deferredCompanyName,
@@ -106,25 +105,17 @@ export class FileheaderVariableBuilder {
       deferredMtime,
     ] as const);
 
-    const deferredAuthorName = queryFieldsExceptDisable(
-      disableFieldSet.has('authorName'),
-      () => {
-        return isTracked ? vcsProvider.getAuthorName(fsPath) : userName;
-      },
-      userName,
-    );
-
-    const deferredAuthorEmail = queryFieldsExceptDisable(
-      disableFieldSet.has('authorEmail'),
-      () => {
-        return isTracked ? vcsProvider.getAuthorEmail(fsPath) : userEmail;
-      },
-      userEmail,
-    );
-
     const [authorName, authorEmail] = await Promise.all([
-      deferredAuthorName,
-      deferredAuthorEmail,
+      queryFieldsExceptDisable(
+        disableFieldSet.has('authorName'),
+        () => (isTracked ? vcsProvider.getAuthorName(fsPath) : userName),
+        userName,
+      ),
+      queryFieldsExceptDisable(
+        disableFieldSet.has('authorEmail'),
+        () => (isTracked ? vcsProvider.getAuthorEmail(fsPath) : userEmail),
+        userEmail,
+      ),
     ] as const);
 
     let tmpBirthtime = birthtime;
@@ -138,9 +129,9 @@ export class FileheaderVariableBuilder {
       }
     }
 
-    let projectName: string | undefined = undefined;
-    let filePath: string | undefined = undefined;
-    let dirPath: string | undefined = undefined;
+    let projectName: string | undefined;
+    let filePath: string | undefined;
+    let dirPath: string | undefined;
     const fileName = basename(fileUri.path);
 
     if (workspace) {
@@ -151,7 +142,7 @@ export class FileheaderVariableBuilder {
         queryFieldsExceptDisable(disableFieldSet.has('filePath'), () =>
           upath.normalize(relative(workspace.uri.path, fileUri.path)),
         ),
-        await queryFieldsExceptDisable(
+        queryFieldsExceptDisable(
           disableFieldSet.has('dirPath'),
           () => upath.normalize(relative(workspace.uri.path, dirname(fileUri.path))) || '',
         ),

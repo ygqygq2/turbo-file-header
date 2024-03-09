@@ -5,6 +5,7 @@ import { OnDidChangeCallback } from './types';
 export class ConfigEvent {
   private configManager: ConfigManager;
   private onDidChangeCallbacks: OnDidChangeCallback[] = [];
+  private disposables: vscode.Disposable[] = [];
 
   constructor(configManager: ConfigManager) {
     this.configManager = configManager;
@@ -15,19 +16,23 @@ export class ConfigEvent {
   };
 
   public registerEvent = () => {
-    // Refresh configuration after configuration changed
-    return vscode.workspace.onDidChangeConfiguration((event) => {
+    const disposable = vscode.workspace.onDidChangeConfiguration((event) => {
       if (!event.affectsConfiguration('TurboFileHeader')) {
         return;
       }
 
-      // 获取最新配置
       const config = this.configManager.getConfigurationFlatten(true);
-
-      // Run change callback
       for (const callback of this.onDidChangeCallbacks) {
         callback(config);
       }
     });
+
+    // this.disposables.push(disposable);
+    return disposable;
   };
+
+  public dispose() {
+    this.disposables.forEach((disposable) => disposable.dispose());
+    this.disposables = [];
+  }
 }

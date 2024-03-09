@@ -5,6 +5,7 @@ import { OnDidChangeCallback } from './types';
 export class LanguageEvent {
   private languageManager: LanguageManager;
   private onDidChangeCallbacks: OnDidChangeCallback[] = [];
+  private disposables: vscode.Disposable[] = [];
 
   constructor(languageManager: LanguageManager) {
     this.languageManager = languageManager;
@@ -15,14 +16,20 @@ export class LanguageEvent {
   };
 
   public registerEvent = () => {
-    // Refresh languages definitions after extensions changed
-    return vscode.extensions.onDidChange(() => {
+    const disposable = vscode.extensions.onDidChange(() => {
       this.languageManager.updateDefinitions();
 
-      // Run change callbacks
       for (const callback of this.onDidChangeCallbacks) {
         callback();
       }
     });
+
+    // this.disposables.push(disposable);
+    return disposable;
   };
+
+  public dispose() {
+    this.disposables.forEach((disposable) => disposable.dispose());
+    this.disposables = [];
+  }
 }
