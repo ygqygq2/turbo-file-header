@@ -1,6 +1,6 @@
 import { IFileheaderVariables } from './typings/types';
 
-export const ConfigTag = 'TurboFileHeader';
+export const ConfigTag = 'turboFileHeader';
 
 export enum ConfigSection {
   userName = ConfigTag + '.' + 'userName',

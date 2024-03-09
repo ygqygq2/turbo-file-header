@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { ConfigManager } from './ConfigManager';
 import { OnDidChangeCallback } from './types';
+import { ConfigTag } from '@/constants';
 
 export class ConfigEvent {
   private configManager: ConfigManager;
@@ -17,7 +18,7 @@ export class ConfigEvent {
 
   public registerEvent = () => {
     const disposable = vscode.workspace.onDidChangeConfiguration((event) => {
-      if (!event.affectsConfiguration('TurboFileHeader')) {
+      if (!event.affectsConfiguration(ConfigTag)) {
         return;
       }
 
