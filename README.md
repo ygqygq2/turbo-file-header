@@ -12,6 +12,7 @@ Turbo file header, sets file header information globally or for a project.
 - Generate file header based on the file header template configuration.
 - Use more reader-friendly comments to highlight important parts in your code.
 - Support for languages in [VSCode known identifiers](https://code.visualstudio.com/docs/languages/identifiers#_known-language-identifiers).
+- l10n support.
 
 ## Settings
 
