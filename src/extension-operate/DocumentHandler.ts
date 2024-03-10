@@ -60,7 +60,13 @@ export class DocumentHandler {
     }, 2000); // 2000毫秒后执行
   };
 
+  // 标签变化
   public onDidChangeVisibleTextEditors = (e: readonly vscode.TextEditor[]) => {
     this.fileheaderManager.recordOriginFileHash(e.map((it) => it.document));
+  };
+
+  // 文档内容变化
+  public onDidChangeTextDocument = (e: vscode.TextDocumentChangeEvent) => {
+    this.fileheaderManager.updateOriginFileHash(e.document);
   };
 }

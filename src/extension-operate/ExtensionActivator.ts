@@ -96,6 +96,11 @@ export class ExtensionActivator {
         this.documentHandler.onDidChangeVisibleTextEditors(editors),
       ),
     );
+    // this.disposers.push(
+    //   vscode.workspace.onDidChangeTextDocument((e) =>
+    //     this.documentHandler.onDidChangeTextDocument(e),
+    //   ),
+    // );
   };
 
   deactivate = () => {

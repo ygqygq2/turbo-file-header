@@ -36,6 +36,7 @@ export class FileheaderManager {
   private fileheaderProviderLoader: FileheaderProviderLoader;
   private fileHashMemento: FileHashMemento;
   private fileheaderVariableBuilder: FileheaderVariableBuilder;
+  private cachedContent: { [key: string]: string } = {};
 
   constructor(
     configManager: ConfigManager,
@@ -104,7 +105,7 @@ export class FileheaderManager {
     return info;
   }
 
-  private async shouldSkipReplace(
+  private async fileIsChanged(
     config: Configuration & vscode.WorkspaceConfiguration,
     document: vscode.TextDocument,
   ) {
@@ -114,11 +115,15 @@ export class FileheaderManager {
     }
 
     const vcsProvider = await initVCSProvider();
-    // if there is a change in VCS provider, we should replace the fileheader
+    // 是否跟踪
     const isTracked = await vcsProvider.isTracked(document.fileName);
-    const hasChanged = isTracked ? await vcsProvider.hasChanged(document.fileName) : false;
-
-    return isTracked && !hasChanged && this.fileHashMemento.has(document);
+    // 是否有修改
+    const isChanged = isTracked ? await vcsProvider.isChanged(document.fileName) : false;
+    // 有跟踪则判断是否有修改，文件 hash 是否有记录
+    // 没有跟踪则直接认为是文件有修改
+    // 有 hash 记录则是有文件修改
+    console.log('hash', this.fileHashMemento.has(document));
+    return (isTracked && isChanged) || this.fileHashMemento.has(document);
   }
 
   private removeDateString(fileHeaderContent: string, regex: RegExp): string {
@@ -126,11 +131,12 @@ export class FileheaderManager {
     return fileHeaderContent.replace(regex, '');
   }
 
-  private async shouldSkipReplacement(
+  private async shouldUpdate(
     document: vscode.TextDocument,
     fileheaderRange: vscode.Range,
     newFileheader: string,
     config: Configuration & vscode.WorkspaceConfiguration,
+    provider: LanguageProvider,
     allowInsert: boolean,
   ) {
     const originContent = document.getText(fileheaderRange)?.replace(/\r\n/g, '\n');
@@ -138,8 +144,12 @@ export class FileheaderManager {
     const dateformat = config.get(ConfigSection.dateFormat, 'YYYY-MM-DD HH:mm:ss');
     const dateRegex = new RegExp(convertDateFormatToRegex(dateformat), 'g');
 
+    const filePath = document.uri.fsPath;
+    const contentWithoutHeader = provider.getSourceFileWithoutFileheader(document);
+    const isContentChange = this.checkContentChange(filePath, contentWithoutHeader);
+
     // 避免 prettier 这类格式后处理空格，导致文件头内容变化影响判断
-    let contentSame: boolean = false;
+    let headerSame: boolean = false;
     if (originContentLineCount > 1) {
       let originContentLines = originContent.split('\n').map((line) => line.trim());
       if (
@@ -167,20 +177,48 @@ export class FileheaderManager {
         dateRegex,
       );
 
-      contentSame = originContentProcessed === newFileheaderProcessed;
+      headerSame = originContentProcessed === newFileheaderProcessed;
     } else {
       const originContentProcessed = this.removeDateString(originContent, dateRegex);
       const newFileheaderProcessed = this.removeDateString(newFileheader, dateRegex);
-      contentSame = originContentProcessed === newFileheaderProcessed;
+      headerSame = originContentProcessed === newFileheaderProcessed;
     }
 
+    console.log('allowInsert', allowInsert);
+    console.log(await this.fileIsChanged(config, document), isContentChange, headerSame);
     // 不允许插入，且范围开始和结束相同（没有文件头的空间）
-    return (
-      (!allowInsert && fileheaderRange.start.isEqual(fileheaderRange.end)) ||
-      // 范围开始和结束不相同（有文件头），且文件头内容相同，或者根据设置判断是否应该跳过更新
-      (!fileheaderRange.start.isEqual(fileheaderRange.end) &&
-        (contentSame || (await this.shouldSkipReplace(config, document))))
-    );
+    const noHeader = fileheaderRange.start.isEqual(fileheaderRange.end);
+    const a = !allowInsert && noHeader;
+    // 文件有修改，则第一次认为是有修改，缓存起来
+    const fileIsChanged = await this.fileIsChanged(config, document);
+    // 范围开始和结束不相同（有文件头）
+    // 文件有修改且是正文，则直接返回
+    const b = !noHeader && fileIsChanged && isContentChange;
+    // 文件有修改，不是正文，就判断文件头是否相同
+    const c = !noHeader && fileIsChanged && !isContentChange;
+    if (a === false) {
+      return false;
+    } else {
+      if (b === true) {
+        return true;
+      }
+      if (c === true) {
+        return !headerSame;
+      }
+      // 文件没有修改
+      return false;
+    }
+  }
+
+  private checkContentChange(filePath: string, newContent: string): boolean {
+    if (this.cachedContent[filePath] === newContent) {
+      // 文件内容未发生变化
+      return false;
+    } else {
+      // 文件内容已经发生变化，更新缓存
+      this.cachedContent[filePath] = newContent;
+      return true;
+    }
   }
 
   private async processFileheaderInsertionOrReplacement(
@@ -202,14 +240,15 @@ export class FileheaderManager {
     const startLine = provider.startLineOffset + (hasShebang(document.getText()) ? 1 : 0);
     const { range } = originFileheaderInfo;
 
-    const shouldSkipReplace = await this.shouldSkipReplacement(
+    const shouldUpdate = await this.shouldUpdate(
       document,
       range,
       fileheader,
       config,
+      provider,
       allowInsert,
     );
-    if (shouldSkipReplace) {
+    if (!shouldUpdate) {
       output.info('Not need update filer header:', document.uri.fsPath);
       return;
     }
@@ -301,6 +340,10 @@ export class FileheaderManager {
     for (const document of documents) {
       this.fileHashMemento.set(document);
     }
+  }
+
+  public updateOriginFileHash(document: vscode.TextDocument) {
+    this.fileHashMemento.set(document);
   }
 
   private async findFiles() {

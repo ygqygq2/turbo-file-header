@@ -98,7 +98,7 @@ export class GitVCSProvider extends BaseVCSProvider {
     }
   }
 
-  public async hasChanged(filePath: string): Promise<boolean> {
+  public async isChanged(filePath: string): Promise<boolean> {
     try {
       const result = await exec(`git status --porcelain ${filePath}`, {
         cwd: dirname(filePath),

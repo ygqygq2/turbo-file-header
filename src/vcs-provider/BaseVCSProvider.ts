@@ -36,5 +36,5 @@ export abstract class BaseVCSProvider {
    */
   public abstract isTracked(filePath: string): Promise<boolean>;
 
-  public abstract hasChanged(filePath: string): Promise<boolean>;
+  public abstract isChanged(filePath: string): Promise<boolean>;
 }

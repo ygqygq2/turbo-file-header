@@ -90,7 +90,7 @@ export class SVNProvider extends BaseVCSProvider {
     }
   }
 
-  public async hasChanged(filePath: string): Promise<boolean> {
+  public async isChanged(filePath: string): Promise<boolean> {
     try {
       // SVN使用'svn status'命令来检查文件状态，然后判断是否有修改
       const status = await exec(`svn status --show-updates ${filePath}`, {

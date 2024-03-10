@@ -29,12 +29,15 @@ export class FileHashMemento {
     this.records.delete(document.fileName);
   }
 
+  // onDidChangeVisibleTextEditors 标签变化时，hash 才会更新
   has(document: vscode.TextDocument, skipCheckHash = false) {
     const originHash = this.records.get(document.fileName);
 
     if (!originHash) {
       return false;
     }
+    console.log(document.getText());
+    console.log(this.calculate(document.getText()), originHash);
     return skipCheckHash || this.calculate(document.getText()) === originHash;
   }
 }
