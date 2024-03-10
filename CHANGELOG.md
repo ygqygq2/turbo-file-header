@@ -6,8 +6,11 @@ All notable changes to the "turbo-file-header" extension will be documented in t
 
 ## 新增功能 🌱
 
-- feat: 配置名使用小驼峰开始
 - feat: 增加 l10n 多语言支持
+
+## 功能优化 🚀
+
+- chore: 配置名使用小驼峰开始
 
 # [0.0.3]
 
