@@ -5,6 +5,7 @@ import { AvailableComments } from './types';
 export class Language {
   public readonly languageId: string;
   private configUri: vscode.Uri | undefined;
+  private configuration: vscode.LanguageConfiguration | undefined;
   private embeddedLanguages = new Set<string>();
   private comments: vscode.CommentRule | undefined;
   private availableComments: AvailableComments | undefined;
@@ -22,6 +23,10 @@ export class Language {
     return this;
   }
 
+  public setConfiguration(configuration: vscode.LanguageConfiguration) {
+    this.configuration = configuration;
+  }
+
   /**
    * Check if config uri already setup
    */
@@ -34,9 +39,15 @@ export class Language {
    * Get language comments rules
    */
   public getComments = async (forceRefresh = false) => {
+    let comments: vscode.CommentRule | undefined;
+
     if (!this.comments || forceRefresh) {
-      // load comment rule from file
-      let comments = await loadCommentRuleFromFile(this.configUri);
+      if (this.configuration && this.configuration.comments) {
+        comments = this.configuration.comments;
+      } else if (this.configUri) {
+        // load comment rule from file
+        comments = await loadCommentRuleFromFile(this.configUri);
+      }
       // get base comment rule if undefined from file
       if (!comments) {
         comments = getBaseCommentRule(this.languageId);

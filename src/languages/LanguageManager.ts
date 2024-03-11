@@ -1,20 +1,21 @@
 import * as vscode from 'vscode';
 import { Language } from './Language';
 import { AvailableCommentRules } from './types';
-import { LanguageConfig, LanguagesConfig } from '@/typings/types';
-import output from '@/error/output';
-import { ConfigTag } from '@/constants';
+import { ConfigManager } from '@/configuration/ConfigManager';
+import { LanguageConfig } from '@/typings/types';
 
 export class LanguageManager {
   private static instance: LanguageManager;
+  private configManager: ConfigManager;
   private languages: Map<string, Language> = new Map<string, Language>();
 
-  private constructor() {
+  private constructor(configManager: ConfigManager) {
+    this.configManager = configManager;
     this.updateDefinitions();
   }
 
-  public static getInstance(): LanguageManager {
-    return LanguageManager.instance || new LanguageManager();
+  public static getInstance(configManager: ConfigManager): LanguageManager {
+    return LanguageManager.instance || new LanguageManager(configManager);
   }
 
   public useLanguage = (languageId: string, autoUpdateDefinition = true) => {
@@ -32,12 +33,21 @@ export class LanguageManager {
     return lang;
   };
 
+  private getLanguagesConfig = () => {
+    const { languages } = this.configManager.getConfiguration();
+    languages.forEach((language: LanguageConfig) => {
+      const { configuration } = language;
+      const lang = this.useLanguage(language.id, false);
+      lang.setConfiguration(configuration);
+    });
+  };
+
   /**
    * Generate a map of configuration files by language as defined by extensions
    * External extensions can override default configurations os VSCode
    */
   public updateDefinitions = () => {
-    // this.languages.clear();
+    this.languages.clear();
 
     for (const extension of vscode.extensions.all) {
       const packageJSON = extension.packageJSON;
@@ -62,25 +72,9 @@ export class LanguageManager {
         lang.setEmbeddedLanguages(embeddedLanguages);
       }
     }
-  };
 
-  public getLanguagesConfig(languages: LanguagesConfig) {
-    languages.forEach((language: LanguageConfig) => {
-      const { configuration } = language;
-      console.log('🚀 ~ file: LanguageManager.ts:70 ~ configuration:', configuration);
-      const { comments } = configuration;
-      if (Object.keys(comments).length > 0) {
-        const uri = vscode.Uri.file(ConfigTag + language.id);
-        vscode.languages.setLanguageConfiguration(language.id, { comments });
-        const lang = this.useLanguage(language.id, false);
-        if (configuration) {
-          lang.setConfigUri(uri);
-        }
-      } else {
-        output.info(vscode.l10n.t('No language configuration comments found for') + language.id);
-      }
-    });
-  }
+    this.getLanguagesConfig();
+  };
 
   /**
    * Gets the configuration information for the specified language

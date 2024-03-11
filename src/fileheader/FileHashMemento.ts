@@ -3,14 +3,18 @@ import { difference } from 'lodash';
 import { getStringHash } from '../utils/utils';
 
 export class FileHashMemento {
+  // 刚打开文件时的 hash
   originRecords: Map<string, string> = new Map();
+  // 当前的 hash
   records: Map<string, string> = new Map();
+  // 正文 hash
+  mainTextRecords: Map<string, string> = new Map();
 
   private calculate(source: string) {
     return getStringHash(source);
   }
 
-  set(document: vscode.TextDocument) {
+  public set(document: vscode.TextDocument) {
     const fsPath = document.uri.fsPath;
     const hash = this.calculate(document.getText());
     if (!this.originRecords.has(fsPath)) {
@@ -20,7 +24,7 @@ export class FileHashMemento {
     }
   }
 
-  update(documents: vscode.TextDocument[]) {
+  public update(documents: vscode.TextDocument[]) {
     const originKeys = Array.from(this.records.keys());
     const newDocumentMap = new Map(documents.map((d) => [d.uri.fsPath, d] as const));
     const newDocumentKey = Array.from(newDocumentMap.keys());
@@ -31,13 +35,13 @@ export class FileHashMemento {
     newInsertKeys.forEach((key) => this.set(newDocumentMap.get(key)!));
   }
 
-  remove(document: vscode.TextDocument) {
+  public remove(document: vscode.TextDocument) {
     const fsPath = document.uri.fsPath;
     this.records.delete(fsPath);
     this.originRecords.delete(fsPath);
   }
 
-  isHashUpdated(document: vscode.TextDocument, skipCheckHash = false) {
+  public isHashUpdated(document: vscode.TextDocument, skipCheckHash = false) {
     const fsPath = document.uri.fsPath;
     const content = document.getText();
     // 第一次记录的 hash
@@ -49,5 +53,14 @@ export class FileHashMemento {
 
     const hash = this.records.get(fsPath);
     return skipCheckHash || hash !== originHash;
+  }
+
+  public isMainTextUpdated(document: vscode.TextDocument, mainText: string) {
+    const fsPath = document.uri.fsPath;
+    if (this.mainTextRecords.get(fsPath) === this.calculate(mainText)) {
+      return false;
+    }
+    this.mainTextRecords.set(fsPath, this.calculate(mainText));
+    return true;
   }
 }

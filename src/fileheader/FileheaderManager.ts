@@ -55,9 +55,30 @@ export class FileheaderManager {
     this.providers = await this.fileheaderProviderLoader.loadProviders(forceRefresh);
   }
 
+  private getConfiguration() {
+    return this.configManager.getConfiguration();
+  }
+
+  private getLanguageIdByExt(ext: string) {
+    const config = this.getConfiguration();
+    const languagesConfig = config.languages;
+    const languageConfig = languagesConfig.find((languageConfig) =>
+      languageConfig.extensions.includes(ext),
+    );
+    return languageConfig ? languageConfig.id : undefined;
+  }
+
   private async findProvider(document: vscode.TextDocument) {
-    // const languageId = document.languageId;
-    const languageId = 'astro';
+    let languageId = document.languageId;
+    // 如果没有识别到自定义语言，则尝试使用后缀匹配
+    if (languageId === 'plaintext') {
+      const ext = path.extname(document.uri.fsPath).slice(1);
+      const tmpLanguageId = this.getLanguageIdByExt(`.${ext}`);
+      if (tmpLanguageId) {
+        languageId = tmpLanguageId;
+      }
+    }
+
     for (const provider of this.providers) {
       // 只有自定义 provider 有 provider.workspaceScopeUri
       let isWorkspaceMatch: boolean;
@@ -207,7 +228,6 @@ export class FileheaderManager {
       return false;
     }
 
-    const filePath = document.uri.fsPath;
     // 范围开始和结束不相同（有文件头）
     const noHeader = range.start.isEqual(range.end);
 
@@ -218,30 +238,22 @@ export class FileheaderManager {
       // 没文件头，允许插入，直接返回 true
       return true;
     } else {
-      const isContentChange = this.checkContentChange(filePath, contentWithoutHeader);
+      const isMainTextChange = this.fileHashMemento.isMainTextUpdated(
+        document,
+        contentWithoutHeader,
+      );
       const fileIsChanged = await this.fileIsChanged(config, document);
-      if (!noHeader && fileIsChanged && isContentChange) {
+      if (!noHeader && fileIsChanged && isMainTextChange) {
         // 文件有修改且是正文，则直接返回
         // 文件有修改，则第一次认为是有修改，缓存起来
         return true;
-      } else if (!noHeader && fileIsChanged && !isContentChange) {
+      } else if (!noHeader && fileIsChanged && !isMainTextChange) {
         // 文件有修改，不是正文，就判断文件头是否相同
         return this.headerChanged(document, range, newFileheader, config);
       }
 
       // 都不是，则认为都没有修改
       return false;
-    }
-  }
-
-  private checkContentChange(filePath: string, newContent: string): boolean {
-    if (this.cachedContent[filePath] === newContent) {
-      // 文件内容未发生变化
-      return false;
-    } else {
-      // 文件内容已经发生变化，更新缓存
-      this.cachedContent[filePath] = newContent;
-      return true;
     }
   }
 
@@ -313,12 +325,8 @@ export class FileheaderManager {
     { allowInsert = true, silent = false }: UpdateFileheaderManagerOptions = {},
   ) {
     // console.log("🚀 ~ file: FileheaderManager.ts:243 ~ allowInsert:", allowInsert);
-    const config = this.configManager.getConfiguration();
-    const languageId = document?.languageId;
+    const config = this.getConfiguration();
     const provider = await this.findProvider(document);
-    if (provider instanceof VscodeInternalProvider) {
-      await provider.getBlockCommentFromVscode(languageId);
-    }
 
     if (!provider) {
       !silent &&

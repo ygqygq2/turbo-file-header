@@ -19,7 +19,7 @@ export const errorHandler = ErrorHandler.getInstance();
 const configReader = ConfigReader.getInstance();
 export const configManager = ConfigManager.getInstance(configReader);
 export const configEvent = new ConfigEvent(configManager);
-export const languageManager = LanguageManager.getInstance();
+export const languageManager = LanguageManager.getInstance(configManager);
 export const languageEvent = new LanguageEvent(languageManager);
 const generateCustomProviderClasses = new GenerateCustomProviderClasses(configReader);
 const fileheaderProviderLoader = new FileheaderProviderLoader(
@@ -38,11 +38,6 @@ const fileWatcher = new FileWatcher(fileheaderManager);
 const debounceManager = new DebounceManager();
 const documentHandler = new DocumentHandler(debounceManager, configManager, fileheaderManager);
 export const generateCustomTemplate = GenerateTemplateConfig.getInstance();
-
-// 加载用户配置中的语言配置
-const languagesConfig = configManager.getConfiguration().languages;
-languageManager.getLanguagesConfig(languagesConfig);
-
 export const extension = new ExtensionActivator(
   configEvent,
   languageEvent,
