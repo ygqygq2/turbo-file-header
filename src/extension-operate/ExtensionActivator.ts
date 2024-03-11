@@ -92,15 +92,15 @@ export class ExtensionActivator {
     );
     this.documentHandler.onDidChangeVisibleTextEditors(vscode.window.visibleTextEditors);
     this.disposers.push(
-      vscode.window.onDidChangeVisibleTextEditors((editors) =>
-        this.documentHandler.onDidChangeVisibleTextEditors(editors),
+      vscode.workspace.onDidOpenTextDocument((document: vscode.TextDocument) =>
+        this.documentHandler.onDidOpenTextDocument(document),
       ),
     );
-    // this.disposers.push(
-    //   vscode.workspace.onDidChangeTextDocument((e) =>
-    //     this.documentHandler.onDidChangeTextDocument(e),
-    //   ),
-    // );
+    this.disposers.push(
+      vscode.workspace.onDidChangeTextDocument((e: vscode.TextDocumentChangeEvent) =>
+        this.documentHandler.onDidChangeTextDocument(e),
+      ),
+    );
   };
 
   deactivate = () => {

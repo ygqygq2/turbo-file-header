@@ -6,6 +6,7 @@ import {
   TEMPLATE_OPTIONAL_GROUP_PLACEHOLDER,
   WILDCARD_ACCESS_VARIABLES,
 } from '../constants';
+import { escapeRegexString } from '@/utils/str';
 
 export abstract class LanguageProvider {
   /**
@@ -158,20 +159,21 @@ export abstract class LanguageProvider {
     return isInsideBlockComment;
   }
 
-  public getSourceFileWithoutFileheader(document: vscode.TextDocument): string {
-    const startLine = hasShebang(document.getText()) ? 1 : 0;
-    // 获取整个文档的文本，然后按行分割
-    const lines = document.getText().split(/\r?\n/);
-    // 从startLine开始获取文本
-    const textFromStartLine = lines.slice(startLine).join('\n');
-    // 用于匹配文件头的正则表达式
-    const regexp = new RegExp(this.getOriginFileheaderRegExp(document.eol), 'mg');
-    // 只替换从startLine开始的部分
-    const sourceWithoutHeader = textFromStartLine.replace(regexp, '');
-    // 如果有shebang，需要将它加回到文本的开始处
-    const shebang = startLine > 0 ? lines.slice(0, startLine).join('\n') + '\n' : '';
-    // 返回去掉文件头的文本，如果有shebang，它会被加回
-    return shebang + sourceWithoutHeader;
+  public getOriginContentWithoutFileheader(
+    document: vscode.TextDocument,
+    range: vscode.Range = this.getOriginFileheaderRange(document),
+  ): string {
+    const documentText = document.getText();
+    const rangeText = document.getText(range);
+
+    if (rangeText === '') {
+      return documentText;
+    }
+
+    const escapedRangeText = escapeRegexString(rangeText);
+    const pattern = new RegExp(`${escapedRangeText}\n?(\r?\n)*`);
+    const sourceWithoutHeader = documentText.replace(pattern, '');
+    return sourceWithoutHeader;
   }
 
   public readonly accessVariableFields = new Set<keyof IFileheaderVariables>();

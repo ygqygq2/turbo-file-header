@@ -3,6 +3,7 @@ import { difference } from 'lodash';
 import { getStringHash } from '../utils/utils';
 
 export class FileHashMemento {
+  originRecords: Map<string, string> = new Map();
   records: Map<string, string> = new Map();
 
   private calculate(source: string) {
@@ -10,13 +11,18 @@ export class FileHashMemento {
   }
 
   set(document: vscode.TextDocument) {
+    const fsPath = document.uri.fsPath;
     const hash = this.calculate(document.getText());
-    this.records.set(document.fileName, hash);
+    if (!this.originRecords.has(fsPath)) {
+      this.originRecords.set(fsPath, hash);
+    } else {
+      this.records.set(fsPath, hash);
+    }
   }
 
   update(documents: vscode.TextDocument[]) {
     const originKeys = Array.from(this.records.keys());
-    const newDocumentMap = new Map(documents.map((d) => [d.fileName, d] as const));
+    const newDocumentMap = new Map(documents.map((d) => [d.uri.fsPath, d] as const));
     const newDocumentKey = Array.from(newDocumentMap.keys());
     const removedKeys = difference(originKeys, newDocumentKey);
     const newInsertKeys = difference(newDocumentKey, originKeys);
@@ -26,18 +32,22 @@ export class FileHashMemento {
   }
 
   remove(document: vscode.TextDocument) {
-    this.records.delete(document.fileName);
+    const fsPath = document.uri.fsPath;
+    this.records.delete(fsPath);
+    this.originRecords.delete(fsPath);
   }
 
-  // onDidChangeVisibleTextEditors 标签变化时，hash 才会更新
-  has(document: vscode.TextDocument, skipCheckHash = false) {
-    const originHash = this.records.get(document.fileName);
+  isHashUpdated(document: vscode.TextDocument, skipCheckHash = false) {
+    const fsPath = document.uri.fsPath;
+    const content = document.getText();
+    // 第一次记录的 hash
+    const originHash = this.originRecords.get(fsPath);
 
-    if (!originHash) {
-      return false;
+    if (!originHash || !content) {
+      return !content;
     }
-    console.log(document.getText());
-    console.log(this.calculate(document.getText()), originHash);
-    return skipCheckHash || this.calculate(document.getText()) === originHash;
+
+    const hash = this.records.get(fsPath);
+    return skipCheckHash || hash !== originHash;
   }
 }

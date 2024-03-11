@@ -2,6 +2,12 @@
 
 All notable changes to the "turbo-file-header" extension will be documented in this file.
 
+# [0.0.5]
+
+## 功能优化 🚀
+
+- perf: 增加防抖、更新文件头判断准确性
+
 # [0.0.4]
 
 ## 新增功能 🌱

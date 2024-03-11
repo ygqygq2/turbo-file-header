@@ -13,6 +13,7 @@ import { GenerateCustomProviderClasses } from './language-providers/GenerateCust
 import { FileheaderVariableBuilder } from './fileheader/FileheaderVariableBuilder';
 import { ConfigReader } from './configuration/ConfigReader';
 import { ExtensionActivator } from './extension-operate/ExtensionActivator';
+import { DebounceManager } from './extension-operate/DebounceManager';
 
 export const errorHandler = ErrorHandler.getInstance();
 const configReader = ConfigReader.getInstance();
@@ -34,7 +35,8 @@ export const fileheaderManager = new FileheaderManager(
   fileheaderVariableBuilder,
 );
 const fileWatcher = new FileWatcher(fileheaderManager);
-const documentHandler = new DocumentHandler(configManager, fileheaderManager);
+const debounceManager = new DebounceManager();
+const documentHandler = new DocumentHandler(debounceManager, configManager, fileheaderManager);
 export const generateCustomTemplate = GenerateTemplateConfig.getInstance();
 
 export const extension = new ExtensionActivator(

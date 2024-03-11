@@ -3,6 +3,7 @@ import { CommandExecError } from '../error/CommandExecError';
 import { Template, TemplateInterpolation } from '../typings/types';
 import { TEMPLATE_OPTIONAL_GROUP_PLACEHOLDER, TEMPLATE_SYMBOL_KEY } from '../constants';
 import crypto from 'crypto';
+import { escapeRegexString } from './str';
 
 /**
  * whether text starts with `'#!'`
@@ -140,8 +141,7 @@ export function convertDateFormatToRegex(dateFormat: string): string {
   };
 
   // 转义可能会干扰正则表达式的特殊字符
-  const specialCharsRegex = /[.*+?^${}()|[\]\\]/g;
-  dateFormat = dateFormat.replace(specialCharsRegex, '\\$&');
+  dateFormat = escapeRegexString(dateFormat);
 
   // 替换所有时间格式字符为对应的正则表达式
   Object.keys(formatToRegexMap).forEach((format) => {
