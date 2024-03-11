@@ -56,7 +56,8 @@ export class FileheaderManager {
   }
 
   private async findProvider(document: vscode.TextDocument) {
-    const languageId = document.languageId;
+    // const languageId = document.languageId;
+    const languageId = 'astro';
     for (const provider of this.providers) {
       // 只有自定义 provider 有 provider.workspaceScopeUri
       let isWorkspaceMatch: boolean;

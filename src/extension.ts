@@ -39,6 +39,10 @@ const debounceManager = new DebounceManager();
 const documentHandler = new DocumentHandler(debounceManager, configManager, fileheaderManager);
 export const generateCustomTemplate = GenerateTemplateConfig.getInstance();
 
+// 加载用户配置中的语言配置
+const languagesConfig = configManager.getConfiguration().languages;
+languageManager.getLanguagesConfig(languagesConfig);
+
 export const extension = new ExtensionActivator(
   configEvent,
   languageEvent,

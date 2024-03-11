@@ -1,6 +1,9 @@
 import * as vscode from 'vscode';
 import { Language } from './Language';
 import { AvailableCommentRules } from './types';
+import { LanguageConfig, LanguagesConfig } from '@/typings/types';
+import output from '@/error/output';
+import { ConfigTag } from '@/constants';
 
 export class LanguageManager {
   private static instance: LanguageManager;
@@ -34,7 +37,7 @@ export class LanguageManager {
    * External extensions can override default configurations os VSCode
    */
   public updateDefinitions = () => {
-    this.languages.clear();
+    // this.languages.clear();
 
     for (const extension of vscode.extensions.all) {
       const packageJSON = extension.packageJSON;
@@ -60,6 +63,24 @@ export class LanguageManager {
       }
     }
   };
+
+  public getLanguagesConfig(languages: LanguagesConfig) {
+    languages.forEach((language: LanguageConfig) => {
+      const { configuration } = language;
+      console.log('🚀 ~ file: LanguageManager.ts:70 ~ configuration:', configuration);
+      const { comments } = configuration;
+      if (Object.keys(comments).length > 0) {
+        const uri = vscode.Uri.file(ConfigTag + language.id);
+        vscode.languages.setLanguageConfiguration(language.id, { comments });
+        const lang = this.useLanguage(language.id, false);
+        if (configuration) {
+          lang.setConfigUri(uri);
+        }
+      } else {
+        output.info(vscode.l10n.t('No language configuration comments found for') + language.id);
+      }
+    });
+  }
 
   /**
    * Gets the configuration information for the specified language

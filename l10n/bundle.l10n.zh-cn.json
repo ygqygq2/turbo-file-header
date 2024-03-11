@@ -4,5 +4,6 @@
   "Not need update filer header": "不需更新文件头",
   "File header updated": "文件头已更新",
   "Please check your workspace": "请检查工作区",
-  "No custom providers": "没找到自定义 providers"
+  "No custom providers": "没找到自定义 providers",
+  "No language configuration comments found for": "没有语言注释符号发现在"
 }

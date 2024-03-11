@@ -1,3 +1,4 @@
+import * as vscode from 'vscode';
 import { TEMPLATE_SYMBOL_KEY } from '../constants';
 
 export type TemplateInterpolation = string | number | null | undefined | boolean | Template;
@@ -99,3 +100,14 @@ export type ConfigYaml = {
   providers: Provider[];
   findFilesConfig: FindFilesConfig;
 };
+
+export interface LanguageConfig {
+  id: string;
+  extensions: string[];
+  aliases: string[];
+  configuration: {
+    comments: vscode.CommentRule;
+  };
+}
+
+export type LanguagesConfig = LanguageConfig[];

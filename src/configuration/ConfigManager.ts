@@ -63,7 +63,7 @@ export class ConfigManager {
       autoInsertOnCreateFile: orig?.autoInsertOnCreateFile || true,
       autoUpdateOnSave: orig?.autoUpdateOnSave || true,
       disableFields: orig?.disableFields || [],
-      language: orig?.language || {},
+      languages: orig?.language || {},
       updateHeaderForModifiedFilesOnly: orig?.updateHeaderForModifiedFilesOnly || true,
       multilineComments: orig?.multilineComments || true,
       useJSDocStyle: orig?.useJSDocStyle || true,

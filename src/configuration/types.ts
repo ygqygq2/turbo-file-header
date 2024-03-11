@@ -1,3 +1,5 @@
+import { LanguagesConfig } from '@/typings/types';
+
 export interface Tag {
   tag: string | string[];
   color: string;
@@ -21,7 +23,7 @@ export interface Configuration {
   autoInsertOnCreateFile: boolean;
   autoUpdateOnSave: boolean;
   disableFields: string[];
-  language: object;
+  languages: LanguagesConfig;
   updateHeaderForModifiedFilesOnly: boolean;
   multilineComments: boolean;
   useJSDocStyle: boolean;
