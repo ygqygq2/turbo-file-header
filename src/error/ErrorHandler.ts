@@ -55,6 +55,7 @@ export class ErrorHandler {
     if (error.originalError instanceof Error) {
       output.error?.(error.originalError?.message);
     }
-    throw error.message;
+    output.error?.(error.message);
+    throw error;
   }
 }
