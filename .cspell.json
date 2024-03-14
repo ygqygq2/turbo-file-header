@@ -8,7 +8,12 @@
     "/^import\\b.*\\n/g"
   ],
   "words": [
+    "birthtime",
+    "ncipollo",
+    "ovsx",
+    "softprops",
     "strikethrough",
-    "upath"
+    "upath",
+    "vsix"
   ]
 }

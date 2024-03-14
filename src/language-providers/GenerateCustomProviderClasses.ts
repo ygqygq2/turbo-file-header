@@ -34,9 +34,14 @@ export class GenerateCustomProviderClasses {
         constructor(languageManager: LanguageManager, workspaceScopeUri?: vscode.Uri | undefined) {
           super(workspaceScopeUri);
           this.languageManager = languageManager;
+          this.initialize(languageId);
         }
 
-        public getBlockCommentFromVscode = async () => {
+        private initialize = async (languageId: string) => {
+          await this.getBlockCommentFromVscode(languageId);
+        };
+
+        public getBlockCommentFromVscode = async (languageId: string) => {
           const comments = await this.languageManager?.useLanguage(languageId).getComments();
           this.comments = comments;
         };

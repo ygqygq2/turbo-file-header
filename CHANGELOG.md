@@ -8,6 +8,10 @@ All notable changes to the "turbo-file-header" extension will be documented in t
 
 - feat: 支持自定义语言设置
 
+## 问题修复 🐛
+
+- fix: 自定义模板中的 provider 无法正确获取注释符号
+
 # [0.0.5]
 
 ## 功能优化 🚀

@@ -94,7 +94,7 @@ export class FileheaderManager {
       }
 
       const isLanguageMatch = await (async () => {
-        if (provider.languages.length === 0 && provider instanceof VscodeInternalProvider) {
+        if (provider instanceof VscodeInternalProvider) {
           await provider.getBlockCommentFromVscode(languageId);
           return true;
         }

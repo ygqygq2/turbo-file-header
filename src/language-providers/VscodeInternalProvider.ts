@@ -5,7 +5,7 @@ import { LanguageManager } from '@/languages/LanguageManager';
 
 export class VscodeInternalProvider extends LanguageProvider {
   private languageManager: LanguageManager;
-  public readonly languages: string[] = [];
+  public languages: string[] = [];
   comments: vscode.CommentRule = { lineComment: '//', blockComment: ['/*', '*/'] };
 
   constructor(languageManager: LanguageManager) {
@@ -14,6 +14,7 @@ export class VscodeInternalProvider extends LanguageProvider {
   }
 
   public getBlockCommentFromVscode = async (languageId: string) => {
+    this.languages = [languageId];
     const comments = await this.languageManager?.useLanguage(languageId).getComments();
     this.comments = comments;
   };
