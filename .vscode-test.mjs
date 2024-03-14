@@ -7,6 +7,7 @@ export default defineConfig([
   {
     label: 'suiteTests',
     files: 'out/test/suite/*.test.js',
+    version: '1.86.0',
     mocha: {
       ui: 'tdd',
       timeout: 20000,
