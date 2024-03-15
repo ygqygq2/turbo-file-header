@@ -1,5 +1,10 @@
 import * as vscode from 'vscode';
-import { IFileheaderVariables, ITemplateFunction } from '../typings/types';
+import {
+  IFileheaderVariables,
+  ITemplateFunction,
+  Template,
+  TemplateInterpolation,
+} from '../typings/types';
 import { LanguageProvider } from './LanguageProvider';
 import { LanguageManager } from '@/languages/LanguageManager';
 
@@ -23,29 +28,43 @@ export class VscodeInternalProvider extends LanguageProvider {
     tpl: ITemplateFunction,
     variables: IFileheaderVariables,
     useJSDocStyle: boolean = false,
-  ) {
+  ): Template {
     const { blockCommentStart, blockCommentEnd } = this.getBlockComment();
 
-    const hasAuthor = variables.authorName;
-    const authorEmailPart = !!variables.authorEmail && tpl`<${variables.authorEmail}>`;
-    const authorLine =
-      hasAuthor && tpl` * @author        ${variables.authorName} ${authorEmailPart}\n`;
-    const ctimeLine = variables.birthtime && tpl` * @date          ${variables.birthtime}\n`;
-    const lastModifiedLine = variables.mtime && tpl` * @lastModified  ${variables.mtime}\n`;
-    const companyNameLine =
-      variables.companyName && tpl` * Copyright ©${variables.companyName} All rights reserved\n`;
+    const labels = ['file', 'description', 'author', 'createTime', 'lastModified'];
+    const longestLabelLength = Math.max(...labels.map((label) => label.length));
+
+    const generateLine = (
+      label: string,
+      ...values: (string | TemplateInterpolation)[]
+    ): Template => {
+      if (values.length === 0) {
+        return tpl``;
+      }
+      const spaces = ' '.repeat(longestLabelLength - label.length);
+      const combinedValues = values.reduce((prev, curr) => tpl`${prev} ${curr}`, tpl``);
+      return tpl` * @${label}${spaces}    ${combinedValues}\n`;
+    };
+
+    const authorEmailPart = variables.authorEmail ? `<${variables.authorEmail}>` : '';
+
+    const lines = [
+      generateLine('file', variables.filePath),
+      generateLine('description', ''),
+      generateLine('author', variables.authorName, authorEmailPart),
+      generateLine('createTime', variables.birthtime),
+      generateLine('lastModified', variables.mtime),
+      tpl` * Copyright ©${variables.companyName} All rights reserved\n`,
+    ];
 
     if (this.comments && this.comments.blockComment && this.comments.blockComment.length) {
-      return tpl`${blockCommentStart}${useJSDocStyle ? '*' : ''}\n${authorLine}${ctimeLine}${lastModifiedLine}${companyNameLine}${blockCommentEnd}`;
+      const combinedLines = lines.reduce((prev, curr) => tpl`${prev}${curr}`, tpl``);
+      return tpl`${blockCommentStart}${useJSDocStyle ? '*' : ''}\n${combinedLines}${blockCommentEnd}`;
     }
-    return tpl`${blockCommentStart}\n${blockCommentStart}${authorLine}${blockCommentStart}${ctimeLine}${blockCommentStart}${lastModifiedLine}${blockCommentStart}${companyNameLine}${blockCommentEnd}`;
-
-    // like this:
-    /**
-     * @author        ${variables.authorName} <${variables.authorEmail}>
-     * @date          ${variables.birthtime}
-     * @lastModified  ${variables.mtime}
-     * Copyright ©${variables.companyName} All rights reserved
-     */
+    const combinedLines = lines.reduce(
+      (prev, curr) => tpl`${prev}${blockCommentStart}${curr}`,
+      tpl``,
+    );
+    return tpl`${blockCommentStart}\n${combinedLines}${blockCommentEnd}`;
   }
 }

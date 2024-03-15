@@ -6,6 +6,7 @@ import { initVCSProvider } from '@/init';
 import { errorHandler } from '@/extension';
 import { convertDateFormatToRegex, hasShebang } from '@/utils/utils';
 import { getActiveDocumentWorkspace, isLineStartOrEnd } from '@/utils/vscode-utils';
+import { withProgress } from '@/utils/with-progress';
 import { FileheaderVariableBuilder } from './FileheaderVariableBuilder';
 import { FileHashMemento } from './FileHashMemento';
 import { CustomError } from '@/error/ErrorHandler';
@@ -18,11 +19,14 @@ import { ConfigManager } from '@/configuration/ConfigManager';
 import { Configuration } from '@/configuration/types';
 import { ConfigSection } from '@/constants';
 import { FileMatcher } from '@/extension-operate/FileMatcher';
-import { withProgress } from '@/utils/with-progress';
 
 type UpdateFileheaderManagerOptions = {
+  // 是否错误提示
   silent?: boolean;
+  // 是否允许插入
   allowInsert?: boolean;
+  // 是否插入光标位置
+  addSelection?: boolean;
 };
 
 type OriginFileheaderInfo = {
@@ -155,9 +159,14 @@ export class FileheaderManager {
     return (isTracked && isChanged) || this.fileHashMemento.isHashUpdated(document);
   }
 
-  private removeDateString(fileHeaderContent: string, regex: RegExp): string {
-    // 将匹配到的时间行替换为空字符串
-    return fileHeaderContent.replace(regex, '');
+  private removeSpecialString(fileHeaderContent: string, regex: RegExp | RegExp[]): string {
+    if (Array.isArray(regex)) {
+      // 如果 regex 是一个数组，将所有正则表达式匹配到的内容替换为空字符串
+      return regex.reduce((content, r) => content.replace(r, ''), fileHeaderContent);
+    } else {
+      // 如果 regex 是一个单独的正则表达式，将匹配到的内容替换为空字符串
+      return fileHeaderContent.replace(regex, '');
+    }
   }
 
   // 避免 prettier 这类格式后处理空格，导致文件头内容变化影响判断
@@ -171,6 +180,7 @@ export class FileheaderManager {
     const originContentLineCount = originContent.split('\n').length;
     const dateformat = config.get(ConfigSection.dateFormat, 'YYYY-MM-DD HH:mm:ss');
     const dateRegex = new RegExp(convertDateFormatToRegex(dateformat), 'g');
+    const descriptionRegex = new RegExp('description.*');
 
     let headerSame: boolean = false;
     if (originContentLineCount > 1) {
@@ -182,10 +192,10 @@ export class FileheaderManager {
       ) {
         originContentLines = originContentLines.slice(1, -1);
       }
-      const originContentProcessed = this.removeDateString(
-        originContentLines.join('\n'),
+      const originContentProcessed = this.removeSpecialString(originContentLines.join('\n'), [
         dateRegex,
-      );
+        descriptionRegex,
+      ]);
 
       let newFileheaderLines = newFileheader.split('\n').map((line) => line.trim());
       if (
@@ -195,15 +205,15 @@ export class FileheaderManager {
       ) {
         newFileheaderLines = newFileheaderLines.slice(1, -1);
       }
-      const newFileheaderProcessed = this.removeDateString(
-        newFileheaderLines.join('\n'),
+      const newFileheaderProcessed = this.removeSpecialString(newFileheaderLines.join('\n'), [
         dateRegex,
-      );
+        descriptionRegex,
+      ]);
 
       headerSame = originContentProcessed === newFileheaderProcessed;
     } else {
-      const originContentProcessed = this.removeDateString(originContent, dateRegex);
-      const newFileheaderProcessed = this.removeDateString(newFileheader, dateRegex);
+      const originContentProcessed = this.removeSpecialString(originContent, dateRegex);
+      const newFileheaderProcessed = this.removeSpecialString(newFileheader, dateRegex);
       headerSame = originContentProcessed === newFileheaderProcessed;
     }
     return !headerSame;
@@ -285,7 +295,7 @@ export class FileheaderManager {
     );
     if (!shouldUpdate) {
       output.info('Not need update filer header:', document.uri.fsPath);
-      return;
+      return false;
     }
 
     // 确保文件头信息后只有一行空行
@@ -318,11 +328,16 @@ export class FileheaderManager {
 
     await document.save();
     output.info('File header updated:', document.uri.fsPath);
+    return true;
   }
 
   public async updateFileheader(
     document: vscode.TextDocument,
-    { allowInsert = true, silent = false }: UpdateFileheaderManagerOptions = {},
+    {
+      allowInsert = true,
+      silent = false,
+      addSelection = false,
+    }: UpdateFileheaderManagerOptions = {},
   ) {
     // console.log("🚀 ~ file: FileheaderManager.ts:243 ~ allowInsert:", allowInsert);
     const config = this.getConfiguration();
@@ -354,7 +369,7 @@ export class FileheaderManager {
       return;
     }
 
-    this.processFileheaderInsertionOrReplacement(
+    const result = await this.processFileheaderInsertionOrReplacement(
       document,
       provider,
       originFileheaderInfo,
@@ -363,8 +378,27 @@ export class FileheaderManager {
       allowInsert,
       silent,
     );
+    if (result && addSelection) {
+      this.addSelectionAfterDescription(document);
+    }
 
     this.fileHashMemento.set(document);
+  }
+
+  private addSelectionAfterDescription(document: vscode.TextDocument) {
+    const editor = vscode.window.activeTextEditor;
+    if (editor) {
+      // 匹配 description 单词
+      // 光标位置设置为 description 这一行的最后
+      for (let i = 0; i < document.lineCount; i++) {
+        const line = document.lineAt(i);
+        if (line.text.includes('description')) {
+          const position = line.range.end;
+          editor.selection = new vscode.Selection(position, position);
+          break;
+        }
+      }
+    }
   }
 
   public recordOriginFileHash(documents: readonly vscode.TextDocument[]) {

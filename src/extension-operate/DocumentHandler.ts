@@ -34,6 +34,7 @@ export class DocumentHandler {
       await this.fileheaderManager.updateFileheader(document, {
         allowInsert: true,
         silent: true,
+        addSelection: true,
       });
     }
   };

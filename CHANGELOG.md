@@ -2,6 +2,16 @@
 
 All notable changes to the "turbo-file-header" extension will be documented in this file.
 
+# [0.0.7]
+
+## 新增功能 🌱
+
+- feat: 新增支持自定义字段 description
+
+## 功能优化 🚀
+
+- refactor: 删除多余的 provider
+
 # [0.0.6]
 
 ## 新增功能 🌱
