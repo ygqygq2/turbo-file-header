@@ -9,6 +9,8 @@
   "turboFileHeader.dateFormat.markdownDescription": "时间格式, 查看[格式文档](https://momentjs.com/docs/#/displaying/format)",
   "turboFileHeader.autoInsertOnCreateFile.description": "创建文件时自动插入文件头",
   "turboFileHeader.autoUpdateOnSave.description": "保存文件时自动更新文件头",
+  "turboFileHeader.include.description": "匹配到的 glob 模式将被插入文件头，影响批量操作命令和新文件自动插入文件头",
+  "turboFileHeader.exclude.description": "匹配到的 glob 模式将被排除插入文件头",
   "turboFileHeader.disableFields.items.enum.birthtime": "文件创建时间. 来自 VCS 或文件系统",
   "turboFileHeader.disableFields.items.enum.mtime": "文件最后修改时间. 来自 VCS 或文件系统",
   "turboFileHeader.disableFields.items.enum.authorName": "文件作者名. 如果文件被 VCS 跟踪, 则从 VCS 中获取作者名, 否则从当前用户名中获取",

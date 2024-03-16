@@ -18,23 +18,28 @@ Turbo file header, sets file header information globally or for a project.
 
 Properties:
 
-| Feature                           | Description                                                      | Setting                          | Default               |
-| --------------------------------- | ---------------------------------------------------------------- | -------------------------------- | --------------------- |
-| Custom user name                  | The fixed user name. The default is from your VCS                | userName                         | ``                    |
-| Custom user email                 | The fixed user email. The default is from your VCS               | userEmail                        | ``                    |
-| Custom company name               | Company name                                                     | companyName                      | `YourCompanyName`     |
-| Date format                       | The [date format](https://momentjs.com/docs/#/displaying/format) | dateFormat                       | `YYYY-MM-DD HH:mm:ss` |
-| Auto insert on create file        | When create file, auto insert file header                        | autoInsertOnCreateFile           | `false`               |
-| Auto update on save file          | When save file, auto update file header                          | autoUpdateOnSave                 | `false`               |
-| Disable fields in file header     | The fields that you want to disable in file header               | disableFields                    | `[]`                  |
-| Only dirty file or not to support | Only dirty file to support update file header                    | updateHeaderForModifiedFilesOnly | `false`               |
-| Extra languages support           | To support new or unknown languages                              | languages                        | the below             |
-| JSDoc style for js/ts             | File header user JSDoc style comments                            | useJSDocStyle                    | `false`               |
-| Multiline comment highlighter     | Whether the multiline comment highlighter should be active       | multilineComments                | `true`                |
-| plaintext comment highlighter     | Whether the plaintext comment highlighter should be active       | highlightPlainText               | `false`               |
-| Use tags to color the comments    | Tags which are used to color the comments                        | tags                             | the below             |
-| Tags for light themes             | Overwrite tags options for light themes                          | tagsLight                        | `[]`                  |
-| Tags for dark themes              | Overwrite tags options for dark themes                           | tagsDark                         | `[]`                  |
+| Feature                           | Description                                                          | Setting                          | Default                  |
+| --------------------------------- | -------------------------------------------------------------------- | -------------------------------- | ------------------------ |
+| Custom user name                  | The fixed user name. The default is from your VCS                    | userName                         | ``                       |
+| Custom user email                 | The fixed user email. The default is from your VCS                   | userEmail                        | ``                       |
+| Custom company name               | Company name                                                         | companyName                      | `YourCompanyName`        |
+| Date format                       | The [date format](https://momentjs.com/docs/#/displaying/format)     | dateFormat                       | `YYYY-MM-DD HH:mm:ss`    |
+| Auto insert on create file        | When create file, auto insert file header                            | autoInsertOnCreateFile           | `false`                  |
+| Auto update on save file          | When save file, auto update file header                              | autoUpdateOnSave                 | `false`                  |
+| Include glob                      | "include glob" for `autoInsertOnCreateFile` and batch update command | include                          | `**/this-default-glob/*` |
+| Exclude glob                      | "exclude glob" for `autoInsertOnCreateFile` and batch update command | exclude                          | ``                       |
+| Disable fields in file header     | The fields that you want to disable in file header                   | disableFields                    | `[]`                     |
+| Only dirty file or not to support | Only dirty file to support update file header                        | updateHeaderForModifiedFilesOnly | `false`                  |
+| Extra languages support           | To support new or unknown languages                                  | languages                        | the below                |
+| JSDoc style for js/ts             | File header user JSDoc style comments                                | useJSDocStyle                    | `false`                  |
+| Multiline comment highlighter     | Whether the multiline comment highlighter should be active           | multilineComments                | `true`                   |
+| plaintext comment highlighter     | Whether the plaintext comment highlighter should be active           | highlightPlainText               | `false`                  |
+| Use tags to color the comments    | Tags which are used to color the comments                            | tags                             | the below                |
+| Tags for light themes             | Overwrite tags options for light themes                              | tagsLight                        | `[]`                     |
+| Tags for dark themes              | Overwrite tags options for dark themes                               | tagsDark                         | `[]`                     |
+
+**Note**:
+- `include` and `exclude` are used to control the scope of the file header update, except for `addFileheader` command.
 
 ## Default settings list
 

@@ -86,3 +86,24 @@ export function isLineStartOrEnd(document: vscode.TextDocument, range: vscode.Ra
     return -1;
   }
 }
+
+/**
+ * 在指定匹配单词最后添加光标
+ * @param document
+ * @param string
+ */
+export function addSelectionAfterString(document: vscode.TextDocument, string: string) {
+  const editor = vscode.window.activeTextEditor;
+  if (editor) {
+    // 匹配 string 单词
+    // 光标位置设置为 string 这一行的最后
+    for (let i = 0; i < document.lineCount; i++) {
+      const line = document.lineAt(i);
+      if (line.text.includes(string)) {
+        const position = line.range.end;
+        editor.selection = new vscode.Selection(position, position);
+        break;
+      }
+    }
+  }
+}

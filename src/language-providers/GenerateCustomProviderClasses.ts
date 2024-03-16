@@ -34,6 +34,7 @@ export class GenerateCustomProviderClasses {
         constructor(languageManager: LanguageManager, workspaceScopeUri?: vscode.Uri | undefined) {
           super(workspaceScopeUri);
           this.languageManager = languageManager;
+          // 这里异步的，但是初始化时很早，所以它会在使用时已经初始化完成
           this.initialize(languageId);
         }
 

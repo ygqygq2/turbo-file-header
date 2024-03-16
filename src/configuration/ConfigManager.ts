@@ -6,17 +6,31 @@ import { ConfigSection, ConfigTag } from '../constants';
 import { Configuration, ConfigurationFlatten, Tag, TagFlatten } from './types';
 import { errorHandler } from '@/extension';
 import { ConfigReader } from './ConfigReader';
+import { ConfigYaml } from '@/typings/types';
 
 export class ConfigManager {
   private static instance: ConfigManager;
   private configReader: ConfigReader;
   private configuration: Configuration & vscode.WorkspaceConfiguration;
   private configFlatten: ConfigurationFlatten;
+  private configYaml: ConfigYaml | undefined;
 
   private constructor(configReader: ConfigReader) {
     this.configReader = configReader;
     this.configuration = this.getConfiguration();
     this.configFlatten = this.getConfigurationFlatten();
+  }
+
+  // 用于执行实例初始化的异步方法
+  private async initialize() {
+    this.configYaml = await this.configReader.getConfigYaml();
+  }
+
+  // 静态异步初始化方法
+  public static async createInstance(configReader: ConfigReader): Promise<ConfigManager> {
+    const manager = new ConfigManager(configReader);
+    await manager.initialize();
+    return manager;
   }
 
   public static getInstance(configReader: ConfigReader): ConfigManager {
@@ -62,6 +76,8 @@ export class ConfigManager {
       dateFormat: orig?.dateFormat || 'YYYY-MM-DD HH:mm:ss',
       autoInsertOnCreateFile: orig?.autoInsertOnCreateFile || true,
       autoUpdateOnSave: orig?.autoUpdateOnSave || true,
+      include: orig?.include || '',
+      exclude: orig?.exclude || '',
       disableFields: orig?.disableFields || [],
       languages: orig?.language || {},
       updateHeaderForModifiedFilesOnly: orig?.updateHeaderForModifiedFilesOnly || true,
@@ -93,7 +109,10 @@ export class ConfigManager {
     return flatTags;
   }
 
-  public async getConfigurationFromCustomConfig() {
-    return this.configReader?.getConfigYaml();
+  public async getConfigurationFromCustomConfig(forceRefresh = false) {
+    if (!this.configYaml || forceRefresh) {
+      this.configYaml = await this.configReader.getConfigYaml();
+    }
+    return this.configYaml;
   }
 }

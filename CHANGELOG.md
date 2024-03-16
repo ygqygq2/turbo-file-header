@@ -2,6 +2,12 @@
 
 All notable changes to the "turbo-file-header" extension will be documented in this file.
 
+# [0.0.8]
+
+## 新增功能 🌱
+
+- feat: 新增配置 `include` 和 `exclude` 控制更新范围
+
 # [0.0.7]
 
 ## 新增功能 🌱

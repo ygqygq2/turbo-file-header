@@ -1,14 +1,14 @@
 import vscode from 'vscode';
 import output from '@/error/output';
 import path from 'path';
-import fs from 'fs';
 import { initVCSProvider } from '@/init';
 import { errorHandler } from '@/extension';
 import { convertDateFormatToRegex, hasShebang } from '@/utils/utils';
-import { getActiveDocumentWorkspace, isLineStartOrEnd } from '@/utils/vscode-utils';
+import { addSelectionAfterString, isLineStartOrEnd } from '@/utils/vscode-utils';
 import { withProgress } from '@/utils/with-progress';
+import { removeSpecialString } from '@/utils/str';
 import { FileheaderVariableBuilder } from './FileheaderVariableBuilder';
-import { FileHashMemento } from './FileHashMemento';
+import { FileHashManager } from './FileHashManager';
 import { CustomError } from '@/error/ErrorHandler';
 import { ErrorCode, errorCodeMessages } from '@/error/ErrorCodeMessage.enum';
 import { FileheaderProviderLoader } from './FileheaderProviderLoader';
@@ -18,53 +18,41 @@ import { IFileheaderVariables } from '../typings/types';
 import { ConfigManager } from '@/configuration/ConfigManager';
 import { Configuration } from '@/configuration/types';
 import { ConfigSection } from '@/constants';
+import { OriginFileheaderInfo, UpdateFileheaderManagerOptions } from './types';
+import { FileheaderProviderService } from './FileheaderProviderService';
 import { FileMatcher } from '@/extension-operate/FileMatcher';
-
-type UpdateFileheaderManagerOptions = {
-  // 是否错误提示
-  silent?: boolean;
-  // 是否允许插入
-  allowInsert?: boolean;
-  // 是否插入光标位置
-  addSelection?: boolean;
-};
-
-type OriginFileheaderInfo = {
-  range: vscode.Range;
-  variables?: IFileheaderVariables | undefined;
-  contentWithoutHeader: string;
-};
 
 export class FileheaderManager {
   private configManager: ConfigManager;
+  private fileMatcher: FileMatcher;
   private providers: LanguageProvider[] = [];
   private fileheaderProviderLoader: FileheaderProviderLoader;
-  private fileHashMemento: FileHashMemento;
+  private fileHashManager: FileHashManager;
   private fileheaderVariableBuilder: FileheaderVariableBuilder;
-  private cachedContent: { [key: string]: string } = {};
+  private fileheaderProviderService: FileheaderProviderService;
 
   constructor(
     configManager: ConfigManager,
+    fileMatcher: FileMatcher,
     fileheaderProviderLoader: FileheaderProviderLoader,
-    fileHashMemento: FileHashMemento,
+    fileHashManager: FileHashManager,
     fileheaderVariableBuilder: FileheaderVariableBuilder,
+    fileheaderProviderService: FileheaderProviderService,
   ) {
     this.configManager = configManager;
+    this.fileMatcher = fileMatcher;
     this.fileheaderProviderLoader = fileheaderProviderLoader;
-    this.fileHashMemento = fileHashMemento;
+    this.fileHashManager = fileHashManager;
     this.fileheaderVariableBuilder = fileheaderVariableBuilder;
+    this.fileheaderProviderService = fileheaderProviderService;
   }
 
   public async loadProviders(forceRefresh = false) {
     this.providers = await this.fileheaderProviderLoader.loadProviders(forceRefresh);
   }
 
-  private getConfiguration() {
-    return this.configManager.getConfiguration();
-  }
-
   private getLanguageIdByExt(ext: string) {
-    const config = this.getConfiguration();
+    const config = this.configManager.getConfiguration();
     const languagesConfig = config.languages;
     const languageConfig = languagesConfig.find((languageConfig) =>
       languageConfig.extensions.includes(ext),
@@ -112,35 +100,7 @@ export class FileheaderManager {
     output.info(new CustomError(ErrorCode.LanguageProviderNotFound));
   }
 
-  private getOriginFileheaderRange(document: vscode.TextDocument, provider: LanguageProvider) {
-    const range = provider.getOriginFileheaderRange(document);
-    return range;
-  }
-
-  private getOriginFileheaderInfo(document: vscode.TextDocument, provider: LanguageProvider) {
-    const range = this.getOriginFileheaderRange(document, provider);
-    const contentWithoutHeader = provider.getOriginContentWithoutFileheader(document, range);
-
-    const pattern = provider.getOriginFileheaderRegExp(document.eol);
-    const info: {
-      range: vscode.Range;
-      variables?: IFileheaderVariables;
-      contentWithoutHeader: string;
-    } = {
-      range,
-      variables: undefined,
-      contentWithoutHeader,
-    };
-
-    const contentWithHeader = document.getText(range);
-    const result = contentWithHeader.match(pattern);
-    if (result) {
-      info.variables = result.groups;
-    }
-    return info;
-  }
-
-  private async fileIsChanged(
+  private async fileChanged(
     config: Configuration & vscode.WorkspaceConfiguration,
     document: vscode.TextDocument,
   ) {
@@ -156,17 +116,7 @@ export class FileheaderManager {
     const isChanged = isTracked ? await vcsProvider.isChanged(document.fileName) : false;
     // 有跟踪则判断是否有修改
     // 没有跟踪则判断是否有 hash 更新
-    return (isTracked && isChanged) || this.fileHashMemento.isHashUpdated(document);
-  }
-
-  private removeSpecialString(fileHeaderContent: string, regex: RegExp | RegExp[]): string {
-    if (Array.isArray(regex)) {
-      // 如果 regex 是一个数组，将所有正则表达式匹配到的内容替换为空字符串
-      return regex.reduce((content, r) => content.replace(r, ''), fileHeaderContent);
-    } else {
-      // 如果 regex 是一个单独的正则表达式，将匹配到的内容替换为空字符串
-      return fileHeaderContent.replace(regex, '');
-    }
+    return (isTracked && isChanged) || this.fileHashManager.isHashUpdated(document);
   }
 
   // 避免 prettier 这类格式后处理空格，导致文件头内容变化影响判断
@@ -192,7 +142,7 @@ export class FileheaderManager {
       ) {
         originContentLines = originContentLines.slice(1, -1);
       }
-      const originContentProcessed = this.removeSpecialString(originContentLines.join('\n'), [
+      const originContentProcessed = removeSpecialString(originContentLines.join('\n'), [
         dateRegex,
         descriptionRegex,
       ]);
@@ -205,15 +155,15 @@ export class FileheaderManager {
       ) {
         newFileheaderLines = newFileheaderLines.slice(1, -1);
       }
-      const newFileheaderProcessed = this.removeSpecialString(newFileheaderLines.join('\n'), [
+      const newFileheaderProcessed = removeSpecialString(newFileheaderLines.join('\n'), [
         dateRegex,
         descriptionRegex,
       ]);
 
       headerSame = originContentProcessed === newFileheaderProcessed;
     } else {
-      const originContentProcessed = this.removeSpecialString(originContent, dateRegex);
-      const newFileheaderProcessed = this.removeSpecialString(newFileheader, dateRegex);
+      const originContentProcessed = removeSpecialString(originContent, dateRegex);
+      const newFileheaderProcessed = removeSpecialString(newFileheader, dateRegex);
       headerSame = originContentProcessed === newFileheaderProcessed;
     }
     return !headerSame;
@@ -225,10 +175,16 @@ export class FileheaderManager {
     newFileheader: string,
     config: Configuration & vscode.WorkspaceConfiguration,
     allowInsert: boolean,
+    newFile: boolean,
   ) {
+    // 新文件先根据匹配模式判断是否添加文件头，新文件肯定是没内容
+    if (newFile) {
+      return this.fileMatcher.shouldAddHeader(document.uri.fsPath);
+    }
+
     const { range, contentWithoutHeader } = originFileheaderInfo;
     const content = document.getText();
-    // 没有内容，认可可以增加文件头
+    // 没有内容，认为可以增加文件头
     if (!content) {
       return true;
     }
@@ -248,11 +204,11 @@ export class FileheaderManager {
       // 没文件头，允许插入，直接返回 true
       return true;
     } else {
-      const isMainTextChange = this.fileHashMemento.isMainTextUpdated(
+      const isMainTextChange = this.fileHashManager.isMainTextUpdated(
         document,
         contentWithoutHeader,
       );
-      const fileIsChanged = await this.fileIsChanged(config, document);
+      const fileIsChanged = await this.fileChanged(config, document);
       if (!noHeader && fileIsChanged && isMainTextChange) {
         // 文件有修改且是正文，则直接返回
         // 文件有修改，则第一次认为是有修改，缓存起来
@@ -274,7 +230,7 @@ export class FileheaderManager {
     fileheaderVariable: IFileheaderVariables,
     config: Configuration & vscode.WorkspaceConfiguration,
     allowInsert: boolean,
-    _silent: boolean,
+    newFile: boolean,
   ) {
     const editor = await vscode.window.showTextDocument(document);
     const { useJSDocStyle } = config;
@@ -292,6 +248,7 @@ export class FileheaderManager {
       fileheader,
       config,
       allowInsert,
+      newFile,
     );
     if (!shouldUpdate) {
       output.info('Not need update filer header:', document.uri.fsPath);
@@ -335,17 +292,15 @@ export class FileheaderManager {
     document: vscode.TextDocument,
     {
       allowInsert = true,
-      silent = false,
       addSelection = false,
+      newFile = false,
     }: UpdateFileheaderManagerOptions = {},
   ) {
-    // console.log("🚀 ~ file: FileheaderManager.ts:243 ~ allowInsert:", allowInsert);
-    const config = this.getConfiguration();
+    const config = this.configManager.getConfiguration();
     const provider = await this.findProvider(document);
 
     if (!provider) {
-      !silent &&
-        !allowInsert &&
+      !allowInsert &&
         errorHandler.handle(
           new CustomError(
             ErrorCode.LanguageNotSupport,
@@ -355,7 +310,10 @@ export class FileheaderManager {
       return;
     }
 
-    const originFileheaderInfo = this.getOriginFileheaderInfo(document, provider);
+    const originFileheaderInfo = this.fileheaderProviderService.getOriginFileheaderInfo(
+      document,
+      provider,
+    );
     let fileheaderVariable: IFileheaderVariables;
     try {
       fileheaderVariable = await this.fileheaderVariableBuilder?.build(
@@ -365,7 +323,7 @@ export class FileheaderManager {
         originFileheaderInfo.variables,
       );
     } catch (error) {
-      !silent && errorHandler.handle(new CustomError(ErrorCode.VariableBuilderFail, error));
+      errorHandler.handle(new CustomError(ErrorCode.VariableBuilderFail, error));
       return;
     }
 
@@ -376,75 +334,27 @@ export class FileheaderManager {
       fileheaderVariable,
       config,
       allowInsert,
-      silent,
+      newFile,
     );
     if (result && addSelection) {
-      this.addSelectionAfterDescription(document);
+      addSelectionAfterString(document, 'description');
     }
 
-    this.fileHashMemento.set(document);
-  }
-
-  private addSelectionAfterDescription(document: vscode.TextDocument) {
-    const editor = vscode.window.activeTextEditor;
-    if (editor) {
-      // 匹配 description 单词
-      // 光标位置设置为 description 这一行的最后
-      for (let i = 0; i < document.lineCount; i++) {
-        const line = document.lineAt(i);
-        if (line.text.includes('description')) {
-          const position = line.range.end;
-          editor.selection = new vscode.Selection(position, position);
-          break;
-        }
-      }
-    }
+    this.fileHashManager.set(document);
   }
 
   public recordOriginFileHash(documents: readonly vscode.TextDocument[]) {
     for (const document of documents) {
-      this.fileHashMemento.set(document);
+      this.fileHashManager.set(document);
     }
   }
 
   public updateOriginFileHash(document: vscode.TextDocument) {
-    this.fileHashMemento.set(document);
-  }
-
-  private async findFiles() {
-    const activeWorkspace = await getActiveDocumentWorkspace();
-    if (!activeWorkspace) {
-      output.info('Please check your workspace');
-      return;
-    }
-
-    const configDir = path.join(activeWorkspace.uri.fsPath, '.vscode');
-    // 确保目标目录存在
-    if (!fs.existsSync(configDir)) {
-      try {
-        fs.mkdirSync(configDir, { recursive: true });
-      } catch (error) {
-        errorHandler.handle(new CustomError(ErrorCode.CreateDirFail, configDir, error));
-      }
-    }
-
-    const config = await this.configManager.getConfigurationFromCustomConfig();
-    if (!config || !config.findFilesConfig) {
-      errorHandler.handle(new CustomError(ErrorCode.GetCustomConfigFail));
-      return;
-    }
-
-    const findFilesConfig = config?.findFilesConfig || {
-      include: '**/tmp/*.{ts,js}',
-      exclude: '**/{node_modules,dist}/**',
-    };
-    const fileMatcher = new FileMatcher(findFilesConfig);
-    const files = await fileMatcher.findFiles();
-    return files;
+    this.fileHashManager.set(document);
   }
 
   public async batchUpdateFileheader() {
-    let failedFiles = (await this.findFiles()) || [];
+    let failedFiles = (await this.fileMatcher.findFiles()) || [];
     let reprocessedFiles: vscode.Uri[] = [];
 
     await withProgress(

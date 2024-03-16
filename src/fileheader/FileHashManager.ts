@@ -2,7 +2,7 @@ import vscode from 'vscode';
 import { difference } from 'lodash';
 import { getStringHash } from '../utils/utils';
 
-export class FileHashMemento {
+export class FileHashManager {
   // 刚打开文件时的 hash
   originRecords: Map<string, string> = new Map();
   // 当前的 hash

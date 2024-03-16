@@ -2,7 +2,7 @@
   "name": "turbo-file-header",
   "displayName": "Turbo File Header",
   "description": "Sets file header information globally or for a project.",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "icon": "resources/icons/icon.png",
   "repository": {
     "type": "git",
@@ -95,6 +95,16 @@
           "type": "boolean",
           "default": false,
           "description": "%turboFileHeader.autoUpdateOnSave.description%"
+        },
+        "turboFileHeader.include": {
+          "type": "string",
+          "description": "%turboFileHeader.include.description%",
+          "default": "**/this-default-glob/*"
+        },
+        "turboFileHeader.exclude": {
+          "type": "string",
+          "description": "%turboFileHeader.exclude.description%",
+          "default": ""
         },
         "turboFileHeader.disableFields": {
           "type": "array",
@@ -468,6 +478,7 @@
     "handlebars": "^4.7.8",
     "json5": "^2.2.3",
     "lodash": "^4.17.21",
+    "minimatch": "^9.0.3",
     "upath": "^2.0.1",
     "yaml": "^2.4.1"
   }

@@ -26,6 +26,11 @@ export class DocumentHandler {
     }
 
     for (const file of e.files) {
+      const fileStat = await vscode.workspace.fs.stat(file);
+      if (fileStat.type === vscode.FileType.Directory) {
+        return;
+      }
+
       const document = await vscode.workspace.openTextDocument(file);
       if (document.lineCount > 1 || document.lineAt(0).text.trim().length !== 0) {
         return;
@@ -33,8 +38,8 @@ export class DocumentHandler {
 
       await this.fileheaderManager.updateFileheader(document, {
         allowInsert: true,
-        silent: true,
         addSelection: true,
+        newFile: true,
       });
     }
   };
@@ -54,7 +59,6 @@ export class DocumentHandler {
       async () => {
         await this.fileheaderManager.updateFileheader(e.document, {
           allowInsert: false,
-          silent: true,
         });
       },
       2000,

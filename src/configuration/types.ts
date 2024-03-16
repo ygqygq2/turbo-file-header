@@ -22,6 +22,8 @@ export interface Configuration {
   dateFormat: string;
   autoInsertOnCreateFile: boolean;
   autoUpdateOnSave: boolean;
+  include: string;
+  exclude: string;
   disableFields: string[];
   languages: LanguagesConfig;
   updateHeaderForModifiedFilesOnly: boolean;

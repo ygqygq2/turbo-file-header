@@ -16,7 +16,7 @@ export class CustomError extends Error {
       } else if (arg instanceof Error) {
         // 如果是 Error 对象，设置 originError 为这个对象
         super(errorCodeMessages[code]);
-        this.originalError = args;
+        this.originalError = arg;
       } else {
         super(errorCodeMessages[code]);
       }
@@ -25,7 +25,7 @@ export class CustomError extends Error {
       const errorObj = args.find((arg) => arg instanceof Error) as Error | undefined;
       // 过滤掉Error对象，只留下其它类型的参数
       const otherArgs = args.filter((arg) => !(arg instanceof Error));
-      super(`${errorCodeMessages[code]}${log(otherArgs)}`);
+      super(`${errorCodeMessages[code]}${log(otherArgs.join(', '))}`);
       this.originalError = errorObj;
     } else {
       super(errorCodeMessages[code]);

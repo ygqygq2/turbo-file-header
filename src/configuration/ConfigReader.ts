@@ -1,21 +1,20 @@
 import path from 'path';
 import fs from 'fs';
 import YAML from 'yaml';
-// import * as vscode from 'vscode';
 import { CUSTOM_CONFIG_FILE_NAME } from '@/constants';
 import { ConfigYaml } from '@/typings/types';
 import { getActiveDocumentWorkspace } from '@/utils/vscode-utils';
+import { errorHandler } from '@/extension';
+import { CustomError, ErrorCode } from '@/error';
 
 export class ConfigReader {
   private static instance: ConfigReader;
-  private configYaml: ConfigYaml;
-
-  private constructor() {
-    this.configYaml = this.getConfigYaml() as unknown as ConfigYaml;
-  }
 
   public static getInstance(): ConfigReader {
-    return ConfigReader?.instance || new ConfigReader();
+    if (!this.instance) {
+      this.instance = new ConfigReader();
+    }
+    return this.instance;
   }
 
   public getConfigYaml = async (): Promise<ConfigYaml> => {
@@ -37,13 +36,20 @@ export class ConfigReader {
       return defaultConfig;
     }
 
-    // 读取 yaml 配置
-    const configContent = fs.readFileSync(configPath, 'utf8');
-    const config: ConfigYaml = YAML.parse(configContent);
-    return { ...defaultConfig, ...config };
+    try {
+      // 读取 yaml 配置
+      const configContent = fs.readFileSync(configPath, 'utf8');
+      const config: ConfigYaml = YAML.parse(configContent);
+      return { ...defaultConfig, ...config };
+    } catch (error) {
+      errorHandler.handle(new CustomError(ErrorCode.GetCustomConfigFail));
+    }
+    return defaultConfig;
   };
 
-  public getAllLanguages = (): string[] => {
-    return this.configYaml?.providers.flatMap((provider) => provider.languages) || [];
+  public getAllLanguages = async (): Promise<string[]> => {
+    const config = await this.getConfigYaml();
+    const languages = config?.providers.flatMap((provider) => provider.languages) || [];
+    return languages;
   };
 }

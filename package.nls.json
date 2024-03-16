@@ -9,6 +9,8 @@
   "turboFileHeader.dateFormat.markdownDescription": "The date format, see [Dayjs Document](https://momentjs.com/docs/#/displaying/format)",
   "turboFileHeader.autoInsertOnCreateFile.description": "Auto insert fileheader when create file",
   "turboFileHeader.autoUpdateOnSave.description": "Auto update fileheader when save file",
+  "turboFileHeader.include.description": "Insert header to files which match the glob pattern. Affects batchUpdateFileheader command and while autoInsertOnCreateFile is true",
+  "turboFileHeader.exclude.description": "Do not insert header to files which match the glob pattern",
   "turboFileHeader.disableFields.items.enum.birthtime": "file create time. will get it from VCS or fallback to filesystem when it is not available.",
   "turboFileHeader.disableFields.items.enum.mtime": "file last modified time. will get it from VCS or fallback to filesystem when it is not available.",
   "turboFileHeader.disableFields.items.enum.authorName": "file author name. if the file is tracked by VCS, it will get the author name from VCS, else it will get it from current user name.",
