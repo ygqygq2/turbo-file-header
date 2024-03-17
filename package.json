@@ -112,33 +112,97 @@
           "items": {
             "type": "string",
             "enum": [
-              "birthtime",
-              "mtime",
-              "authorName",
-              "authorEmail",
-              "userName",
-              "userEmail",
-              "companyName",
-              "projectName",
-              "filePath",
-              "dirPath",
-              "fileName"
+              "file",
+              "description",
+              "author",
+              "createTime",
+              "lastModifedTime",
+              "copyright"
             ]
           },
           "markdownEnumDescriptions": [
-            "%turboFileHeader.disableFields.items.enum.birthtime%",
-            "%turboFileHeader.disableFields.items.enum.mtime%",
-            "%turboFileHeader.disableFields.items.enum.authorName%",
-            "%turboFileHeader.disableFields.items.enum.authorEmail%",
-            "%turboFileHeader.disableFields.items.enum.userName%",
-            "%turboFileHeader.disableFields.items.enum.userEmail%",
-            "%turboFileHeader.disableFields.items.enum.companyName%",
-            "%turboFileHeader.disableFields.items.enum.projectName%",
-            "%turboFileHeader.disableFields.items.enum.filePath%",
-            "%turboFileHeader.disableFields.items.enum.dirPath%",
-            "%turboFileHeader.disableFields.items.enum.fileName%"
+            "%turboFileHeader.disableFields.items.enum.file%",
+            "%turboFileHeader.disableFields.items.enum.description%",
+            "%turboFileHeader.disableFields.items.enum.author%",
+            "%turboFileHeader.disableFields.items.enum.createTime%",
+            "%turboFileHeader.disableFields.items.enum.lastModifedTime%",
+            "%turboFileHeader.disableFields.items.enum.copyright%"
           ],
           "markdownDescription": "%turboFileHeader.disableFields.markdownDescription%"
+        },
+        "turboFileHeader.customFields": {
+          "type": "array",
+          "description": "%turboFileHeader.customFields.description%",
+          "items": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": "string",
+                "description": "%turboFileHeader.customFields.items.properties.key.description%"
+              },
+              "value": {
+                "type": "string",
+                "description": "%turboFileHeader.customFields.items.properties.value.description%"
+              }
+            },
+            "required": [
+              "key",
+              "value"
+            ],
+            "default": []
+          }
+        },
+        "turboFileHeader.fileheader": {
+          "type": "array",
+          "description": "%turboFileHeader.fileheader.description%",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string",
+                "description": "%turboFileHeader.fileheader.items.properties.key.description%"
+              },
+              "value": {
+                "type": "string",
+                "description": "turboFileHeader.fileheader.items.properties.value.description%"
+              },
+              "wholeLine": {
+                "type": "boolean",
+                "description": "turboFileHeader.fileheader.items.properties.wholeLine.description%"
+              }
+            },
+            "required": [
+              "key",
+              "value"
+            ]
+          },
+          "default": [
+            {
+              "label": "@file",
+              "value": "{{filePath}}"
+            },
+            {
+              "label": "@description",
+              "value": ""
+            },
+            {
+              "label": "@author",
+              "value": "{{authorName}} <{{authorEmail}}>"
+            },
+            {
+              "label": "createTime",
+              "value": "{{birthtime}}"
+            },
+            {
+              "label": "lastModifiedTime",
+              "value": "{{mtime}}"
+            },
+            {
+              "label": "copyright",
+              "value": "Copyright ©{{companyName}} All rights reserved",
+              "wholeLine": true
+            }
+          ]
         },
         "turboFileHeader.updateHeaderForModifiedFilesOnly": {
           "type": "boolean",

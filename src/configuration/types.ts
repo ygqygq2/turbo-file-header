@@ -15,6 +15,17 @@ export interface TagFlatten extends Tag {
   tagEscaped: string;
 }
 
+export interface customField {
+  name: string;
+  value: string;
+}
+
+export interface headerLine {
+  label: string;
+  value: string;
+  wholeLine?: boolean;
+}
+
 export interface Configuration {
   userName: string;
   userEmail: string;
@@ -25,6 +36,8 @@ export interface Configuration {
   include: string;
   exclude: string;
   disableFields: string[];
+  customFields: customField[];
+  fileheader: headerLine[];
   languages: LanguagesConfig;
   updateHeaderForModifiedFilesOnly: boolean;
   multilineComments: boolean;

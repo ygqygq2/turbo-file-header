@@ -3,6 +3,8 @@
 [![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/ygqygq2.turbo-file-header.svg?color=07c160&label=turbo-file-header&logo=visual-studio-code)](https://marketplace.visualstudio.com/items?itemName=ygqygq2.turbo-file-header)
 ![Visual Studio Marketplace Installs](https://img.shields.io/visual-studio-marketplace/i/ygqygq2.turbo-file-header)
 
+[中文](README.zh-CN.md)
+
 Turbo file header, sets file header information globally or for a project.
 
 ## Features
@@ -12,7 +14,7 @@ Turbo file header, sets file header information globally or for a project.
 - Generate file header based on the file header template configuration.
 - Use more reader-friendly comments to highlight important parts in your code.
 - Support for languages in [VSCode known identifiers](https://code.visualstudio.com/docs/languages/identifiers#_known-language-identifiers).
-- l10n support.
+- Extension configuration Multi-language display, l10n support.
 
 ## Settings
 
@@ -39,7 +41,25 @@ Properties:
 | Tags for dark themes              | Overwrite tags options for dark themes                               | tagsDark                         | `[]`                     |
 
 **Note**:
+
 - `include` and `exclude` are used to control the scope of the file header update, except for `addFileheader` command.
+- `author` if the file is tracked by VCS, it will get the author name/email from VCS, else it will get it from `userName`/`userEmail`.
+
+**Fileheader variables**
+
+- `{{birthtime}}` {string} file create time. will get it from VCS or fallback to filesystem when it is not available
+- `{{mtime}}` {string} file modification time. will get it from VCS or fallback to filesystem when it is not available
+- `{{authorName}}` {string} if the file is tracked by VCS, it will get the author name from VCS. else it will get it from current user name
+- `{{authorEmail}}` {string} if the file is tracked by VCS, it will get the author email from VCS. else it will get it from current user email
+- `{{userName}}` {string} else it will get it from current user name
+- `{{userEmail}}` {string} userEmail user email is from VSCode config, and fallback to VCS config
+- `{{companyName}}` {string} companyName
+- `{{projectName}}` {string} name of current project
+- `{{filePath}}` {string} the file path, relative to project root with POSIX path separator
+- `{{dirPath}}` {string} the directory path, relative to project root with POSIX path separator
+- `{{fileName}}` {string} filename with extension
+- `{{description}}` {string} description for the file
+- `{{now}}` {string} current time when the fileheader is generating
 
 ## Default settings list
 

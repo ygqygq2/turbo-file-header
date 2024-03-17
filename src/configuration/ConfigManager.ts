@@ -70,20 +70,7 @@ export class ConfigManager {
     const orig = this.getConfiguration();
 
     this.configFlatten = {
-      userName: orig?.userName || '',
-      userEmail: orig?.userEmail || '',
-      companyName: orig?.companyName || '',
-      dateFormat: orig?.dateFormat || 'YYYY-MM-DD HH:mm:ss',
-      autoInsertOnCreateFile: orig?.autoInsertOnCreateFile || true,
-      autoUpdateOnSave: orig?.autoUpdateOnSave || true,
-      include: orig?.include || '',
-      exclude: orig?.exclude || '',
-      disableFields: orig?.disableFields || [],
-      languages: orig?.language || {},
-      updateHeaderForModifiedFilesOnly: orig?.updateHeaderForModifiedFilesOnly || true,
-      multilineComments: orig?.multilineComments || true,
-      useJSDocStyle: orig?.useJSDocStyle || true,
-      highlightPlainText: orig?.highlightPlainText || true,
+      ...orig,
       tags: this.flattenTags(orig?.tags || []),
       tagsLight: this.flattenTags(orig?.tagsLight || []),
       tagsDark: this.flattenTags(orig?.tagsDark || []),

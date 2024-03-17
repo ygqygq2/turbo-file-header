@@ -44,11 +44,33 @@ export class FileheaderVariableBuilder {
     provider: LanguageProvider,
     originVariable?: IFileheaderVariables,
   ): Promise<IFileheaderVariables> {
+    const { isCustomProvider, accessVariableFields } = provider;
+    console.log(
+      '🚀 ~ file: FileheaderVariableBuilder.ts:51 ~ accessVariableFields:',
+      accessVariableFields,
+    );
     const workspace = vscode.workspace.getWorkspaceFolder(fileUri);
     const vcsProvider = await initVCSProvider();
 
-    const { isCustomProvider, accessVariableFields } = provider;
-    const disableFieldSet = new Set(
+    // 获取文件头需要的变量，用 {{}} 包裹
+    const { fileheader } = config;
+    const variables: string[] = [];
+    const regex = /{{(.*?)}}/g;
+
+    fileheader.forEach((item) => {
+      const matches = item.value.match(regex);
+      if (matches) {
+        matches.forEach((match) => {
+          // 去除两边的 {{ 和 }}，只保留变量名
+          const variable = match.slice(2, -2);
+          variables.push(variable);
+        });
+      }
+    });
+
+    console.log(variables);
+
+    const noNeedFieldSet = new Set(
       !isCustomProvider
         ? difference(config.get<(keyof IFileheaderVariables)[]>(ConfigSection.disableFields, []))
         : difference(TEMPLATE_VARIABLE_KEYS, Array.from(accessVariableFields)),
@@ -72,28 +94,28 @@ export class FileheaderVariableBuilder {
 
     // authorName and authorEmail depends on username and userEmail in VCS
     const deferredUserName = queryFieldsExceptDisable(
-      disableFieldSet.has('userName') && disableFieldSet.has('authorName'),
+      noNeedFieldSet.has('userName') && noNeedFieldSet.has('authorName'),
       () => vcsProvider.getUserName(dirname(fsPath)),
       fixedUserName!,
     );
 
     const deferredUserEmail = queryFieldsExceptDisable(
-      disableFieldSet.has('userEmail') && disableFieldSet.has('authorEmail'),
+      noNeedFieldSet.has('userEmail') && noNeedFieldSet.has('authorEmail'),
       () => vcsProvider.getUserEmail(dirname(fsPath)),
       fixedUserEmail!,
     );
 
     const deferredBirthtime = queryFieldsExceptDisable(
-      disableFieldSet.has('birthtime'),
+      noNeedFieldSet.has('birthtime'),
       () => (isTracked ? vcsProvider.getBirthtime(fsPath) : dayjs(fileStat.birthtime)),
       dayjs(fileStat.birthtime),
     );
-    const deferredMtime = queryFieldsExceptDisable(disableFieldSet.has('mtime'), () =>
+    const deferredMtime = queryFieldsExceptDisable(noNeedFieldSet.has('mtime'), () =>
       dayjs(fileStat.mtime),
     );
 
     const deferredCompanyName = queryFieldsExceptDisable(
-      disableFieldSet.has('companyName'),
+      noNeedFieldSet.has('companyName'),
       () => config.get<string>(ConfigSection.companyName)!,
     );
 
@@ -107,12 +129,12 @@ export class FileheaderVariableBuilder {
 
     const [authorName, authorEmail] = await Promise.all([
       queryFieldsExceptDisable(
-        disableFieldSet.has('authorName'),
+        noNeedFieldSet.has('authorName'),
         () => (isTracked ? vcsProvider.getAuthorName(fsPath) : userName),
         userName,
       ),
       queryFieldsExceptDisable(
-        disableFieldSet.has('authorEmail'),
+        noNeedFieldSet.has('authorEmail'),
         () => (isTracked ? vcsProvider.getAuthorEmail(fsPath) : userEmail),
         userEmail,
       ),
@@ -136,14 +158,14 @@ export class FileheaderVariableBuilder {
 
     if (workspace) {
       [projectName, filePath, dirPath] = await Promise.all([
-        queryFieldsExceptDisable(disableFieldSet.has('projectName'), () =>
+        queryFieldsExceptDisable(noNeedFieldSet.has('projectName'), () =>
           upath.normalize(basename(workspace.uri.path)),
         ),
-        queryFieldsExceptDisable(disableFieldSet.has('filePath'), () =>
+        queryFieldsExceptDisable(noNeedFieldSet.has('filePath'), () =>
           upath.normalize(relative(workspace.uri.path, fileUri.path)),
         ),
         queryFieldsExceptDisable(
-          disableFieldSet.has('dirPath'),
+          noNeedFieldSet.has('dirPath'),
           () => upath.normalize(relative(workspace.uri.path, dirname(fileUri.path))) || '',
         ),
       ] as const);
@@ -154,8 +176,8 @@ export class FileheaderVariableBuilder {
       mtime: mtime?.format(dateFormat),
       authorName,
       authorEmail,
-      userName: !disableFieldSet.has('userName') ? userName : undefined,
-      userEmail: !disableFieldSet.has('userEmail') ? userEmail : undefined,
+      userName: !noNeedFieldSet.has('userName') ? userName : undefined,
+      userEmail: !noNeedFieldSet.has('userEmail') ? userEmail : undefined,
       companyName: companyName ? companyName : userName ? userName : undefined,
 
       projectName,

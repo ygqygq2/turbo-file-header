@@ -15,6 +15,7 @@
 # @dirPath {string} the directory path, relative to project root with POSIX path separator
 # @fileName {string} filename with extension
 # @description {string} description for the file
+# @now {string} current time when the fileheader is generating
 
 providers:
   # name * 必填

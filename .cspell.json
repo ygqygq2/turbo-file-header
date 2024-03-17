@@ -8,9 +8,11 @@
     "/^import\\b.*\\n/g"
   ],
   "words": [
+    "astro",
     "birthtime",
     "ncipollo",
     "ovsx",
+    "POSIX",
     "softprops",
     "strikethrough",
     "upath",
