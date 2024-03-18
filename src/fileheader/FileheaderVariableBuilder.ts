@@ -1,6 +1,6 @@
-import vscode from 'vscode';
+import vscode, { WorkspaceFolder } from 'vscode';
 import { basename, dirname, relative } from 'path';
-import dayjs, { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 import upath from 'upath';
 import { Config, HeaderLine } from '../typings/types';
 import { stat } from 'fs/promises';
@@ -9,116 +9,105 @@ import { initVCSProvider } from '@/init';
 import { ConfigManager } from '@/configuration/ConfigManager';
 import { errorHandler } from '@/extension';
 import { CustomError, ErrorCode } from '@/error';
-import { workspace } from 'vscode';
-import {LanguageProvider} from '@/language-providers';
-
+import { LanguageProvider } from '@/language-providers';
+import { BaseVCSProvider } from '@/vcs-provider/BaseVCSProvider';
 
 export class FileheaderVariableBuilder {
   private config: Config;
   private variableBuilders: { [key: string]: () => Promise<string | undefined> };
-  private configManager: ConfigManager;
-  private workspace;
-  private vcsProvider;
+  private workspace?: WorkspaceFolder;
+  private vcsProvider?: BaseVCSProvider;
   private variableRegex = /{{(.*?)}}/g;
-  private fileUri;
+  private fileUri?: vscode.Uri;
 
-  constructor(configManager: ConfigManager) {
-    this.configManager = configManager;
+  constructor(private configManager: ConfigManager) {
     this.config = configManager.getConfiguration();
 
     this.variableBuilders = {
-      ...Object.keys(WILDCARD_ACCESS_VARIABLES).reduce((obj, key) => {
-        const methodName = `build${key.charAt(0).toUpperCase() + key.slice(1)}`;
-        if (typeof this[methodName] === 'function') {
-          obj[key] = this[methodName].bind(this);
-        }
-        return obj;
-      }, {}),
+      ...Object.keys(WILDCARD_ACCESS_VARIABLES).reduce(
+        (obj, key) => {
+          const methodName =
+            `build${key.charAt(0).toUpperCase() + key.slice(1)}` as keyof FileheaderVariableBuilder;
+          if (typeof this[methodName] === 'function') {
+            obj[key] = (this[methodName] as () => Promise<string | undefined>).bind(this);
+          }
+          return obj;
+        },
+        {} as { [key: string]: () => Promise<string | undefined> },
+      ),
     };
   }
 
-  private build = async (fileUri: vscode.Uri, provider: LanguageProvider, ) => {
-    const { isCustomProvider, accessVariableFields } = provider;
-    const workspace = vscode.workspace.getWorkspaceFolder(fileUri);
-    this.workspace = workspace;
-    const vcsProvider = await initVCSProvider();
+  private async build(fileUri: vscode.Uri, provider: LanguageProvider): Promise<HeaderLine[]> {
+    // const { isCustomProvider, accessVariableFields } = provider;
+    this.fileUri = fileUri;
+    const fsPath = fileUri.fsPath;
+    this.workspace = vscode.workspace.getWorkspaceFolder(fileUri);
     try {
-      await vcsProvider.validate(dirname(fsPath));
+      this.vcsProvider = await initVCSProvider();
+      if (!this.vcsProvider) {
+        errorHandler.throw(new CustomError(ErrorCode.VCSInvalid));
+      }
+      await this.vcsProvider.validate(dirname(fsPath));
     } catch (error) {
-      errorHandler.handle(new CustomError(ErrorCode.VCSInvalid, error));
+      errorHandler.throw(new CustomError(ErrorCode.VCSInvalid, error));
     }
-    this.vcsProvider = vcsProvider;
 
-    // 获取文件头配置中需要的变量，用 {{}} 包裹，可能含自定义变量
     const { fileheader, disableLabels } = this.config;
     const newFileheader: HeaderLine[] = [];
 
-    fileheader.forEach((item: HeaderLine) => {
+    for (const item of fileheader) {
       if (!disableLabels.includes(item.label)) {
         const matches = item.value.match(this.variableRegex);
-        // 含有引用的变量名
         if (matches) {
-          matches.forEach(async (match) => {
-            // 去除两边的 {{ 和 }}，只保留变量名
+          for (const match of matches) {
+            // Remove the {{ and }} on both sides, leaving only the variable name
             const variable = match.slice(2, -2);
-            // 把 variable 转成字符串
             const builder = this.variableBuilders[variable];
-            if (builder) {
-              // 内置变量
-              const result = (await builder()) || '';
-              newFileheader.push({
-                label: item.label,
-                value: result,
-                ...(item.wholeLine !== undefined && { wholeLine: item.wholeLine }),
-              });
-            } else {
-              // 自定义变量
-              const result = (await this.buildCustomVariable(variable)) || '';
-              newFileheader.push({
-                label: item.label,
-                value: result,
-                ...(item.wholeLine !== undefined && { wholeLine: item.wholeLine }),
-              });
-            }
-          });
+            const result = builder
+              ? (await builder()) || ''
+              : (await this.buildCustomVariable(variable)) || '';
+            newFileheader.push({
+              label: item.label,
+              value: result,
+              ...(item.wholeLine !== undefined && { wholeLine: item.wholeLine }),
+            });
+          }
         } else {
           newFileheader.push(item);
         }
       }
-    });
+    }
 
     return newFileheader;
-  };
+  }
 
-  private buildCustomVariable = async (variable: string) => {
+  private async buildCustomVariable(variable: string): Promise<string> {
     const { customVariables } = this.config;
     const customVariable = customVariables.find((item) => item.name === variable);
     let { value = '' } = customVariable || {};
     const matches = value.match(this.variableRegex);
 
-    // 含有引用的变量名
     if (matches) {
       for (const match of matches) {
-        // 去除两边的 {{ 和 }}，只保留变量名
+        // Remove the {{ and }} on both sides, leaving only the variable name
         const variableName = match.slice(2, -2);
-        // 把 variable 转成字符串
         const builder = this.variableBuilders[variableName];
         if (builder) {
-          // 内置变量
           const result = (await builder()) || '';
           value = value.replace(match, result);
         } else {
-          // 示知变量
-          errorHandler.handle(new CustomError(ErrorCode.UnknownVariable));
+          errorHandler.handle(new CustomError(ErrorCode.UnknownVariable, variableName));
         }
       }
     }
     return value;
-  };
+  }
 
   private buildAuthorInfo = async () => {
-    const userName = await vcsProvider.getUserName(dirname(fsPath));
-    const userEmail = await vcsProvider.getUserEmail(dirname(fsPath));
+    const fsPath = this.fileUri!.fsPath;
+    const userName = this.vcsProvider ? await this.vcsProvider.getUserName(dirname(fsPath)) : '';
+    const userEmail = this.vcsProvider ? await this.vcsProvider.getUserEmail(dirname(fsPath)) : '';
     return {
       userName,
       userEmail,
@@ -126,66 +115,60 @@ export class FileheaderVariableBuilder {
   };
 
   private buildBirthtime = async () => {
-    const fsPath = this.fileUri.fsPath;
-     const fileStat = await stat(fsPath);
-        const isTracked = await this.vcsProvider.isTracked(fsPath);
+    const fsPath = this.fileUri!.fsPath;
+    const fileStat = await stat(fsPath);
+    const isTracked = await this.vcsProvider!.isTracked(fsPath);
     const dateFormat = this.config.get(ConfigSection.dateFormat, 'YYYY-MM-DD HH:mm:ss');
-    const birthtime = isTracked ? this.vcsProvider.getBirthtime(fsPath) : dayjs(fileStat.birthtime);
-    let tmpBirthtime = birthtime;
+    const birthtime = isTracked ? this.vcsProvider?.getBirthtime(fsPath) ?? dayjs(fileStat.birthtime) : dayjs(fileStat.birthtime);
+    // let tmpBirthtime = birthtime;
 
-    let originBirthtime: Dayjs | undefined = dayjs(originVariable?.birthtime, dateFormat);
-    if (!originBirthtime.isValid()) {
-      originBirthtime = undefined;
-    } else {
-      if (originBirthtime.isBefore(birthtime)) {
-        tmpBirthtime = originBirthtime;
-      }
-    }
+    // let originBirthtime: Dayjs | undefined = dayjs(originVariable?.birthtime, dateFormat);
+    // if (!originBirthtime.isValid()) {
+    //   originBirthtime = undefined;
+    // } else {
+    //   if (originBirthtime.isBefore(birthtime)) {
+    //     tmpBirthtime = originBirthtime;
+    //   }
+    // }
 
     return birthtime;
   };
 
-  private buildMtime = () => {
+  private async buildMtime() {
+    const fsPath = this.fileUri!.fsPath;
+    const fileStat = await stat(fsPath);
     return dayjs(fileStat.mtime);
-  };
+  }
 
-  private buildAuthorName = () => {};
-  private buildAuthorEmail = () => {};
+  private async buildUserName() {
+    return this.config?.userName || '';
+  }
 
-  private buildUserName = async () => {
-    return this.config.get<string | null>(ConfigSection.userName, null);
-  };
+  private async buildUserEmail() {
+    return this.config?.userEmail || '';
+  }
 
-  private buildUserEmail = async () => {
-    const fixedUserEmail = this.config.get<string | null>(ConfigSection.userEmail, null);
+  private buildCompanyName() {
+    return this.config?.companyName || this.config?.userName || '';
+  }
 
+  private buildProjectName() {
+    const projectName = upath.normalize(basename(this.workspace!.uri.path));
+    return projectName;
+  }
 
+  private buildFilePath() {
+    const filePath = upath.normalize(relative(this.workspace!.uri.path, this.fileUri!.path));
+    return filePath;
+  }
 
-   
+  private buildDirPath() {
+    const dirPath =
+      upath.normalize(relative(this.workspace!.uri.path, dirname(this.fileUri!.path))) || '';
+    return dirPath;
+  }
 
-  };
-
-  private buildCompanyName = () => {
-    return this.config.get<string>(ConfigSection.companyName)!;
-  };
-
-  private buildProjectName = () => {
-  const projectName = upath.normalize(basename(workspace.uri.path));
-  return projectName;
-};
-
-  private buildFilePath = () => {
-  const filePath = upath.normalize(relative(workspace.uri.path, fileUri.path));
-  return filePath;
-  };
-  private buildDirPath = () => {
-  const dirPath = upath.normalize(relative(workspace.uri.path, dirname(fileUri.path))) || '';
-  return dirPath;
-};
-
-  private buildFileName = () => {
-    return basename(this.fileUri.path);
-  };
-
-  private buildNow = () => {};
+  private buildFileName() {
+    return basename(this.fileUri!.path);
+  }
 }
