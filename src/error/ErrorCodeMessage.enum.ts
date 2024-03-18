@@ -3,6 +3,11 @@ type ErrorCodeMessage = {
 };
 
 export enum ErrorCode {
+  // 其他错误 (800 - 999)
+  OpenDocumentFail = 800,
+  GetCustomConfigFail = 801,
+  UnknownError = 802,
+
   // Git 相关错误 (1000 - 1009)
   GitNotInit = 1000,
   GitGetUserNameFail = 1001,
@@ -13,60 +18,63 @@ export enum ErrorCode {
   ShouldSetUserEmail = 1006,
   // 保留 Git 相关错误的空间 (1007 - 1009)
 
-  // VCS 相关错误 (1100 - 1109)
-  NoVCSProvider = 1100,
-  VCSProviderCreateFail = 1101,
-  VCSInvalid = 1102,
+  // VCS 相关错误 (1010 - 1019)
+  NoVCSProvider = 1010,
+  VCSProviderCreateFail = 1011,
+  VCSInvalid = 1012,
 
-  // SVN 相关错误 (1200 - 1209)
-  SVNNotInit = 1200,
-  SVNGetUserNameFail = 1201,
-  SVNGetUserEmailFail = 1202,
-  SVNInfoShowUserNameFail = 1203,
-  SVNGetBirthtimeFail = 1204,
-  SVNStatusFail = 1205,
-  SVNCommandNotFound = 1206,
-  // 保留 SVN 相关错误的空间 (1206 - 1209)
+  // SVN 相关错误 (1020 - 1029)
+  SVNNotInit = 1020,
+  SVNGetUserNameFail = 1021,
+  SVNGetUserEmailFail = 1022,
+  SVNInfoShowUserNameFail = 1023,
+  SVNGetBirthtimeFail = 1024,
+  SVNStatusFail = 1025,
+  SVNCommandNotFound = 1026,
+  // 保留 SVN 相关错误的空间 (1027 - 1029)
 
-  // 配置和语言相关错误 (1300 - 1309)
-  CustomFileheaderConfigFail = 1300,
-  GetConfigurationFail = 1301,
-  LanguageNotSupport = 1302,
-  LanguageProviderNotFound = 1303,
-  GenerateTemplateConfigFail = 1304,
-  // 保留 配置和语言相关错误的空间 (1305 - 1309)
+  // 配置和语言相关错误 (1030 - 1039)
+  CustomFileheaderConfigFail = 1030,
+  GetConfigurationFail = 1031,
+  LanguageNotSupport = 1032,
+  LanguageProviderNotFound = 1033,
+  GenerateTemplateConfigFail = 1034,
+  // 保留 配置和语言相关错误的空间 (1035 - 1039)
 
-  // 工作区相关错误 (1400 - 1409)
-  WorkspaceFolderNotFound = 1400,
-  // 保留 工作区相关错误的空间 (1401 - 1409)
+  // 工作区相关错误 (1040 - 1049)
+  WorkspaceFolderNotFound = 1040,
+  // 保留 工作区相关错误的空间 (1041 - 1049)
 
-  // 扩展相关错误 (1500 - 1509)
-  NeedExtensionContext = 1500,
-  VariableBuilderFail = 1501,
-  UpdateFileHeaderFail = 1502,
-  // 保留 扩展相关错误的空间 (1501 - 1509)
+  // 扩展相关错误 (1050 - 1059)
+  NeedExtensionContext = 1050,
+  VariableBuilderFail = 1051,
+  UpdateFileHeaderFail = 1052,
+  // 保留 扩展相关错误的空间 (1053 - 1059)
 
-  // 文件和目录操作错误 (1600 - 1609)
-  CreateDirFail = 1600,
-  CreateFileFail = 1601,
-  // 保留 文件和目录操作错误的空间 (1602 - 1609)
+  // 文件和目录操作错误 (1060 - 1069)
+  CreateDirFail = 1060,
+  CreateFileFail = 1061,
+  // 保留 文件和目录操作错误的空间 (1062 - 1069)
 
-  // 自定义提供者相关错误 (1700 - 1709)
-  GenerateCustomProviderFail = 1700,
-  CustomProviderInstanceFail = 1701,
-  // 保留 自定义提供者相关错误的空间 (1702 - 1709)
+  // 自定义提供者相关错误 (1070 - 1079)
+  GenerateCustomProviderFail = 1070,
+  CustomProviderInstanceFail = 1071,
+  // 保留 自定义提供者相关错误的空间 (1072 - 1079)
 
-  // 其他错误 (1800 - 1809)
-  OpenDocumentFail = 1800,
-  GetCustomConfigFail = 1801,
-  UnknownError = 1802,
-  // 保留 其他错误的空间 (1803 - 1809)
+  // 变量转换错误 (1080 - 1089)
+  UnknownVariable = 1080,
 
   // 保留未来扩展的空间 (1900 - 1999)
   // ...
 }
 
 const extensionPrefix = '';
+
+const otherErrorCodeMessage = {
+  [ErrorCode.GetCustomConfigFail]: `${extensionPrefix}Failed to get custom config.`,
+  [ErrorCode.OpenDocumentFail]: `${extensionPrefix}Failed to open document: `,
+  [ErrorCode.UnknownError]: `${extensionPrefix}Unknown error.`,
+};
 
 const gitErrorCodeMessage = {
   [ErrorCode.MissingUserNameEmail]: `${extensionPrefix}Missing user name and email.`,
@@ -124,13 +132,12 @@ const extensionErrorCodeMessage = {
   [ErrorCode.UpdateFileHeaderFail]: `${extensionPrefix}Failed to update file header: `,
 };
 
-const otherErrorCodeMessage = {
-  [ErrorCode.GetCustomConfigFail]: `${extensionPrefix}Failed to get custom config.`,
-  [ErrorCode.OpenDocumentFail]: `${extensionPrefix}Failed to open document: `,
-  [ErrorCode.UnknownError]: `${extensionPrefix}Unknown error.`,
+const variableErrorCodeMessage = {
+  [ErrorCode.UnknownVariable]: `${extensionPrefix}Unknown variable.`,
 };
 
 export const errorCodeMessages: ErrorCodeMessage = {
+  ...otherErrorCodeMessage,
   ...gitErrorCodeMessage,
   ...vcsErrorCodeMessage,
   ...svnErrorCodeMessage,
@@ -139,5 +146,5 @@ export const errorCodeMessages: ErrorCodeMessage = {
   ...fileDirErrorCodeMessage,
   ...customProviderErrorCodeMessage,
   ...extensionErrorCodeMessage,
-  ...otherErrorCodeMessage,
+  ...variableErrorCodeMessage,
 };

@@ -34,7 +34,7 @@ const fileheaderProviderLoader = new FileheaderProviderLoader(
   generateCustomProviderClasses,
 );
 const fileHashMemento = new FileHashManager();
-const fileheaderVariableBuilder = new FileheaderVariableBuilder();
+const fileheaderVariableBuilder = new FileheaderVariableBuilder(configManager);
 const fileheaderProviderService = new FileheaderProviderService();
 export const fileheaderManager = new FileheaderManager(
   configManager,

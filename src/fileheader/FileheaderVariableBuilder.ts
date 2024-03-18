@@ -2,144 +2,135 @@ import vscode from 'vscode';
 import { basename, dirname, relative } from 'path';
 import dayjs, { Dayjs } from 'dayjs';
 import upath from 'upath';
-import { IFileheaderVariables } from '../typings/types';
+import { Config, HeaderLine } from '../typings/types';
 import { stat } from 'fs/promises';
-import { ConfigSection, TEMPLATE_VARIABLE_KEYS } from '../constants';
-import { difference } from 'lodash';
-import { LanguageProvider } from '../language-providers';
-import { Configuration } from '@/configuration/types';
+import { ConfigSection, WILDCARD_ACCESS_VARIABLES } from '../constants';
 import { initVCSProvider } from '@/init';
+import { ConfigManager } from '@/configuration/ConfigManager';
 import { errorHandler } from '@/extension';
 import { CustomError, ErrorCode } from '@/error';
+import { workspace } from 'vscode';
+import {LanguageProvider} from '@/language-providers';
 
-/**
- * query template variable fields when it is enabled
- * @param disabled if true this function will return undefined immediately
- * @param queryAction get variable operation
- * @param fallbackVal fallback value, if it is falsy, it will throw the origin error
- * @returns variable value or fallback value
- */
-async function queryFieldsExceptDisable<T>(
-  disabled: boolean,
-  queryAction: () => Promise<T> | T,
-  fallbackVal?: T,
-): Promise<T | undefined> {
-  if (disabled) {
-    return undefined;
-  }
-  try {
-    return await queryAction();
-  } catch (e) {
-    if (fallbackVal) {
-      return fallbackVal;
-    }
-    throw e;
-  }
-}
 
 export class FileheaderVariableBuilder {
-  public async build(
-    config: vscode.WorkspaceConfiguration & Configuration,
-    fileUri: vscode.Uri,
-    provider: LanguageProvider,
-    originVariable?: IFileheaderVariables,
-  ): Promise<IFileheaderVariables> {
+  private config: Config;
+  private variableBuilders: { [key: string]: () => Promise<string | undefined> };
+  private configManager: ConfigManager;
+  private workspace;
+  private vcsProvider;
+  private variableRegex = /{{(.*?)}}/g;
+  private fileUri;
+
+  constructor(configManager: ConfigManager) {
+    this.configManager = configManager;
+    this.config = configManager.getConfiguration();
+
+    this.variableBuilders = {
+      ...Object.keys(WILDCARD_ACCESS_VARIABLES).reduce((obj, key) => {
+        const methodName = `build${key.charAt(0).toUpperCase() + key.slice(1)}`;
+        if (typeof this[methodName] === 'function') {
+          obj[key] = this[methodName].bind(this);
+        }
+        return obj;
+      }, {}),
+    };
+  }
+
+  private build = async (fileUri: vscode.Uri, provider: LanguageProvider, ) => {
     const { isCustomProvider, accessVariableFields } = provider;
-    console.log(
-      '🚀 ~ file: FileheaderVariableBuilder.ts:51 ~ accessVariableFields:',
-      accessVariableFields,
-    );
     const workspace = vscode.workspace.getWorkspaceFolder(fileUri);
+    this.workspace = workspace;
     const vcsProvider = await initVCSProvider();
+    try {
+      await vcsProvider.validate(dirname(fsPath));
+    } catch (error) {
+      errorHandler.handle(new CustomError(ErrorCode.VCSInvalid, error));
+    }
+    this.vcsProvider = vcsProvider;
 
-    // 获取文件头需要的变量，用 {{}} 包裹
-    const { fileheader } = config;
-    const variables: string[] = [];
-    const regex = /{{(.*?)}}/g;
+    // 获取文件头配置中需要的变量，用 {{}} 包裹，可能含自定义变量
+    const { fileheader, disableLabels } = this.config;
+    const newFileheader: HeaderLine[] = [];
 
-    fileheader.forEach((item) => {
-      const matches = item.value.match(regex);
-      if (matches) {
-        matches.forEach((match) => {
-          // 去除两边的 {{ 和 }}，只保留变量名
-          const variable = match.slice(2, -2);
-          variables.push(variable);
-        });
+    fileheader.forEach((item: HeaderLine) => {
+      if (!disableLabels.includes(item.label)) {
+        const matches = item.value.match(this.variableRegex);
+        // 含有引用的变量名
+        if (matches) {
+          matches.forEach(async (match) => {
+            // 去除两边的 {{ 和 }}，只保留变量名
+            const variable = match.slice(2, -2);
+            // 把 variable 转成字符串
+            const builder = this.variableBuilders[variable];
+            if (builder) {
+              // 内置变量
+              const result = (await builder()) || '';
+              newFileheader.push({
+                label: item.label,
+                value: result,
+                ...(item.wholeLine !== undefined && { wholeLine: item.wholeLine }),
+              });
+            } else {
+              // 自定义变量
+              const result = (await this.buildCustomVariable(variable)) || '';
+              newFileheader.push({
+                label: item.label,
+                value: result,
+                ...(item.wholeLine !== undefined && { wholeLine: item.wholeLine }),
+              });
+            }
+          });
+        } else {
+          newFileheader.push(item);
+        }
       }
     });
 
-    console.log(variables);
+    return newFileheader;
+  };
 
-    const noNeedFieldSet = new Set(
-      !isCustomProvider
-        ? difference(config.get<(keyof IFileheaderVariables)[]>(ConfigSection.disableFields, []))
-        : difference(TEMPLATE_VARIABLE_KEYS, Array.from(accessVariableFields)),
-    );
+  private buildCustomVariable = async (variable: string) => {
+    const { customVariables } = this.config;
+    const customVariable = customVariables.find((item) => item.name === variable);
+    let { value = '' } = customVariable || {};
+    const matches = value.match(this.variableRegex);
 
-    const dateFormat = config.get(ConfigSection.dateFormat, 'YYYY-MM-DD HH:mm:ss');
-    const fsPath = fileUri.fsPath;
-
-    const fixedUserName = config.get<string | null>(ConfigSection.userName, null);
-    const fixedUserEmail = config.get<string | null>(ConfigSection.userEmail, null);
-    if (!fixedUserEmail || !fixedUserName) {
-      try {
-        await vcsProvider.validate(dirname(fsPath));
-      } catch (error) {
-        errorHandler.handle(new CustomError(ErrorCode.VCSInvalid, error));
+    // 含有引用的变量名
+    if (matches) {
+      for (const match of matches) {
+        // 去除两边的 {{ 和 }}，只保留变量名
+        const variableName = match.slice(2, -2);
+        // 把 variable 转成字符串
+        const builder = this.variableBuilders[variableName];
+        if (builder) {
+          // 内置变量
+          const result = (await builder()) || '';
+          value = value.replace(match, result);
+        } else {
+          // 示知变量
+          errorHandler.handle(new CustomError(ErrorCode.UnknownVariable));
+        }
       }
     }
+    return value;
+  };
 
-    const fileStat = await stat(fsPath);
-    const isTracked = await vcsProvider.isTracked(fsPath);
+  private buildAuthorInfo = async () => {
+    const userName = await vcsProvider.getUserName(dirname(fsPath));
+    const userEmail = await vcsProvider.getUserEmail(dirname(fsPath));
+    return {
+      userName,
+      userEmail,
+    };
+  };
 
-    // authorName and authorEmail depends on username and userEmail in VCS
-    const deferredUserName = queryFieldsExceptDisable(
-      noNeedFieldSet.has('userName') && noNeedFieldSet.has('authorName'),
-      () => vcsProvider.getUserName(dirname(fsPath)),
-      fixedUserName!,
-    );
-
-    const deferredUserEmail = queryFieldsExceptDisable(
-      noNeedFieldSet.has('userEmail') && noNeedFieldSet.has('authorEmail'),
-      () => vcsProvider.getUserEmail(dirname(fsPath)),
-      fixedUserEmail!,
-    );
-
-    const deferredBirthtime = queryFieldsExceptDisable(
-      noNeedFieldSet.has('birthtime'),
-      () => (isTracked ? vcsProvider.getBirthtime(fsPath) : dayjs(fileStat.birthtime)),
-      dayjs(fileStat.birthtime),
-    );
-    const deferredMtime = queryFieldsExceptDisable(noNeedFieldSet.has('mtime'), () =>
-      dayjs(fileStat.mtime),
-    );
-
-    const deferredCompanyName = queryFieldsExceptDisable(
-      noNeedFieldSet.has('companyName'),
-      () => config.get<string>(ConfigSection.companyName)!,
-    );
-
-    const [companyName, userName, userEmail, birthtime, mtime] = await Promise.all([
-      deferredCompanyName,
-      deferredUserName,
-      deferredUserEmail,
-      deferredBirthtime,
-      deferredMtime,
-    ] as const);
-
-    const [authorName, authorEmail] = await Promise.all([
-      queryFieldsExceptDisable(
-        noNeedFieldSet.has('authorName'),
-        () => (isTracked ? vcsProvider.getAuthorName(fsPath) : userName),
-        userName,
-      ),
-      queryFieldsExceptDisable(
-        noNeedFieldSet.has('authorEmail'),
-        () => (isTracked ? vcsProvider.getAuthorEmail(fsPath) : userEmail),
-        userEmail,
-      ),
-    ] as const);
-
+  private buildBirthtime = async () => {
+    const fsPath = this.fileUri.fsPath;
+     const fileStat = await stat(fsPath);
+        const isTracked = await this.vcsProvider.isTracked(fsPath);
+    const dateFormat = this.config.get(ConfigSection.dateFormat, 'YYYY-MM-DD HH:mm:ss');
+    const birthtime = isTracked ? this.vcsProvider.getBirthtime(fsPath) : dayjs(fileStat.birthtime);
     let tmpBirthtime = birthtime;
 
     let originBirthtime: Dayjs | undefined = dayjs(originVariable?.birthtime, dateFormat);
@@ -151,39 +142,50 @@ export class FileheaderVariableBuilder {
       }
     }
 
-    let projectName: string | undefined;
-    let filePath: string | undefined;
-    let dirPath: string | undefined;
-    const fileName = basename(fileUri.path);
+    return birthtime;
+  };
 
-    if (workspace) {
-      [projectName, filePath, dirPath] = await Promise.all([
-        queryFieldsExceptDisable(noNeedFieldSet.has('projectName'), () =>
-          upath.normalize(basename(workspace.uri.path)),
-        ),
-        queryFieldsExceptDisable(noNeedFieldSet.has('filePath'), () =>
-          upath.normalize(relative(workspace.uri.path, fileUri.path)),
-        ),
-        queryFieldsExceptDisable(
-          noNeedFieldSet.has('dirPath'),
-          () => upath.normalize(relative(workspace.uri.path, dirname(fileUri.path))) || '',
-        ),
-      ] as const);
-    }
+  private buildMtime = () => {
+    return dayjs(fileStat.mtime);
+  };
 
-    return {
-      birthtime: tmpBirthtime?.format(dateFormat),
-      mtime: mtime?.format(dateFormat),
-      authorName,
-      authorEmail,
-      userName: !noNeedFieldSet.has('userName') ? userName : undefined,
-      userEmail: !noNeedFieldSet.has('userEmail') ? userEmail : undefined,
-      companyName: companyName ? companyName : userName ? userName : undefined,
+  private buildAuthorName = () => {};
+  private buildAuthorEmail = () => {};
 
-      projectName,
-      filePath,
-      dirPath,
-      fileName,
-    };
-  }
+  private buildUserName = async () => {
+    return this.config.get<string | null>(ConfigSection.userName, null);
+  };
+
+  private buildUserEmail = async () => {
+    const fixedUserEmail = this.config.get<string | null>(ConfigSection.userEmail, null);
+
+
+
+   
+
+  };
+
+  private buildCompanyName = () => {
+    return this.config.get<string>(ConfigSection.companyName)!;
+  };
+
+  private buildProjectName = () => {
+  const projectName = upath.normalize(basename(workspace.uri.path));
+  return projectName;
+};
+
+  private buildFilePath = () => {
+  const filePath = upath.normalize(relative(workspace.uri.path, fileUri.path));
+  return filePath;
+  };
+  private buildDirPath = () => {
+  const dirPath = upath.normalize(relative(workspace.uri.path, dirname(fileUri.path))) || '';
+  return dirPath;
+};
+
+  private buildFileName = () => {
+    return basename(this.fileUri.path);
+  };
+
+  private buildNow = () => {};
 }

@@ -1,6 +1,6 @@
 import vscode from 'vscode';
 import { evaluateTemplate, getTaggedTemplateInputs, hasShebang } from '../utils/utils';
-import { IFileheaderVariables, ITemplateFunction, Template } from '../typings/types';
+import { Config, IFileheaderVariables, ITemplateFunction, Template } from '../typings/types';
 import {
   TEMPLATE_NAMED_GROUP_WILDCARD_PLACEHOLDER,
   TEMPLATE_OPTIONAL_GROUP_PLACEHOLDER,
@@ -9,11 +9,14 @@ import {
 import { escapeRegexString } from '@/utils/str';
 
 export abstract class LanguageProvider {
+  private config: Config;
+
   /**
    *
    * @param workspaceScopeUri the custom loader workspace folder uri
    */
-  constructor(public readonly workspaceScopeUri?: vscode.Uri) {
+  constructor(config: Config, public readonly workspaceScopeUri?: vscode.Uri) {
+    this.config = config;
     this.calculateVariableAccessInfo();
   }
 

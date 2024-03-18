@@ -76,6 +76,12 @@ export type IFileheaderVariables = {
    * filename including extension
    */
   fileName?: string;
+
+  now?: string;
+};
+
+export type CustomVariables = {
+  [key: string]: string;
 };
 
 export type Command = {
@@ -111,3 +117,61 @@ export interface LanguageConfig {
 }
 
 export type LanguagesConfig = LanguageConfig[];
+
+export interface Tag {
+  tag: string | string[];
+  color: string;
+  strikethrough: boolean;
+  underline: boolean;
+  bold: boolean;
+  italic: boolean;
+  backgroundColor: string;
+}
+
+export interface TagFlatten extends Tag {
+  tag: string;
+  tagEscaped: string;
+}
+
+export interface CustomVariable {
+  name: string;
+  value: string;
+}
+
+export interface HeaderLine {
+  label: string;
+  value: string;
+  wholeLine?: boolean;
+}
+
+export interface Configuration {
+  userName: string;
+  userEmail: string;
+  companyName: string;
+  dateFormat: string;
+  autoInsertOnCreateFile: boolean;
+  autoUpdateOnSave: boolean;
+  include: string;
+  exclude: string;
+  disableLabels: string[];
+  customVariables: CustomVariable[];
+  fileheader: HeaderLine[];
+  languages: LanguagesConfig;
+  updateHeaderForModifiedFilesOnly: boolean;
+  multilineComments: boolean;
+  useJSDocStyle: boolean;
+  highlightPlainText: boolean;
+  tags: Tag[];
+  tagsLight: Tag[];
+  tagsDark: Tag[];
+}
+
+export interface ConfigurationFlatten extends Configuration {
+  tags: TagFlatten[];
+  tagsLight: TagFlatten[];
+  tagsDark: TagFlatten[];
+}
+
+export type OnDidChangeCallback = (config: ConfigurationFlatten) => void;
+
+export type Config = vscode.WorkspaceConfiguration & Configuration;

@@ -10,13 +10,12 @@ import { removeSpecialString } from '@/utils/str';
 import { FileheaderVariableBuilder } from './FileheaderVariableBuilder';
 import { FileHashManager } from './FileHashManager';
 import { CustomError } from '@/error/ErrorHandler';
-import { ErrorCode, errorCodeMessages } from '@/error/ErrorCodeMessage.enum';
+import { ErrorCode } from '@/error/ErrorCodeMessage.enum';
 import { FileheaderProviderLoader } from './FileheaderProviderLoader';
 import { LanguageProvider } from '@/language-providers';
 import { VscodeInternalProvider } from '@/language-providers/VscodeInternalProvider';
-import { IFileheaderVariables } from '../typings/types';
+import { Configuration, IFileheaderVariables } from '../typings/types';
 import { ConfigManager } from '@/configuration/ConfigManager';
-import { Configuration } from '@/configuration/types';
 import { ConfigSection } from '@/constants';
 import { OriginFileheaderInfo, UpdateFileheaderManagerOptions } from './types';
 import { FileheaderProviderService } from './FileheaderProviderService';
@@ -300,13 +299,7 @@ export class FileheaderManager {
     const provider = await this.findProvider(document);
 
     if (!provider) {
-      !allowInsert &&
-        errorHandler.handle(
-          new CustomError(
-            ErrorCode.LanguageNotSupport,
-            errorCodeMessages[ErrorCode.LanguageNotSupport],
-          ),
-        );
+      !allowInsert && errorHandler.handle(new CustomError(ErrorCode.LanguageNotSupport));
       return;
     }
 
@@ -317,7 +310,6 @@ export class FileheaderManager {
     let fileheaderVariable: IFileheaderVariables;
     try {
       fileheaderVariable = await this.fileheaderVariableBuilder?.build(
-        config,
         document.uri,
         provider,
         originFileheaderInfo.variables,

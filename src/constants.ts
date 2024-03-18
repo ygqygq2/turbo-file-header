@@ -9,7 +9,9 @@ export enum ConfigSection {
   dateFormat = ConfigTag + '.' + 'dateFormat',
   autoInsertOnCreateFile = ConfigTag + '.' + 'autoInsertOnCreateFile',
   autoUpdateOnSave = ConfigTag + '.' + 'autoUpdateOnSave',
-  disableFields = ConfigTag + '.' + 'disableFields',
+  disableLabels = ConfigTag + '.' + 'disableLabels',
+  customVariables =  ConfigTag + '.' + 'customVariables',
+  fileheader = ConfigTag + '.' + 'fileheader',
   language = ConfigTag + '.' + 'language',
   updateHeaderForModifiedFilesOnly = ConfigTag + '.' + 'updateHeaderForModifiedFilesOnly',
   multilineComments = ConfigTag + '.' + 'multilineComments',
@@ -40,12 +42,10 @@ export const WILDCARD_ACCESS_VARIABLES: Readonly<Required<IFileheaderVariables>>
   filePath: `${TEMPLATE_NAMED_GROUP_WILDCARD_PLACEHOLDER}_filePath_${TEMPLATE_NAMED_GROUP_WILDCARD_PLACEHOLDER}`,
   dirPath: `${TEMPLATE_NAMED_GROUP_WILDCARD_PLACEHOLDER}_dirPath_${TEMPLATE_NAMED_GROUP_WILDCARD_PLACEHOLDER}`,
   fileName: `${TEMPLATE_NAMED_GROUP_WILDCARD_PLACEHOLDER}_fileName_${TEMPLATE_NAMED_GROUP_WILDCARD_PLACEHOLDER}`,
+  now: `${TEMPLATE_NAMED_GROUP_WILDCARD_PLACEHOLDER}_now_${TEMPLATE_NAMED_GROUP_WILDCARD_PLACEHOLDER}`,
 };
 
 export const CUSTOM_CONFIG_FILE_NAME = 'fileheader.config.yaml';
 
-export const UPDATE_FILEHEADER_THRESHOLD = 10;
+// 返回所有的 key 值组成数组
 
-export const TEMPLATE_VARIABLE_KEYS = Reflect.ownKeys(
-  WILDCARD_ACCESS_VARIABLES,
-) as (keyof IFileheaderVariables)[];

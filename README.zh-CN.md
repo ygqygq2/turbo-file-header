@@ -30,7 +30,9 @@ Properties:
 | 保存文件时更新文件头     | 保存文件时更新文件头                                                  | autoUpdateOnSave                 | `false`                  |
 | `include` glob 模式      | 全局的 `include` glob 模式，项目级 `include` 优先                     | include                          | `**/this-default-glob/*` |
 | `exclude` glob 模式      | 全局的 `exclude` glob 模式，项目级 `exclude` 优先                     | exclude                          | ``                       |
-| 文件头中禁用字段         | 文件头中不展示的字段                                                  | disableFields                    | `[]`                     |
+| 文件头中禁用字段         | 文件头中不展示的字段                                                  | disableLabels                    | `[]`                     |
+| 自定义文件头变量         | 文件头变量支持引用其它变量                                            | customVariable                   | `[]`                     |
+| 自定义文件头             | 自定义文件头内容覆盖默认文件头                                        | fileheader                       | `[]`                     |
 | 只支持脏文件             | 只有已更新但未保存文件支持插入/更新文件头                             | updateHeaderForModifiedFilesOnly | `false`                  |
 | 额外语言支持             | 通过配置支持新/未知语言插入/更新文件头                                | languages                        | the below                |
 | JSDoc 注释风格支持 js/ts | js/ts 文件使用 JSDoc 注释风格                                         | useJSDocStyle                    | `false`                  |
@@ -40,12 +42,12 @@ Properties:
 | 配置 `tags` 在明亮主题   | 明亮主题中的 `tags` 配置                                              | tagsLight                        | `[]`                     |
 | 配置 `tags` 在暗黑主题   | 暗黑主题中的 `tags` 配置                                              | tagsDark                         | `[]`                     |
 
-**Note**:
+**注意e**:
 
 - `include` 和 `exclude` 是为了控制文件头影响范围，`addFileheader` 命令不受它们影响。
 - `author` 包含用户名/邮箱，如果文件被 VCS 追踪，将从 VCS 中获取用户信息，否则将使用备用用户名/邮箱.
 
-**Fileheader variables**
+**文件头可用变量**
 
 - `{{birthtime}}` {string} 文件创建时间. 来自 VCS 或文件系统
 - `{{mtime}}` {string} 文件最后修改时间. 来自 VCS 或文件系统
@@ -59,7 +61,7 @@ Properties:
 - `{{dirPath}}` {string} 目录路径. 相对于项目根目录. POSIX 路径分隔符
 - `{{fileName}}` {string} 包含扩展名的文件名
 - `{{description}}` {string} 文件描述，由用户输入
-- `{{now}}` {string} current time when the fileheader is generating
+- `{{now}}` {string} 生成文件头时的时间
 
 ## 默认配置列表
 

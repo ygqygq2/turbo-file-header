@@ -150,3 +150,28 @@ export function convertDateFormatToRegex(dateFormat: string): string {
 
   return dateFormat;
 }
+
+/**
+ * query when it is enabled
+ * @param disabled if true this function will return undefined immediately
+ * @param queryAction get variable operation
+ * @param fallbackVal fallback value, if it is falsy, it will throw the origin error
+ * @returns variable value or fallback value
+ */
+export async function queryResultExceptDisable<T>(
+  disabled: boolean,
+  queryAction: () => Promise<T> | T,
+  fallbackVal?: T,
+): Promise<T | undefined> {
+  if (disabled) {
+    return undefined;
+  }
+  try {
+    return await queryAction();
+  } catch (e) {
+    if (fallbackVal) {
+      return fallbackVal;
+    }
+    throw e;
+  }
+}

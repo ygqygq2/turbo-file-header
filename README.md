@@ -30,7 +30,9 @@ Properties:
 | Auto update on save file          | When save file, auto update file header                              | autoUpdateOnSave                 | `false`                  |
 | Include glob                      | "include glob" for `autoInsertOnCreateFile` and batch update command | include                          | `**/this-default-glob/*` |
 | Exclude glob                      | "exclude glob" for `autoInsertOnCreateFile` and batch update command | exclude                          | ``                       |
-| Disable fields in file header     | The fields that you want to disable in file header                   | disableFields                    | `[]`                     |
+| Disable fields in file header     | The fields that you want to disable in file header                   | disableLabels                    | `[]`                     |
+| Custom variable                   | Support use other variable                                           | customVariable                   | `[]`                     |
+| File header content               | File header content, overwrite the default file header content       | fileheader                       | the below                |
 | Only dirty file or not to support | Only dirty file to support update file header                        | updateHeaderForModifiedFilesOnly | `false`                  |
 | Extra languages support           | To support new or unknown languages                                  | languages                        | the below                |
 | JSDoc style for js/ts             | File header user JSDoc style comments                                | useJSDocStyle                    | `false`                  |
@@ -59,9 +61,46 @@ Properties:
 - `{{dirPath}}` {string} the directory path, relative to project root with POSIX path separator
 - `{{fileName}}` {string} filename with extension
 - `{{description}}` {string} description for the file
-- `{{now}}` {string} current time when the fileheader is generating
+- `{{now}}` {string} current time when the fileheader is generating, use `dateFormat` to format the time
+
+**Custom variable value can use like this:**
+
+- `{{now 'YYYY-MM-DD HH:mm:ss'}}` {string} current time when the fileheader is generating, use the custom format to format the time
+- `{{now-1 'MM'}}` {string} current time when the fileheader is generating, use month, support calculation
 
 ## Default settings list
+
+`fileheader` default settings:
+
+```
+[
+  {
+    "label": "@file",
+    "value": "{{filePath}}"
+  },
+  {
+    "label": "@description",
+    "value": ""
+  },
+  {
+    "label": "@author",
+    "value": "{{authorName}} <{{authorEmail}}>"
+  },
+  {
+    "label": "@createTime",
+    "value": "{{birthtime}}"
+  },
+  {
+    "label": "@lastModifiedTime",
+    "value": "{{mtime}}"
+  },
+  {
+    "label": "@copyright",
+    "value": "Copyright ©{{companyName}} All rights reserved",
+    "wholeLine": true
+  }
+]
+```
 
 `languages` default settings:
 

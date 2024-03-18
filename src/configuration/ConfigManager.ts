@@ -3,7 +3,7 @@ import { escapeRegexString } from '@/utils/str';
 import { ErrorCode } from '@/error/ErrorCodeMessage.enum';
 import { CustomError } from '@/error/ErrorHandler';
 import { ConfigSection, ConfigTag } from '../constants';
-import { Configuration, ConfigurationFlatten, Tag, TagFlatten } from './types';
+import { Configuration, ConfigurationFlatten, Tag, TagFlatten } from '../typings/types';
 import { errorHandler } from '@/extension';
 import { ConfigReader } from './ConfigReader';
 import { ConfigYaml } from '@/typings/types';

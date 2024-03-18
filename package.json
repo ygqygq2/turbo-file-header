@@ -106,7 +106,7 @@
           "description": "%turboFileHeader.exclude.description%",
           "default": ""
         },
-        "turboFileHeader.disableFields": {
+        "turboFileHeader.disableLabels": {
           "type": "array",
           "default": [],
           "items": {
@@ -121,32 +121,32 @@
             ]
           },
           "markdownEnumDescriptions": [
-            "%turboFileHeader.disableFields.items.enum.file%",
-            "%turboFileHeader.disableFields.items.enum.description%",
-            "%turboFileHeader.disableFields.items.enum.author%",
-            "%turboFileHeader.disableFields.items.enum.createTime%",
-            "%turboFileHeader.disableFields.items.enum.lastModifedTime%",
-            "%turboFileHeader.disableFields.items.enum.copyright%"
+            "%turboFileHeader.disableLabels.items.enum.file%",
+            "%turboFileHeader.disableLabels.items.enum.description%",
+            "%turboFileHeader.disableLabels.items.enum.author%",
+            "%turboFileHeader.disableLabels.items.enum.createTime%",
+            "%turboFileHeader.disableLabels.items.enum.lastModifedTime%",
+            "%turboFileHeader.disableLabels.items.enum.copyright%"
           ],
-          "markdownDescription": "%turboFileHeader.disableFields.markdownDescription%"
+          "markdownDescription": "%turboFileHeader.disableLabels.markdownDescription%"
         },
-        "turboFileHeader.customFields": {
+        "turboFileHeader.customVariable": {
           "type": "array",
-          "description": "%turboFileHeader.customFields.description%",
+          "description": "%turboFileHeader.customVariable.description%",
           "items": {
             "type": "object",
             "properties": {
-              "key": {
+              "name": {
                 "type": "string",
-                "description": "%turboFileHeader.customFields.items.properties.key.description%"
+                "description": "%turboFileHeader.customVariable.items.properties.name.description%"
               },
               "value": {
                 "type": "string",
-                "description": "%turboFileHeader.customFields.items.properties.value.description%"
+                "description": "%turboFileHeader.customVariable.items.properties.value.description%"
               }
             },
             "required": [
-              "key",
+              "name",
               "value"
             ],
             "default": []
@@ -190,15 +190,15 @@
               "value": "{{authorName}} <{{authorEmail}}>"
             },
             {
-              "label": "createTime",
+              "label": "@createTime",
               "value": "{{birthtime}}"
             },
             {
-              "label": "lastModifiedTime",
+              "label": "@lastModifiedTime",
               "value": "{{mtime}}"
             },
             {
-              "label": "copyright",
+              "label": "@copyright",
               "value": "Copyright ©{{companyName}} All rights reserved",
               "wholeLine": true
             }
