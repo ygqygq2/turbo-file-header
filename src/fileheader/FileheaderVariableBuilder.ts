@@ -2,9 +2,9 @@ import vscode, { WorkspaceFolder } from 'vscode';
 import { basename, dirname, relative } from 'path';
 import dayjs from 'dayjs';
 import upath from 'upath';
-import { Config, HeaderLine } from '../typings/types';
+import { Config, HeaderLine, IFileheaderVariables } from '../typings/types';
 import { stat } from 'fs/promises';
-import { ConfigSection, WILDCARD_ACCESS_VARIABLES } from '../constants';
+import { WILDCARD_ACCESS_VARIABLES } from '../constants';
 import { initVCSProvider } from '@/init';
 import { ConfigManager } from '@/configuration/ConfigManager';
 import { errorHandler } from '@/extension';
@@ -19,9 +19,11 @@ export class FileheaderVariableBuilder {
   private vcsProvider?: BaseVCSProvider;
   private variableRegex = /{{(.*?)}}/g;
   private fileUri?: vscode.Uri;
+  private dateFormat: string;
 
   constructor(private configManager: ConfigManager) {
     this.config = configManager.getConfiguration();
+    this.dateFormat = this.config.dateFormat || 'YYYY-MM-DD HH:mm:ss';
 
     this.variableBuilders = {
       ...Object.keys(WILDCARD_ACCESS_VARIABLES).reduce(
@@ -29,7 +31,7 @@ export class FileheaderVariableBuilder {
           const methodName =
             `build${key.charAt(0).toUpperCase() + key.slice(1)}` as keyof FileheaderVariableBuilder;
           if (typeof this[methodName] === 'function') {
-            obj[key] = (this[methodName] as () => Promise<string | undefined>).bind(this);
+            obj[key] = (this[methodName] as unknown as () => Promise<string | undefined>).bind(this);
           }
           return obj;
         },
@@ -38,8 +40,18 @@ export class FileheaderVariableBuilder {
     };
   }
 
-  private async build(fileUri: vscode.Uri, provider: LanguageProvider): Promise<HeaderLine[]> {
-    // const { isCustomProvider, accessVariableFields } = provider;
+  public async build(
+    fileUri: vscode.Uri,
+    provider: LanguageProvider,
+    variables: IFileheaderVariables,
+  ): Promise<HeaderLine[]> {
+    console.log('🚀 ~ file: FileheaderVariableBuilder.ts:48 ~ variables:', variables);
+    const { isCustomProvider, accessVariableFields } = provider;
+    console.log(
+    '🚀 ~ file: FileheaderVariableBuilder.ts:51 ~ isCustomProvider, accessVariableFields:',
+    isCustomProvider,
+    accessVariableFields,
+    );
     this.fileUri = fileUri;
     const fsPath = fileUri.fsPath;
     this.workspace = vscode.workspace.getWorkspaceFolder(fileUri);
@@ -118,8 +130,9 @@ export class FileheaderVariableBuilder {
     const fsPath = this.fileUri!.fsPath;
     const fileStat = await stat(fsPath);
     const isTracked = await this.vcsProvider!.isTracked(fsPath);
-    const dateFormat = this.config.get(ConfigSection.dateFormat, 'YYYY-MM-DD HH:mm:ss');
-    const birthtime = isTracked ? this.vcsProvider?.getBirthtime(fsPath) ?? dayjs(fileStat.birthtime) : dayjs(fileStat.birthtime);
+    const birthtime = isTracked
+      ? this.vcsProvider?.getBirthtime(fsPath) ?? dayjs(fileStat.birthtime, this.dateFormat)
+      : dayjs(fileStat.birthtime, this.dateFormat);
     // let tmpBirthtime = birthtime;
 
     // let originBirthtime: Dayjs | undefined = dayjs(originVariable?.birthtime, dateFormat);
@@ -137,7 +150,7 @@ export class FileheaderVariableBuilder {
   private async buildMtime() {
     const fsPath = this.fileUri!.fsPath;
     const fileStat = await stat(fsPath);
-    return dayjs(fileStat.mtime);
+    return dayjs(fileStat.mtime, this.dateFormat);
   }
 
   private async buildUserName() {

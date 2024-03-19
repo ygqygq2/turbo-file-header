@@ -14,7 +14,7 @@ import { ErrorCode } from '@/error/ErrorCodeMessage.enum';
 import { FileheaderProviderLoader } from './FileheaderProviderLoader';
 import { LanguageProvider } from '@/language-providers';
 import { VscodeInternalProvider } from '@/language-providers/VscodeInternalProvider';
-import { Configuration, IFileheaderVariables } from '../typings/types';
+import { Config, IFileheaderVariables } from '../typings/types';
 import { ConfigManager } from '@/configuration/ConfigManager';
 import { ConfigSection } from '@/constants';
 import { OriginFileheaderInfo, UpdateFileheaderManagerOptions } from './types';
@@ -99,10 +99,7 @@ export class FileheaderManager {
     output.info(new CustomError(ErrorCode.LanguageProviderNotFound));
   }
 
-  private async fileChanged(
-    config: Configuration & vscode.WorkspaceConfiguration,
-    document: vscode.TextDocument,
-  ) {
+  private async fileChanged(config: Config, document: vscode.TextDocument) {
     // 只支持脏文档时，如果当前文档不是脏文档，则标记跳过
     if (config.updateHeaderForModifiedFilesOnly && !document.isDirty) {
       return true;
@@ -123,7 +120,7 @@ export class FileheaderManager {
     document: vscode.TextDocument,
     fileheaderRange: vscode.Range,
     newFileheader: string,
-    config: Configuration & vscode.WorkspaceConfiguration,
+    config: Config,
   ) {
     const originContent = document.getText(fileheaderRange)?.replace(/\r\n/g, '\n');
     const originContentLineCount = originContent.split('\n').length;
@@ -172,7 +169,7 @@ export class FileheaderManager {
     document: vscode.TextDocument,
     originFileheaderInfo: OriginFileheaderInfo,
     newFileheader: string,
-    config: Configuration & vscode.WorkspaceConfiguration,
+    config: Config,
     allowInsert: boolean,
     newFile: boolean,
   ) {
@@ -227,7 +224,7 @@ export class FileheaderManager {
     provider: LanguageProvider,
     originFileheaderInfo: OriginFileheaderInfo,
     fileheaderVariable: IFileheaderVariables,
-    config: Configuration & vscode.WorkspaceConfiguration,
+    config: Config,
     allowInsert: boolean,
     newFile: boolean,
   ) {

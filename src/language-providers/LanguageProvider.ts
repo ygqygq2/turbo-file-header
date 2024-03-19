@@ -1,22 +1,32 @@
 import vscode from 'vscode';
 import { evaluateTemplate, getTaggedTemplateInputs, hasShebang } from '../utils/utils';
-import { Config, IFileheaderVariables, ITemplateFunction, Template } from '../typings/types';
+import {
+  IFileheaderVariables,
+  ITemplateFunction,
+  Template,
+  TemplateInterpolation,
+} from '../typings/types';
 import {
   TEMPLATE_NAMED_GROUP_WILDCARD_PLACEHOLDER,
   TEMPLATE_OPTIONAL_GROUP_PLACEHOLDER,
   WILDCARD_ACCESS_VARIABLES,
 } from '../constants';
 import { escapeRegexString } from '@/utils/str';
+import { ConfigManager } from '@/configuration/ConfigManager';
+import { LanguageProviderOptions } from './types';
 
 export abstract class LanguageProvider {
-  private config: Config;
+  protected configManager: ConfigManager;
+  public readonly workspaceScopeUri?: vscode.Uri;
+  public readonly accessVariableFields = new Set<keyof IFileheaderVariables>();
 
   /**
    *
    * @param workspaceScopeUri the custom loader workspace folder uri
    */
-  constructor(config: Config, public readonly workspaceScopeUri?: vscode.Uri) {
-    this.config = config;
+  constructor(options: LanguageProviderOptions) {
+    this.configManager = options.configManager;
+    this.workspaceScopeUri = options.workspaceScopeUri;
     this.calculateVariableAccessInfo();
   }
 
@@ -43,6 +53,20 @@ export abstract class LanguageProvider {
       blockCommentEnd = this.comments.lineComment;
     }
     return { blockCommentStart, blockCommentEnd };
+  }
+
+  protected generateLine(
+    tpl: ITemplateFunction,
+    label: string,
+    value: string | TemplateInterpolation,
+    longestLabelLength: number,
+    wholeLine: boolean = false,
+  ): Template {
+    if (wholeLine) {
+      return tpl` * ${value}\n`;
+    }
+    const spaces = ' '.repeat(longestLabelLength - label.length);
+    return tpl` * ${label}${spaces}    ${value}\n`;
   }
 
   protected abstract getTemplate(
@@ -179,7 +203,6 @@ export abstract class LanguageProvider {
     return sourceWithoutHeader;
   }
 
-  public readonly accessVariableFields = new Set<keyof IFileheaderVariables>();
   private calculateVariableAccessInfo() {
     const addVariableAccess = (p: string) =>
       this.accessVariableFields.add(p as keyof IFileheaderVariables);

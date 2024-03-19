@@ -3,7 +3,7 @@ import { escapeRegexString } from '@/utils/str';
 import { ErrorCode } from '@/error/ErrorCodeMessage.enum';
 import { CustomError } from '@/error/ErrorHandler';
 import { ConfigSection, ConfigTag } from '../constants';
-import { Configuration, ConfigurationFlatten, Tag, TagFlatten } from '../typings/types';
+import { Config, ConfigurationFlatten, Tag, TagFlatten } from '../typings/types';
 import { errorHandler } from '@/extension';
 import { ConfigReader } from './ConfigReader';
 import { ConfigYaml } from '@/typings/types';
@@ -11,7 +11,7 @@ import { ConfigYaml } from '@/typings/types';
 export class ConfigManager {
   private static instance: ConfigManager;
   private configReader: ConfigReader;
-  private configuration: Configuration & vscode.WorkspaceConfiguration;
+  private configuration: Config;
   private configFlatten: ConfigurationFlatten;
   private configYaml: ConfigYaml | undefined;
 
@@ -49,13 +49,12 @@ export class ConfigManager {
     await this._config.update(section, value);
   }
 
-  public getConfiguration(forceRefresh = false): Configuration & vscode.WorkspaceConfiguration {
+  public getConfiguration(forceRefresh = false): Config {
     if (this.configuration && !forceRefresh) {
       return this.configuration;
     }
 
-    const config = vscode.workspace.getConfiguration(ConfigTag) as Configuration &
-      vscode.WorkspaceConfiguration;
+    const config = vscode.workspace.getConfiguration(ConfigTag) as Config;
     if (!config) {
       errorHandler.handle(new CustomError(ErrorCode.GetConfigurationFail));
     }

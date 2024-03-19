@@ -5,10 +5,20 @@ import { LanguageProvider } from './LanguageProvider';
 import output from '@/error/output';
 import { LanguageManager } from '@/languages/LanguageManager';
 import { ConfigReader } from '../configuration/ConfigReader';
+import { ExtendedLanguageProviderOptions } from './types';
+import { ConfigManager } from '@/configuration/ConfigManager';
 
 interface ProviderDyClass {
   name: string;
-  providerClass: new (languageManager: LanguageManager, uri: vscode.Uri) => LanguageProvider;
+  providerClass: new ({
+    configManager,
+    languageManager,
+    workspaceScopeUri,
+  }: {
+    configManager: ConfigManager;
+    languageManager: LanguageManager;
+    workspaceScopeUri: vscode.Uri;
+  }) => LanguageProvider;
 }
 
 export class GenerateCustomProviderClasses {
@@ -31,8 +41,9 @@ export class GenerateCustomProviderClasses {
         public readonly languages = [languageId];
         readonly startLineOffset = startLineOffset;
 
-        constructor(languageManager: LanguageManager, workspaceScopeUri?: vscode.Uri | undefined) {
-          super(workspaceScopeUri);
+        constructor(options: ExtendedLanguageProviderOptions) {
+          super(options);
+          const { languageManager } = options;
           this.languageManager = languageManager;
           // 这里异步的，但是初始化时很早，所以它会在使用时已经初始化完成
           this.initialize(languageId);

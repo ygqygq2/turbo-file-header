@@ -10,7 +10,7 @@ export enum ConfigSection {
   autoInsertOnCreateFile = ConfigTag + '.' + 'autoInsertOnCreateFile',
   autoUpdateOnSave = ConfigTag + '.' + 'autoUpdateOnSave',
   disableLabels = ConfigTag + '.' + 'disableLabels',
-  customVariables =  ConfigTag + '.' + 'customVariables',
+  customVariables = ConfigTag + '.' + 'customVariables',
   fileheader = ConfigTag + '.' + 'fileheader',
   language = ConfigTag + '.' + 'language',
   updateHeaderForModifiedFilesOnly = ConfigTag + '.' + 'updateHeaderForModifiedFilesOnly',
@@ -46,6 +46,3 @@ export const WILDCARD_ACCESS_VARIABLES: Readonly<Required<IFileheaderVariables>>
 };
 
 export const CUSTOM_CONFIG_FILE_NAME = 'fileheader.config.yaml';
-
-// 返回所有的 key 值组成数组
-

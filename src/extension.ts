@@ -16,7 +16,6 @@ import { GenerateTemplateConfig } from './fileheader/GenerateTemplateConfig';
 import { GenerateCustomProviderClasses } from './language-providers/GenerateCustomProviderClasses';
 import { FileheaderVariableBuilder } from './fileheader/FileheaderVariableBuilder';
 import { ConfigReader } from './configuration/ConfigReader';
-import { ExtensionActivator } from './extension-operate/ExtensionActivator';
 import { DebounceManager } from './extension-operate/DebounceManager';
 import { FileheaderProviderService } from './fileheader/FileheaderProviderService';
 import { FileMatcher } from './extension-operate/FileMatcher';
@@ -30,6 +29,7 @@ export const languageManager = LanguageManager.getInstance(configManager);
 export const languageEvent = new LanguageEvent(languageManager);
 const generateCustomProviderClasses = new GenerateCustomProviderClasses(configReader);
 const fileheaderProviderLoader = new FileheaderProviderLoader(
+  configManager,
   languageManager,
   generateCustomProviderClasses,
 );
@@ -48,15 +48,8 @@ const fileWatcher = new FileWatcher(configManager, fileheaderManager);
 const debounceManager = new DebounceManager();
 const documentHandler = new DocumentHandler(debounceManager, configManager, fileheaderManager);
 export const generateCustomTemplate = GenerateTemplateConfig.getInstance();
-export const extension = new ExtensionActivator(
-  configEvent,
-  languageEvent,
-  fileWatcher,
-  documentHandler,
-  fileheaderManager,
-);
 
-const activate = async (context: vscode.ExtensionContext) => {
+export const activate = async (context: vscode.ExtensionContext) => {
   const parser = useParser();
   await fileheaderManager.loadProviders();
 
@@ -128,6 +121,4 @@ const activate = async (context: vscode.ExtensionContext) => {
   );
 };
 
-const deactivate = () => {};
-
-export { activate, deactivate };
+export const deactivate = () => {};

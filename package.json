@@ -266,6 +266,23 @@
                   ]
                 }
               }
+            },
+            {
+              "id": "vue",
+              "extensions": [
+                ".vue"
+              ],
+              "aliases": [
+                "vue"
+              ],
+              "configuration": {
+                "comments": {
+                  "blockComment": [
+                    "<!--",
+                    "-->"
+                  ]
+                }
+              }
             }
           ]
         },

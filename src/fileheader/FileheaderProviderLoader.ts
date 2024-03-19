@@ -8,17 +8,21 @@ import { getActiveDocumentWorkspace } from '@/utils/vscode-utils';
 import { CUSTOM_CONFIG_FILE_NAME } from '@/constants';
 import { LanguageManager } from '@/languages/LanguageManager';
 import { VscodeInternalProvider } from '../language-providers/VscodeInternalProvider';
+import { ConfigManager } from '@/configuration/ConfigManager';
 
 export class FileheaderProviderLoader {
+  private configManager: ConfigManager;
   private languageManager: LanguageManager;
   private generateCustomProviderClasses: GenerateCustomProviderClasses;
   // 存储已加载 provider 的缓存
   private providersCache: LanguageProvider[] | null = null;
 
   constructor(
+    configManager: ConfigManager,
     languageManager: LanguageManager,
     generateCustomProviderClasses: GenerateCustomProviderClasses,
   ) {
+    this.configManager = configManager;
     this.languageManager = languageManager;
     this.generateCustomProviderClasses = generateCustomProviderClasses;
   }
@@ -32,7 +36,10 @@ export class FileheaderProviderLoader {
     this.providersCache = [
       ...customProviders,
       ...internalProviders,
-      new VscodeInternalProvider(this.languageManager),
+      new VscodeInternalProvider({
+        configManager: this.configManager,
+        languageManager: this.languageManager,
+      }),
     ];
     return this.providersCache;
   }
@@ -52,7 +59,11 @@ export class FileheaderProviderLoader {
           try {
             const defaultUri = vscode.Uri.file('.vscode' + CUSTOM_CONFIG_FILE_NAME);
             const uriToUse = activeWorkspace?.uri || defaultUri;
-            return new ProviderClass(this.languageManager, uriToUse);
+            return new ProviderClass({
+              configManager: this.configManager,
+              languageManager: this.languageManager,
+              workspaceScopeUri: uriToUse,
+            });
           } catch (error) {
             output.error(
               errorHandler.handle(

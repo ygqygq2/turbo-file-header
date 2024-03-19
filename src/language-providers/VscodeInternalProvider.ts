@@ -1,21 +1,17 @@
 import * as vscode from 'vscode';
-import {
-  Config,
-  IFileheaderVariables,
-  ITemplateFunction,
-  Template,
-  TemplateInterpolation,
-} from '../typings/types';
+import { ITemplateFunction, Template, TemplateInterpolation } from '../typings/types';
 import { LanguageProvider } from './LanguageProvider';
 import { LanguageManager } from '@/languages/LanguageManager';
+import { ExtendedLanguageProviderOptions } from './types';
 
 export class VscodeInternalProvider extends LanguageProvider {
   private languageManager: LanguageManager;
   public languages: string[] = [];
   comments: vscode.CommentRule = { lineComment: '//', blockComment: ['/*', '*/'] };
 
-  constructor(languageManager: LanguageManager) {
-    super();
+  constructor(options: ExtendedLanguageProviderOptions) {
+    super(options);
+    const { languageManager } = options;
     this.languageManager = languageManager;
   }
 
@@ -25,38 +21,22 @@ export class VscodeInternalProvider extends LanguageProvider {
     this.comments = comments;
   };
 
-  override getTemplate(
+  public override getTemplate(
     tpl: ITemplateFunction,
-    variables: IFileheaderVariables,
+    variables: any,
     useJSDocStyle: boolean = false,
   ): Template {
     const { blockCommentStart, blockCommentEnd } = this.getBlockComment();
 
-    const labels = ['file', 'description', 'author', 'createTime', 'lastModified'];
-    const longestLabelLength = Math.max(...labels.map((label) => label.length));
-
-    const generateLine = (
-      label: string,
-      ...values: (string | TemplateInterpolation)[]
-    ): Template => {
-      if (values.length === 0) {
-        return tpl``;
-      }
-      const spaces = ' '.repeat(longestLabelLength - label.length);
-      const combinedValues = values.reduce((prev, curr) => tpl`${prev} ${curr}`, tpl``);
-      return tpl` * @${label}${spaces}    ${combinedValues}\n`;
-    };
-
-    const authorEmailPart = variables.authorEmail ? `<${variables.authorEmail}>` : '';
-
-    const lines = [
-      generateLine('file', variables.filePath),
-      generateLine('description', ''),
-      generateLine('author', variables.authorName, authorEmailPart),
-      generateLine('createTime', variables.birthtime),
-      generateLine('lastModified', variables.mtime),
-      tpl` * Copyright ©${variables.companyName} All rights reserved\n`,
-    ];
+    const config = this.configManager.getConfiguration();
+    const { fileheader } = config;
+    let longestLabelLength = 0;
+    const lines = fileheader.map((item) => {
+      const { label, wholeLine } = item;
+      longestLabelLength = Math.max(longestLabelLength, label.length);
+      const value = variables[label];
+      return this.generateLine(tpl, label, value, longestLabelLength, wholeLine);
+    });
 
     if (this.comments && this.comments.blockComment && this.comments.blockComment.length) {
       const combinedLines = lines.reduce((prev, curr) => tpl`${prev}${curr}`, tpl``);
