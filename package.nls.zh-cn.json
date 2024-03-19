@@ -23,6 +23,7 @@
   "turboFileHeader.fileheader.description": "文件头内容，如果设置，将会覆盖默认文件头内容",
   "turboFileHeader.fileheader.items.properties.label.description": "左边标签的名称",
   "turboFileHeader.fileheader.items.properties.value.description": "字段的值",
+  "turboFileHeader.fileheader.items.properties.usePrevious.description": "使用上一次的值",
   "turboFileHeader.fileheader.items.properties.wholeLine.description": "是否占据一整行，即不显示 key",
   "turboFileHeader.updateHeaderForModifiedFilesOnly.description": "只对修改过但未保存的文件进行更新文件头（注意是否开启了自动保存功能）",
   "turboFileHeader.languages.description": "自定义语言支持",

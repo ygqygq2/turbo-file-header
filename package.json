@@ -166,6 +166,10 @@
                 "type": "string",
                 "description": "turboFileHeader.fileheader.items.properties.value.description%"
               },
+              "usePrevious": {
+                "type": "boolean",
+                "description": "turboFileHeader.fileheader.items.properties.usePrevious.description%"
+              },
               "wholeLine": {
                 "type": "boolean",
                 "description": "turboFileHeader.fileheader.items.properties.wholeLine.description%"
@@ -183,7 +187,8 @@
             },
             {
               "label": "@description",
-              "value": ""
+              "value": "",
+              "usePrevious": true
             },
             {
               "label": "@author",

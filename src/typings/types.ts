@@ -141,6 +141,7 @@ export interface CustomVariable {
 export interface HeaderLine {
   label: string;
   value: string;
+  usePrevious: boolean;
   wholeLine?: boolean;
 }
 
