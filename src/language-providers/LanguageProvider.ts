@@ -68,7 +68,7 @@ export abstract class LanguageProvider {
     const spaces = ' '.repeat(longestLabelLength - label.length);
     const combinedValues = values.reduce(
       (prev, curr, index) => {
-        return index === 0 ? tpl`${curr}` : tpl`${prev} ${curr}`;
+        return index === 0 ? tpl`${curr}` : tpl`${prev}${curr}`;
       },
       tpl``,
     );
@@ -112,9 +112,7 @@ export abstract class LanguageProvider {
   public getOriginFileheaderRegExp(eol: vscode.EndOfLine): RegExp {
     const { wildcardAccessVariables } = this.generateWildcardAccessVariables();
     const template = this.getTemplateInternal(wildcardAccessVariables);
-    console.log('🚀 ~ file: LanguageProvider.ts:114 ~ template:', template);
     const templateValue = evaluateTemplate(template.strings, template.interpolations, true);
-    console.log('🚀 ~ file: LanguageProvider.ts:116 ~ templateValue:', templateValue);
 
     const pattern = templateValue
       .replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // 转义正则特殊字符
