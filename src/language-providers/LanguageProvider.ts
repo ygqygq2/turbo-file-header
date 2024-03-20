@@ -6,11 +6,7 @@ import {
   Template,
   TemplateInterpolation,
 } from '../typings/types';
-import {
-  TEMPLATE_NAMED_GROUP_WILDCARD_PLACEHOLDER,
-  TEMPLATE_OPTIONAL_GROUP_PLACEHOLDER,
-  WILDCARD_ACCESS_VARIABLES,
-} from '../constants';
+import { TEMPLATE_NAMED_GROUP_WILDCARD_PLACEHOLDER, WILDCARD_ACCESS_VARIABLES } from '../constants';
 import { escapeRegexString } from '@/utils/str';
 import { ConfigManager } from '@/configuration/ConfigManager';
 import { LanguageProviderOptions } from './types';
@@ -18,7 +14,7 @@ import { LanguageProviderOptions } from './types';
 export abstract class LanguageProvider {
   protected configManager: ConfigManager;
   public readonly workspaceScopeUri?: vscode.Uri;
-  public readonly accessVariableFields = new Set<keyof IFileheaderVariables>();
+  public readonly accessVariableFields = new Set<string>();
 
   /**
    *
@@ -58,15 +54,21 @@ export abstract class LanguageProvider {
   protected generateLine(
     tpl: ITemplateFunction,
     label: string,
-    value: string | TemplateInterpolation,
+    values: (string | TemplateInterpolation)[],
     longestLabelLength: number,
-    wholeLine: boolean = false,
+    wholeLine = false,
   ): Template {
-    if (wholeLine) {
-      return tpl` * ${value}\n`;
+    if (values.length === 0) {
+      return tpl``;
     }
     const spaces = ' '.repeat(longestLabelLength - label.length);
-    return tpl` * ${label}${spaces}    ${value}\n`;
+    const combinedValues = values.reduce(
+      (prev, curr, index) => {
+        return index === 0 ? tpl`${curr}` : tpl`${prev} ${curr}`;
+      },
+      tpl``,
+    );
+    return wholeLine ? tpl`${combinedValues}\n` : tpl`${label}${spaces}    ${combinedValues}\n`;
   }
 
   protected abstract getTemplate(
@@ -75,7 +77,7 @@ export abstract class LanguageProvider {
     useJSDocStyle?: boolean,
   ): Template;
 
-  private getTemplateInternal(variables: IFileheaderVariables, useJSDocStyle: boolean = false) {
+  private getTemplateInternal(variables: any, useJSDocStyle: boolean = false) {
     return this.getTemplate(getTaggedTemplateInputs, variables, useJSDocStyle);
   }
 
@@ -89,25 +91,37 @@ export abstract class LanguageProvider {
     return evaluateTemplate(copiedStrings, interpolations);
   }
 
+  protected generateWildcardAccessVariables() {
+    const config = this.configManager.getConfiguration();
+    const { customVariables } = config;
+    // 创建一个新的对象，将 WILDCARD_ACCESS_VARIABLES 对象和新的属性合并到这个新的对象中
+    const newVariables: { [key: string]: string } = { ...WILDCARD_ACCESS_VARIABLES };
+    // 将 customVariables 的 name 属性添加到 newVariables 对象中
+    customVariables.forEach((variable) => {
+      newVariables[variable.name] =
+        `${TEMPLATE_NAMED_GROUP_WILDCARD_PLACEHOLDER}_${variable.name}_${TEMPLATE_NAMED_GROUP_WILDCARD_PLACEHOLDER}`;
+    });
+    return { customVariables, wildcardAccessVariables: newVariables };
+  }
+
   public getOriginFileheaderRegExp(eol: vscode.EndOfLine): RegExp {
-    const template = this.getTemplateInternal(WILDCARD_ACCESS_VARIABLES as IFileheaderVariables);
+    const { wildcardAccessVariables } = this.generateWildcardAccessVariables();
+    const template = this.getTemplateInternal(wildcardAccessVariables);
+    console.log('🚀 ~ file: LanguageProvider.ts:114 ~ template:', template);
     const templateValue = evaluateTemplate(template.strings, template.interpolations, true);
+    console.log('🚀 ~ file: LanguageProvider.ts:116 ~ templateValue:', templateValue);
 
+    // 替换特殊字符和处理换行符
     const pattern = templateValue
-      .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-      .replace(/\r\n/g, '\n')
-      .replace(new RegExp(`${TEMPLATE_OPTIONAL_GROUP_PLACEHOLDER.start}`, 'g'), '(?:')
-      .replace(new RegExp(`${TEMPLATE_OPTIONAL_GROUP_PLACEHOLDER.end}`, 'g'), ')?')
-      .replace(
-        new RegExp(
-          `${TEMPLATE_NAMED_GROUP_WILDCARD_PLACEHOLDER}_(\\w+)_${TEMPLATE_NAMED_GROUP_WILDCARD_PLACEHOLDER}`,
-          'g',
-        ),
-        '(?<$1>.*)',
-      )
-      .replace(/\n/g, eol === vscode.EndOfLine.CRLF ? '\r\n' : '\n');
+      .replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // 转义正则特殊字符
+      .replace(/\s*→\s*|\s*←\s*/g, '\\s*') // 将“→”和“←”转换为对应的空白字符匹配
+      .replace(/这是分界符_(\w+)_这是分界符/g, '(?<$1>.*?)'); // 转换变量部分为捕获组，注意这里用.*?进行非贪婪匹配
 
-    return new RegExp(pattern, 'm');
+    // 创建正则表达式，使用'm'标志进行多行匹配
+    const regex = new RegExp(pattern, 'm');
+
+    console.log(regex);
+    return regex;
   }
 
   public getOriginFileheaderRange(document: vscode.TextDocument) {
@@ -204,10 +218,14 @@ export abstract class LanguageProvider {
   }
 
   private calculateVariableAccessInfo() {
+    const { wildcardAccessVariables, customVariables } = this.generateWildcardAccessVariables();
+    customVariables.forEach((variable) => {
+      this.accessVariableFields.add(variable.name);
+    });
     const addVariableAccess = (p: string) =>
       this.accessVariableFields.add(p as keyof IFileheaderVariables);
 
-    const proxyVariables = new Proxy(WILDCARD_ACCESS_VARIABLES, {
+    const proxyVariables = new Proxy(wildcardAccessVariables, {
       get(target, p, _receiver) {
         addVariableAccess(p as string);
         return Reflect.get(target, p);

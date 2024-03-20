@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import output from '@/error/output';
-import { LanguageProvider, internalProviders } from '@/language-providers';
+import { LanguageProvider } from '@/language-providers';
 import { GenerateCustomProviderClasses } from '../language-providers/GenerateCustomProviderClasses';
 import { errorHandler } from '@/extension';
 import { CustomError, ErrorCode } from '@/error';
@@ -9,6 +9,7 @@ import { CUSTOM_CONFIG_FILE_NAME } from '@/constants';
 import { LanguageManager } from '@/languages/LanguageManager';
 import { VscodeInternalProvider } from '../language-providers/VscodeInternalProvider';
 import { ConfigManager } from '@/configuration/ConfigManager';
+import { VueProvider } from '@/language-providers/VueProvider';
 
 export class FileheaderProviderLoader {
   private configManager: ConfigManager;
@@ -35,7 +36,7 @@ export class FileheaderProviderLoader {
     const customProviders = await this.loadCustomProvers();
     this.providersCache = [
       ...customProviders,
-      ...internalProviders,
+      new VueProvider({ configManager: this.configManager }),
       new VscodeInternalProvider({
         configManager: this.configManager,
         languageManager: this.languageManager,

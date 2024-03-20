@@ -28,7 +28,7 @@ export const TEMPLATE_OPTIONAL_GROUP_PLACEHOLDER = {
   end: '←' as const,
 };
 
-export const TEMPLATE_NAMED_GROUP_WILDCARD_PLACEHOLDER = '欢迎使用 Turbo File Header';
+export const TEMPLATE_NAMED_GROUP_WILDCARD_PLACEHOLDER = '这是分界符';
 
 export const WILDCARD_ACCESS_VARIABLES: Readonly<Required<IFileheaderVariables>> = {
   birthtime: `${TEMPLATE_NAMED_GROUP_WILDCARD_PLACEHOLDER}_birthtime_${TEMPLATE_NAMED_GROUP_WILDCARD_PLACEHOLDER}`,

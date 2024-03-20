@@ -130,19 +130,19 @@
           ],
           "markdownDescription": "%turboFileHeader.disableLabels.markdownDescription%"
         },
-        "turboFileHeader.customVariable": {
+        "turboFileHeader.customVariables": {
           "type": "array",
-          "description": "%turboFileHeader.customVariable.description%",
+          "description": "%turboFileHeader.customVariables.description%",
           "items": {
             "type": "object",
             "properties": {
               "name": {
                 "type": "string",
-                "description": "%turboFileHeader.customVariable.items.properties.name.description%"
+                "description": "%turboFileHeader.customVariables.items.properties.name.description%"
               },
               "value": {
                 "type": "string",
-                "description": "%turboFileHeader.customVariable.items.properties.value.description%"
+                "description": "%turboFileHeader.customVariables.items.properties.value.description%"
               }
             },
             "required": [
@@ -182,29 +182,29 @@
           },
           "default": [
             {
-              "label": "@file",
+              "label": " * @file",
               "value": "{{filePath}}"
             },
             {
-              "label": "@description",
+              "label": " * @description",
               "value": "",
               "usePrevious": true
             },
             {
-              "label": "@author",
+              "label": " * @author",
               "value": "{{authorName}} <{{authorEmail}}>"
             },
             {
-              "label": "@createTime",
+              "label": " * @createTime",
               "value": "{{birthtime}}"
             },
             {
-              "label": "@lastModifiedTime",
+              "label": " * @lastModifiedTime",
               "value": "{{mtime}}"
             },
             {
               "label": "@copyright",
-              "value": "Copyright ©{{companyName}} All rights reserved",
+              "value": " * Copyright ©{{companyName}} All rights reserved",
               "wholeLine": true
             }
           ]

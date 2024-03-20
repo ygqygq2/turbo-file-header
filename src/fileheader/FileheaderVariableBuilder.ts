@@ -45,7 +45,6 @@ export class FileheaderVariableBuilder {
     provider: LanguageProvider,
     variables: IFileheaderVariables,
   ): Promise<HeaderLine[]> {
-    console.log('🚀 ~ file: FileheaderVariableBuilder.ts:48 ~ variables:', variables);
     const { isCustomProvider, accessVariableFields } = provider;
     console.log(
     '🚀 ~ file: FileheaderVariableBuilder.ts:51 ~ isCustomProvider, accessVariableFields:',

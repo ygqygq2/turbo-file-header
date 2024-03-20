@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { ITemplateFunction, Template, TemplateInterpolation } from '../typings/types';
+import { ITemplateFunction, Template } from '../typings/types';
 import { LanguageProvider } from './LanguageProvider';
 import { LanguageManager } from '@/languages/LanguageManager';
 import { ExtendedLanguageProviderOptions } from './types';
@@ -32,10 +32,16 @@ export class VscodeInternalProvider extends LanguageProvider {
     const { fileheader } = config;
     let longestLabelLength = 0;
     const lines = fileheader.map((item) => {
-      const { label, wholeLine } = item;
+      const { label, wholeLine = false } = item;
+      const value = item.value;
       longestLabelLength = Math.max(longestLabelLength, label.length);
-      const value = variables[label];
-      return this.generateLine(tpl, label, value, longestLabelLength, wholeLine);
+      // 使用正则表达式替换 {{变量}} 格式的字符串
+      const valueParts = value.split(/(\{\{\w+\}\})/g).map((part) => {
+        return part.replace(/\{\{(\w+)\}\}/, (match, p1) => {
+          return variables[p1] || '';
+        });
+      });
+      return this.generateLine(tpl, label, valueParts, longestLabelLength, wholeLine);
     });
 
     if (this.comments && this.comments.blockComment && this.comments.blockComment.length) {
