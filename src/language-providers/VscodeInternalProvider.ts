@@ -31,6 +31,11 @@ export class VscodeInternalProvider extends LanguageProvider {
     const config = this.configManager.getConfiguration();
     const { fileheader } = config;
     let longestLabelLength = 0;
+    for (const item of fileheader) {
+      const { label } = item;
+      longestLabelLength = Math.max(longestLabelLength, label.length);
+    }
+
     const lines = fileheader.map((item) => {
       const { label, wholeLine = false } = item;
       const value = item.value;

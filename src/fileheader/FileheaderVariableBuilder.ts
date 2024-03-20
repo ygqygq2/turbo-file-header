@@ -2,7 +2,7 @@ import vscode, { WorkspaceFolder } from 'vscode';
 import { basename, dirname, relative } from 'path';
 import dayjs from 'dayjs';
 import upath from 'upath';
-import { Config, HeaderLine, IFileheaderVariables } from '../typings/types';
+import { Config } from '../typings/types';
 import { stat } from 'fs/promises';
 import { WILDCARD_ACCESS_VARIABLES } from '../constants';
 import { initVCSProvider } from '@/init';
@@ -31,7 +31,9 @@ export class FileheaderVariableBuilder {
           const methodName =
             `build${key.charAt(0).toUpperCase() + key.slice(1)}` as keyof FileheaderVariableBuilder;
           if (typeof this[methodName] === 'function') {
-            obj[key] = (this[methodName] as unknown as () => Promise<string | undefined>).bind(this);
+            obj[key] = (this[methodName] as unknown as () => Promise<string | undefined>).bind(
+              this,
+            );
           }
           return obj;
         },
@@ -43,13 +45,13 @@ export class FileheaderVariableBuilder {
   public async build(
     fileUri: vscode.Uri,
     provider: LanguageProvider,
-    variables: IFileheaderVariables,
-  ): Promise<HeaderLine[]> {
+    variables: { [key: string]: string } | undefined,
+  ): Promise<{ [key: string]: string }> {
     const { isCustomProvider, accessVariableFields } = provider;
     console.log(
-    '🚀 ~ file: FileheaderVariableBuilder.ts:51 ~ isCustomProvider, accessVariableFields:',
-    isCustomProvider,
-    accessVariableFields,
+      '🚀 ~ file: FileheaderVariableBuilder.ts:51 ~ isCustomProvider, accessVariableFields:',
+      isCustomProvider,
+      accessVariableFields,
     );
     this.fileUri = fileUri;
     const fsPath = fileUri.fsPath;
@@ -65,7 +67,7 @@ export class FileheaderVariableBuilder {
     }
 
     const { fileheader, disableLabels } = this.config;
-    const newFileheader: HeaderLine[] = [];
+    const newVariables: { [key: string]: string } = {};
 
     for (const item of fileheader) {
       if (!disableLabels.includes(item.label)) {
@@ -78,19 +80,13 @@ export class FileheaderVariableBuilder {
             const result = builder
               ? (await builder()) || ''
               : (await this.buildCustomVariable(variable)) || '';
-            newFileheader.push({
-              label: item.label,
-              value: result,
-              ...(item.wholeLine !== undefined && { wholeLine: item.wholeLine }),
-            });
+            newVariables[variable] = result;
           }
-        } else {
-          newFileheader.push(item);
         }
       }
     }
 
-    return newFileheader;
+    return newVariables;
   }
 
   private async buildCustomVariable(variable: string): Promise<string> {
@@ -115,14 +111,18 @@ export class FileheaderVariableBuilder {
     return value;
   }
 
-  private buildAuthorInfo = async () => {
+  private buildAuthorName = async () => {
     const fsPath = this.fileUri!.fsPath;
-    const userName = this.vcsProvider ? await this.vcsProvider.getUserName(dirname(fsPath)) : '';
-    const userEmail = this.vcsProvider ? await this.vcsProvider.getUserEmail(dirname(fsPath)) : '';
-    return {
-      userName,
-      userEmail,
-    };
+    const authorName = this.vcsProvider ? await this.vcsProvider.getAuthorName(fsPath) : '';
+    const userName = await this.buildUserName();
+    return authorName || userName;
+  };
+
+  private buildAuthorEmail = async () => {
+    const fsPath = this.fileUri!.fsPath;
+    const authorEmail = this.vcsProvider ? await this.vcsProvider.getAuthorEmail(fsPath) : '';
+    const userEmail = await this.buildUserEmail();
+    return authorEmail || userEmail;
   };
 
   private buildBirthtime = async () => {
@@ -130,8 +130,10 @@ export class FileheaderVariableBuilder {
     const fileStat = await stat(fsPath);
     const isTracked = await this.vcsProvider!.isTracked(fsPath);
     const birthtime = isTracked
-      ? this.vcsProvider?.getBirthtime(fsPath) ?? dayjs(fileStat.birthtime, this.dateFormat)
-      : dayjs(fileStat.birthtime, this.dateFormat);
+      ? dayjs((await this.vcsProvider?.getBirthtime(fsPath)) ?? fileStat.birthtime).format(
+          this.dateFormat,
+        )
+      : dayjs(fileStat.birthtime).format(this.dateFormat);
     // let tmpBirthtime = birthtime;
 
     // let originBirthtime: Dayjs | undefined = dayjs(originVariable?.birthtime, dateFormat);
@@ -149,15 +151,19 @@ export class FileheaderVariableBuilder {
   private async buildMtime() {
     const fsPath = this.fileUri!.fsPath;
     const fileStat = await stat(fsPath);
-    return dayjs(fileStat.mtime, this.dateFormat);
+    return dayjs(fileStat.mtime).format(this.dateFormat);
   }
 
   private async buildUserName() {
-    return this.config?.userName || '';
+    const fsPath = this.fileUri!.fsPath;
+    const userName = this.vcsProvider ? await this.vcsProvider.getUserName(dirname(fsPath)) : '';
+    return userName || this.config?.userName || '';
   }
 
   private async buildUserEmail() {
-    return this.config?.userEmail || '';
+    const fsPath = this.fileUri!.fsPath;
+    const userEmail = this.vcsProvider ? await this.vcsProvider.getUserEmail(dirname(fsPath)) : '';
+    return userEmail || this.config?.userEmail || '';
   }
 
   private buildCompanyName() {

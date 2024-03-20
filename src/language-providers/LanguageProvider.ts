@@ -6,7 +6,11 @@ import {
   Template,
   TemplateInterpolation,
 } from '../typings/types';
-import { TEMPLATE_NAMED_GROUP_WILDCARD_PLACEHOLDER, WILDCARD_ACCESS_VARIABLES } from '../constants';
+import {
+  TEMPLATE_NAMED_GROUP_WILDCARD_PLACEHOLDER,
+  TEMPLATE_OPTIONAL_GROUP_PLACEHOLDER,
+  WILDCARD_ACCESS_VARIABLES,
+} from '../constants';
 import { escapeRegexString } from '@/utils/str';
 import { ConfigManager } from '@/configuration/ConfigManager';
 import { LanguageProviderOptions } from './types';
@@ -78,6 +82,7 @@ export abstract class LanguageProvider {
   ): Template;
 
   private getTemplateInternal(variables: any, useJSDocStyle: boolean = false) {
+    console.log(getTaggedTemplateInputs, variables, useJSDocStyle);
     return this.getTemplate(getTaggedTemplateInputs, variables, useJSDocStyle);
   }
 
@@ -111,11 +116,18 @@ export abstract class LanguageProvider {
     const templateValue = evaluateTemplate(template.strings, template.interpolations, true);
     console.log('🚀 ~ file: LanguageProvider.ts:116 ~ templateValue:', templateValue);
 
-    // 替换特殊字符和处理换行符
     const pattern = templateValue
       .replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // 转义正则特殊字符
-      .replace(/\s*→\s*|\s*←\s*/g, '\\s*') // 将“→”和“←”转换为对应的空白字符匹配
-      .replace(/这是分界符_(\w+)_这是分界符/g, '(?<$1>.*?)'); // 转换变量部分为捕获组，注意这里用.*?进行非贪婪匹配
+      .replace(/\r\n/g, '\n')
+      .replace(new RegExp(`${TEMPLATE_OPTIONAL_GROUP_PLACEHOLDER.start}`, 'g'), '')
+      .replace(new RegExp(`${TEMPLATE_OPTIONAL_GROUP_PLACEHOLDER.end}`, 'g'), '')
+      .replace(
+        new RegExp(
+          `${TEMPLATE_NAMED_GROUP_WILDCARD_PLACEHOLDER}_(\\w+)_${TEMPLATE_NAMED_GROUP_WILDCARD_PLACEHOLDER}`,
+          'g',
+        ),
+        '(?<$1>.*)'.replace(/\n/g, eol === vscode.EndOfLine.CRLF ? '\r\n' : '\n'),
+      );
 
     // 创建正则表达式，使用'm'标志进行多行匹配
     const regex = new RegExp(pattern, 'm');
