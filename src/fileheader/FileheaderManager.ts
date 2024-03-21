@@ -126,7 +126,6 @@ export class FileheaderManager {
     const originContentLineCount = originContent.split('\n').length;
     const dateformat = config.get(ConfigSection.dateFormat, 'YYYY-MM-DD HH:mm:ss');
     const dateRegex = new RegExp(convertDateFormatToRegex(dateformat), 'g');
-    const descriptionRegex = new RegExp('description.*');
 
     let headerSame: boolean = false;
     if (originContentLineCount > 1) {
@@ -140,7 +139,6 @@ export class FileheaderManager {
       }
       const originContentProcessed = removeSpecialString(originContentLines.join('\n'), [
         dateRegex,
-        descriptionRegex,
       ]);
 
       let newFileheaderLines = newFileheader.split('\n').map((line) => line.trim());
@@ -153,7 +151,6 @@ export class FileheaderManager {
       }
       const newFileheaderProcessed = removeSpecialString(newFileheaderLines.join('\n'), [
         dateRegex,
-        descriptionRegex,
       ]);
 
       headerSame = originContentProcessed === newFileheaderProcessed;

@@ -18,7 +18,7 @@
   "turboFileHeader.disableLabels.items.enum.lastModified": "The file last modified time",
   "turboFileHeader.disableLabels.items.enum.copyright": "Copyright information",
   "turboFileHeader.disableLabels.markdownDescription": "Disable some fields in default fileheader. This properties can not affect the custom fileheader config file.",
-  "turboFileHeader.customVariables.description": "Custom fields can be used in fileheader.",
+  "turboFileHeader.customVariables.description": "Custom variables that can be referenced in the header support {{name}} form to be referenced, and {{now}} to refer to built-in variables.",
   "turboFileHeader.customVariables.items.properties.name.description": "The key of custom field. Can be used in `turboFileHeader.fileheader` with {{name}}.",
   "turboFileHeader.fileheader.description": "File header, if set, will be overwrite efault file header",
   "turboFileHeader.fileheader.items.properties.label.description": "The left label of file header",

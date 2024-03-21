@@ -2,6 +2,14 @@
 
 All notable changes to the "turbo-file-header" extension will be documented in this file.
 
+# [0.1.0]
+
+## 新增功能 🌱
+
+- feat: 新增配置 `customVariables` 和 `fileheader`，支持自定义变量和自定义文件头内容
+- feat: 配置中使用 `usePrevious: true` 支持文件头保留字段
+- feat: 配置中使用 `wholeLine: true` 支持文件头变量值占据整行
+
 # [0.0.8]
 
 ## 新增功能 🌱

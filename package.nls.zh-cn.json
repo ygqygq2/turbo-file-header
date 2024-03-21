@@ -18,7 +18,7 @@
   "turboFileHeader.disableLabels.items.enum.lastModified": "文件最后修改时间",
   "turboFileHeader.disableLabels.items.enum.copyright": "版权信息",
   "turboFileHeader.disableLabels.markdownDescription": "禁用默认文件头中的某些字段. 该属性不会影响自定义文件头",
-  "turboFileHeader.customVariables.description": "",
+  "turboFileHeader.customVariables.description": "可以文件头中被引用的自定义变量，支持 {{name}} 形式被引用，和 {{内置变量}} 引用内置变量",
   "turboFileHeader.customVariables.items.properties.name.description": "自定义字段 key，可以在 `turboFileHeader.fileheader` 中以 {{name}} 形式引用",
   "turboFileHeader.fileheader.description": "文件头内容，如果设置，将会覆盖默认文件头内容",
   "turboFileHeader.fileheader.items.properties.label.description": "左边标签的名称",

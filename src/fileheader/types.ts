@@ -15,3 +15,7 @@ export type OriginFileheaderInfo = {
   variables?: IFileheaderVariables | undefined;
   contentWithoutHeader: string;
 };
+
+export type VariableBuilder =
+  | ((param?: string) => Promise<string | undefined>)
+  | (() => Promise<string | undefined>);

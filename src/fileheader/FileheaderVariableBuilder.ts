@@ -1,5 +1,6 @@
 import vscode, { WorkspaceFolder } from 'vscode';
 import { basename, dirname, relative } from 'path';
+import { evaluate } from 'mathjs';
 import dayjs from 'dayjs';
 import upath from 'upath';
 import { Config } from '../typings/types';
@@ -11,10 +12,11 @@ import { errorHandler } from '@/extension';
 import { CustomError, ErrorCode } from '@/error';
 import { LanguageProvider } from '@/language-providers';
 import { BaseVCSProvider } from '@/vcs-provider/BaseVCSProvider';
+import { VariableBuilder } from './types';
 
 export class FileheaderVariableBuilder {
   private config: Config;
-  private variableBuilders: { [key: string]: () => Promise<string | undefined> };
+  private variableBuilders: { [key: string]: VariableBuilder };
   private workspace?: WorkspaceFolder;
   private vcsProvider?: BaseVCSProvider;
   private variableRegex = /{{(.*?)}}/g;
@@ -24,20 +26,17 @@ export class FileheaderVariableBuilder {
   constructor(private configManager: ConfigManager) {
     this.config = configManager.getConfiguration();
     this.dateFormat = this.config.dateFormat || 'YYYY-MM-DD HH:mm:ss';
-
     this.variableBuilders = {
       ...Object.keys(WILDCARD_ACCESS_VARIABLES).reduce(
         (obj, key) => {
           const methodName =
             `build${key.charAt(0).toUpperCase() + key.slice(1)}` as keyof FileheaderVariableBuilder;
           if (typeof this[methodName] === 'function') {
-            obj[key] = (this[methodName] as unknown as () => Promise<string | undefined>).bind(
-              this,
-            );
+            obj[key] = (this[methodName] as unknown as VariableBuilder).bind(this);
           }
           return obj;
         },
-        {} as { [key: string]: () => Promise<string | undefined> },
+        {} as { [key: string]: VariableBuilder },
       ),
     };
   }
@@ -47,7 +46,6 @@ export class FileheaderVariableBuilder {
     _provider: LanguageProvider,
     variables: { [key: string]: string } | undefined,
   ): Promise<{ [key: string]: string }> {
-    // const { isCustomProvider, accessVariableFields } = provider;
     this.fileUri = fileUri;
     const fsPath = fileUri.fsPath;
     this.workspace = vscode.workspace.getWorkspaceFolder(fileUri);
@@ -62,35 +60,58 @@ export class FileheaderVariableBuilder {
     }
 
     const { fileheader, disableLabels } = this.config;
+    const disableLabelsSet = new Set(disableLabels);
     const newVariables: { [key: string]: string } = {};
 
     for (const item of fileheader) {
       const { label, value, usePrevious = false } = item;
       // 如果没有在禁用列表里，就进行变量替换
-      if (!disableLabels.includes(label)) {
+      if (!disableLabelsSet.has(label)) {
         const matches = value.match(this.variableRegex);
         if (matches) {
-          for (const match of matches) {
-            // Remove the {{ and }} on both sides, leaving only the variable name
-            const variable = match.slice(2, -2);
-            if (usePrevious) {
-              const previousValue = variables?.[variable];
-              if (previousValue) {
-                newVariables[variable] = previousValue;
-                continue;
+          await Promise.all(
+            matches.map(async (match) => {
+              const variable = match.slice(2, -2);
+              if (usePrevious && variables?.[variable]) {
+                newVariables[variable] = variables[variable];
+                return;
               }
-            }
-            const builder = this.variableBuilders[variable];
-            const result = builder
-              ? (await builder()) || ''
-              : (await this.buildCustomVariable(variable)) || '';
-            newVariables[variable] = result;
-          }
+              const builder = this.variableBuilders[variable];
+              const result = builder ? await builder() : await this.buildCustomVariable(variable);
+              newVariables[variable] = result || '';
+            }),
+          );
         }
       }
     }
 
     return newVariables;
+  }
+
+  private async handleCustomVariableBuilder(
+    builderName: string,
+    param: string,
+    calculation: string | undefined,
+    match: string,
+    value: string,
+  ): Promise<string> {
+    const builder = this.variableBuilders[builderName];
+    if (builder) {
+      let result: string | undefined;
+      // 支持 now 自定义格式并计算出结果，当然格式后的值是能够计算的
+      if (typeof builder === 'function' && builderName === 'now') {
+        result = await builder(param);
+        if (calculation) {
+          result = String(evaluate(result + calculation));
+        }
+      } else {
+        result = await builder();
+      }
+      value = value.replace(match, result || '');
+    } else {
+      errorHandler.handle(new CustomError(ErrorCode.UnknownVariable, builderName));
+    }
+    return value;
   }
 
   private async buildCustomVariable(variable: string): Promise<string> {
@@ -101,19 +122,28 @@ export class FileheaderVariableBuilder {
 
     if (matches) {
       for (const match of matches) {
-        // Remove the {{ and }} on both sides, leaving only the variable name
         const variableName = match.slice(2, -2);
-        const builder = this.variableBuilders[variableName];
-        if (builder) {
-          const result = (await builder()) || '';
-          value = value.replace(match, result);
-        } else {
-          errorHandler.handle(new CustomError(ErrorCode.UnknownVariable, variableName));
+        const calculationRegex = /(\w+)\s*([+\-*/]\s*\d+)?\s*(.*)/;
+        const calculationMatch = variableName.match(calculationRegex);
+        if (calculationMatch) {
+          const [_, builderName, calculation, param] = calculationMatch;
+          value = await this.handleCustomVariableBuilder(
+            builderName,
+            param,
+            calculation,
+            match,
+            value,
+          );
         }
       }
     }
     return value;
   }
+
+  private buildNow = async (param: string = '') => {
+    const cleanedParam = param.trim().replace(/^['"]|['"]$/g, '');
+    return dayjs().format(cleanedParam || this.dateFormat);
+  };
 
   private buildAuthorName = async () => {
     const fsPath = this.fileUri!.fsPath;
@@ -181,9 +211,5 @@ export class FileheaderVariableBuilder {
 
   private buildFileName() {
     return basename(this.fileUri!.path);
-  }
-
-  private buildNow() {
-    return dayjs().format(this.dateFormat);
   }
 }

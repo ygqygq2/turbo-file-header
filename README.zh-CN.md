@@ -63,9 +63,14 @@ Properties:
 - `{{description}}` {string} 文件描述，由用户输入
 - `{{now}}` {string} 生成文件头时的时间
 
+**自定义变量可以这样使用:**
+
+- `{{now 'YYYY-MM-DD HH:mm:ss'}}` {string} 生成文件头的当前时间，可以自定义格式
+- `{{now-1 'MM'}}` {string} 自定义格式的当前时间，并且支持简单计算，注意格式化后值是支持计算的才行
+
 ## 默认配置列表
 
-`customVariables` 设置设置:
+`customVariables` 默认设置:
 
 ```
 [

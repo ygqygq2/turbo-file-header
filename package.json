@@ -2,7 +2,7 @@
   "name": "turbo-file-header",
   "displayName": "Turbo File Header",
   "description": "Sets file header information globally or for a project.",
-  "version": "0.0.8",
+  "version": "0.1.0",
   "icon": "resources/icons/icon.png",
   "repository": {
     "type": "git",
@@ -158,10 +158,6 @@
             {
               "name": "copyright",
               "value": " * Copyright ©{{companyName}} All rights reserved"
-            },
-            {
-              "name": "test1",
-              "value": "{{now-1 'YYYY'}}"
             }
           ]
         },
@@ -578,6 +574,7 @@
     "handlebars": "^4.7.8",
     "json5": "^2.2.3",
     "lodash": "^4.17.21",
+    "mathjs": "^12.4.1",
     "minimatch": "^9.0.3",
     "upath": "^2.0.1",
     "yaml": "^2.4.1"
