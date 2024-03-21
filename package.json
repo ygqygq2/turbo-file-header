@@ -148,9 +148,14 @@
             "required": [
               "name",
               "value"
-            ],
-            "default": []
-          }
+            ]
+          },
+          "default": [
+            {
+              "name": "test1",
+              "value": "{{now-1 'YYYY'}}"
+            }
+          ]
         },
         "turboFileHeader.fileheader": {
           "type": "array",
@@ -204,7 +209,7 @@
             },
             {
               "label": "@copyright",
-              "value": " * Copyright ©{{companyName}} All rights reserved",
+              "value": " * Copyright ©{{companyName}} All rights reserved {{test1}}",
               "wholeLine": true
             }
           ]

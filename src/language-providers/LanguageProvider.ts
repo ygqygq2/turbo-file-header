@@ -82,7 +82,6 @@ export abstract class LanguageProvider {
   ): Template;
 
   private getTemplateInternal(variables: any, useJSDocStyle: boolean = false) {
-    console.log(getTaggedTemplateInputs, variables, useJSDocStyle);
     return this.getTemplate(getTaggedTemplateInputs, variables, useJSDocStyle);
   }
 
@@ -129,8 +128,6 @@ export abstract class LanguageProvider {
 
     // 创建正则表达式，使用'm'标志进行多行匹配
     const regex = new RegExp(pattern, 'm');
-
-    console.log(regex);
     return regex;
   }
 
@@ -237,6 +234,9 @@ export abstract class LanguageProvider {
 
     const proxyVariables = new Proxy(wildcardAccessVariables, {
       get(target, p, _receiver) {
+        if (p === '__isProxy') {
+          return true;
+        }
         addVariableAccess(p as string);
         return Reflect.get(target, p);
       },

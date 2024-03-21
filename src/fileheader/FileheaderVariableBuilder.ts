@@ -48,11 +48,7 @@ export class FileheaderVariableBuilder {
     variables: { [key: string]: string } | undefined,
   ): Promise<{ [key: string]: string }> {
     const { isCustomProvider, accessVariableFields } = provider;
-    console.log(
-      '🚀 ~ file: FileheaderVariableBuilder.ts:51 ~ isCustomProvider, accessVariableFields:',
-      isCustomProvider,
-      accessVariableFields,
-    );
+    console.log('🚀 ~ file: FileheaderVariableBuilder.ts:51 ~ isCustomProvider', isCustomProvider);
     this.fileUri = fileUri;
     const fsPath = fileUri.fsPath;
     this.workspace = vscode.workspace.getWorkspaceFolder(fileUri);
@@ -188,5 +184,9 @@ export class FileheaderVariableBuilder {
 
   private buildFileName() {
     return basename(this.fileUri!.path);
+  }
+
+  private buildNow() {
+    return dayjs().format(this.dateFormat);
   }
 }

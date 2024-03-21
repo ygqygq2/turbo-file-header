@@ -23,7 +23,7 @@ export class VscodeInternalProvider extends LanguageProvider {
 
   public override getTemplate(
     tpl: ITemplateFunction,
-    variables: any,
+    variables: { [key: string]: string },
     useJSDocStyle: boolean = false,
   ): Template {
     const { blockCommentStart, blockCommentEnd } = this.getBlockComment();
@@ -40,9 +40,29 @@ export class VscodeInternalProvider extends LanguageProvider {
       const { label, wholeLine = false } = item;
       const value = item.value;
       longestLabelLength = Math.max(longestLabelLength, label.length);
+      console.log('🚀 ~ file: VscodeInternalProvider.ts:44 ~ variables:', variables);
       // 使用正则表达式替换 {{变量}} 格式的字符串
       const valueParts = value.split(/(\{\{\w+\}\})/g).map((part) => {
-        return part.replace(/\{\{(\w+)\}\}/, (match, p1) => {
+        return part.replace(/\{\{(\w+)\}\}/, (_match, p1) => {
+          console.log('🚀 ~ file: VscodeInternalProvider.ts:47 ~ p1:', p1);
+          // 如果不包含 TEMPLATE_NAMED_GROUP_WILDCARD_PLACEHOLDER
+          // 则是生成真实模板过程
+          // if (!variables['__isProxy']) {
+          //   // 判断是否在 customVariables 里，如果在，则把变量替换为 customVariables 里的值
+          //   const { customVariables } = this.generateWildcardAccessVariables();
+          //   const customVariable = customVariables.find((variable) => variable.name === p1);
+          //   // 如果值还引用内置变量，则继续替换为内置变量的值
+          //   if (customVariable) {
+          //     if (/\{\{(\w+)\}\}/.test(customVariable.value)) {
+          //       return customVariable.value.replace(
+          //         /\{\{(\w+)\}\}/,
+          //         (_match, p1) => variables[p1] || '',
+          //       );
+          //     } else {
+          //       return customVariable.value;
+          //     }
+          //   }
+          // }
           return variables[p1] || '';
         });
       });

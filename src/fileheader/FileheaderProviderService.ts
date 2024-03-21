@@ -1,6 +1,5 @@
 import vscode from 'vscode';
 import { LanguageProvider } from '@/language-providers';
-import { IFileheaderVariables } from '../typings/types';
 
 export class FileheaderProviderService {
   public getOriginFileheaderRange(document: vscode.TextDocument, provider: LanguageProvider) {
@@ -13,10 +12,9 @@ export class FileheaderProviderService {
     const contentWithoutHeader = provider.getOriginContentWithoutFileheader(document, range);
 
     const pattern = provider.getOriginFileheaderRegExp(document.eol);
-    console.log("🚀 ~ file: FileheaderProviderService.ts:16 ~ pattern:", pattern);
     const info: {
       range: vscode.Range;
-      variables?: IFileheaderVariables;
+      variables?: { [key: string]: string };
       contentWithoutHeader: string;
     } = {
       range,
@@ -25,7 +23,6 @@ export class FileheaderProviderService {
     };
 
     const contentWithHeader = document.getText(range);
-    console.log("🚀 ~ file: FileheaderProviderService.ts:28 ~ contentWithHeader:", contentWithHeader);
     const result = contentWithHeader.match(pattern);
     if (result) {
       info.variables = result.groups;
