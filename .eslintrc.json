@@ -10,7 +10,16 @@
     "ecmaVersion": "latest",
     "sourceType": "module"
   },
-  "plugins": ["@typescript-eslint", "unused-imports"],
+  "plugins": ["@typescript-eslint", "unused-imports", "import"],
+  "settings": {
+    "import/resolver": {
+      "alias": {
+        "map": [["@", "./src"]],
+        "extensions": [".ts"]
+      }
+    },
+    "import/core-modules": ["vscode", "mocha"]
+  },
   "ignorePatterns": ["out", "dist", "**/*.d.ts"],
   "rules": {
     "@typescript-eslint/naming-convention": [
@@ -25,9 +34,13 @@
     "eqeqeq": "warn",
     "no-throw-literal": "warn",
     "semi": "off",
-    "@typescript-eslint/no-unused-vars": "off",
+    "import/no-unresolved": "error",
     "no-unused-vars": "off",
     "unused-imports/no-unused-imports": "error",
+    "@typescript-eslint/no-unused-vars": [
+      "warn",
+      { "varsIgnorePattern": "^_", "argsIgnorePattern": "^_" }
+    ],
     "unused-imports/no-unused-vars": [
       "warn",
       { "vars": "all", "varsIgnorePattern": "^_", "args": "after-used", "argsIgnorePattern": "^_" }

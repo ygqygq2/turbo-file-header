@@ -31,7 +31,7 @@ Properties:
 | Include glob                      | "include glob" for `autoInsertOnCreateFile` and batch update command | include                          | `**/this-default-glob/*` |
 | Exclude glob                      | "exclude glob" for `autoInsertOnCreateFile` and batch update command | exclude                          | ``                       |
 | Disable fields in file header     | The fields that you want to disable in file header                   | disableLabels                    | `[]`                     |
-| Custom variable                   | Support use other variable                                           | customVariables                  | `[]`                     |
+| Custom variable                   | Support use other variable                                           | customVariables                  | the below                |
 | File header content               | File header content, overwrite the default file header content       | fileheader                       | the below                |
 | Only dirty file or not to support | Only dirty file to support update file header                        | updateHeaderForModifiedFilesOnly | `false`                  |
 | Extra languages support           | To support new or unknown languages                                  | languages                        | the below                |
@@ -123,6 +123,7 @@ Properties:
 ```
 
 > Tips:
+
 - if use `"usePrevious": true`, please set the custom variable, then use the entire variable to represent the entire value.
 
 `languages` default settings:

@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { useBlockPicker } from './block-picker';
 import { useLinePicker } from './line-picker';
 import { configEvent, configManager } from '@/extension';
-import { TagFlatten } from '@/configuration/types';
+import { TagFlatten } from '@/typings/types';
 
 export type LinePicker = ReturnType<typeof useLinePicker>;
 export type BlockPicker = ReturnType<typeof useBlockPicker>;

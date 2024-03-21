@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { ConfigManager } from './ConfigManager';
-import { OnDidChangeCallback } from './types';
 import { ConfigTag } from '@/constants';
+import { OnDidChangeCallback } from '@/typings/types';
 
 export class ConfigEvent {
   private configManager: ConfigManager;
