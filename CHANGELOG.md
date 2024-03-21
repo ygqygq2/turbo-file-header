@@ -2,6 +2,12 @@
 
 All notable changes to the "turbo-file-header" extension will be documented in this file.
 
+# [0.1.1]
+
+## 新增功能 🌱
+
+- feat: 新增配置 `patternMultiline` 支持匹配原文件头是否使用多行正则模式
+
 # [0.1.0]
 
 ## 新增功能 🌱

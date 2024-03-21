@@ -147,14 +147,9 @@ export abstract class LanguageProvider {
     return { customVariables, wildcardAccessVariables: newVariables };
   }
 
-  public getOriginFileheaderRegExp(eol: vscode.EndOfLine): RegExp {
-    const { wildcardAccessVariables } = this.generateWildcardAccessVariables();
-    const template = this.getTemplateInternal(wildcardAccessVariables);
-    const templateValue = evaluateTemplate(template.strings, template.interpolations, true);
-
-    const pattern = templateValue
+  private generatePattern(content: string, eol: vscode.EndOfLine): string {
+    const pattern = content
       .replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // 转义正则特殊字符
-      .replace(/\r\n/g, '\n')
       .replace(new RegExp(`${TEMPLATE_OPTIONAL_GROUP_PLACEHOLDER.start}`, 'g'), '')
       .replace(new RegExp(`${TEMPLATE_OPTIONAL_GROUP_PLACEHOLDER.end}`, 'g'), '')
       .replace(
@@ -164,10 +159,27 @@ export abstract class LanguageProvider {
         ),
         '(?<$1>.*)'.replace(/\n/g, eol === vscode.EndOfLine.CRLF ? '\r\n' : '\n'),
       );
+    return pattern;
+  }
 
-    // 创建正则表达式，使用'm'标志进行多行匹配
-    const regex = new RegExp(pattern, 'm');
-    return regex;
+  public getOriginFileheaderRegExp(
+    eol: vscode.EndOfLine,
+    patternMultiline: boolean = false,
+  ): RegExp | RegExp[] {
+    const { wildcardAccessVariables } = this.generateWildcardAccessVariables();
+    const template = this.getTemplateInternal(wildcardAccessVariables);
+    const templateValue = evaluateTemplate(template.strings, template.interpolations, true);
+
+    if (patternMultiline) {
+      const pattern = this.generatePattern(templateValue, eol);
+      return new RegExp(pattern, 'm');
+    } else {
+      const lines = templateValue.split('\n');
+      const regexps = lines
+        .filter((line) => line.includes(TEMPLATE_NAMED_GROUP_WILDCARD_PLACEHOLDER))
+        .map((line) => new RegExp(this.generatePattern(line, eol)));
+      return regexps;
+    }
   }
 
   public getOriginFileheaderRange(document: vscode.TextDocument) {

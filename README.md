@@ -33,6 +33,7 @@ Properties:
 | Disable fields in file header     | The fields that you want to disable in file header                   | disableLabels                    | `[]`                     |
 | Custom variable                   | Support use other variable                                           | customVariables                  | the below                |
 | File header content               | File header content, overwrite the default file header content       | fileheader                       | the below                |
+| Multiline regex pattern           | Match the original file header using multiline regex pattern.        | patternMultiline                 | `false`                  |
 | Only dirty file or not to support | Only dirty file to support update file header                        | updateHeaderForModifiedFilesOnly | `false`                  |
 | Extra languages support           | To support new or unknown languages                                  | languages                        | the below                |
 | JSDoc style for js/ts             | File header user JSDoc style comments                                | useJSDocStyle                    | `false`                  |
@@ -46,6 +47,7 @@ Properties:
 
 - `include` and `exclude` are used to control the scope of the file header update, except for `addFileheader` command.
 - `author` if the file is tracked by VCS, it will get the author name/email from VCS, else it will get it from `userName`/`userEmail`.
+- `patternMultiline` is `true`, the regular match will be less, and the performance will be better when batch update. When `false`, it supports some lines that are the same as the new file header and the line positions are different, and the performance impact is not significant.
 
 **Fileheader variables**
 

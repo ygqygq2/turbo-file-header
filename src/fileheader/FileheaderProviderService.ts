@@ -7,11 +7,15 @@ export class FileheaderProviderService {
     return range;
   }
 
-  public getOriginFileheaderInfo(document: vscode.TextDocument, provider: LanguageProvider) {
+  public getOriginFileheaderInfo(
+    document: vscode.TextDocument,
+    provider: LanguageProvider,
+    patternMultiline: boolean,
+  ) {
     const range = this.getOriginFileheaderRange(document, provider);
     const contentWithoutHeader = provider.getOriginContentWithoutFileheader(document, range);
 
-    const pattern = provider.getOriginFileheaderRegExp(document.eol);
+    const patterns = provider.getOriginFileheaderRegExp(document.eol, patternMultiline);
     const info: {
       range: vscode.Range;
       variables?: { [key: string]: string };
@@ -23,9 +27,25 @@ export class FileheaderProviderService {
     };
 
     const contentWithHeader = document.getText(range);
-    const result = contentWithHeader.match(pattern);
-    if (result) {
-      info.variables = result.groups;
+    if (patternMultiline === false) {
+      if (patterns instanceof Array) {
+        for (const pattern of patterns) {
+          const result = contentWithHeader.match(pattern);
+          if (result) {
+            if (!info.variables) {
+              info.variables = {};
+            }
+            Object.assign(info.variables, result.groups);
+          }
+        }
+      }
+    } else {
+      if (patterns instanceof RegExp) {
+        const result = contentWithHeader.match(patterns);
+        if (result) {
+          info.variables = result.groups;
+        }
+      }
     }
     return info;
   }

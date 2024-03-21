@@ -147,16 +147,20 @@ export class FileheaderVariableBuilder {
 
   private buildAuthorName = async () => {
     const fsPath = this.fileUri!.fsPath;
-    const authorName = this.vcsProvider ? await this.vcsProvider.getAuthorName(fsPath) : '';
-    const userName = await this.buildUserName();
-    return authorName || userName;
+    let authorName = this.vcsProvider ? await this.vcsProvider.getAuthorName(fsPath) : '';
+    if (!authorName) {
+      authorName = await this.buildUserName();
+    }
+    return authorName;
   };
 
   private buildAuthorEmail = async () => {
     const fsPath = this.fileUri!.fsPath;
-    const authorEmail = this.vcsProvider ? await this.vcsProvider.getAuthorEmail(fsPath) : '';
-    const userEmail = await this.buildUserEmail();
-    return authorEmail || userEmail;
+    let authorEmail = this.vcsProvider ? await this.vcsProvider.getAuthorEmail(fsPath) : '';
+    if (!authorEmail) {
+      authorEmail = await this.buildUserEmail();
+    }
+    return authorEmail;
   };
 
   private buildBirthtime = async () => {

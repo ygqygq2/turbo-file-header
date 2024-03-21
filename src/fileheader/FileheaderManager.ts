@@ -300,6 +300,7 @@ export class FileheaderManager {
     const originFileheaderInfo = this.fileheaderProviderService.getOriginFileheaderInfo(
       document,
       provider,
+      config.patternMultiline,
     );
     let fileheaderVariable: IFileheaderVariables;
     try {

@@ -20,6 +20,7 @@
   "turboFileHeader.fileheader.items.properties.value.description": "The value of file header",
   "turboFileHeader.fileheader.items.properties.usePrevious.description": "Use the previous value",
   "turboFileHeader.fileheader.items.properties.wholeLine.description": "Is whole line file header(don't display the key)",
+  "turboFileHeader.patternMultiline.description": "Match the original file header to get information using multiline regex pattern.",
   "turboFileHeader.updateHeaderForModifiedFilesOnly.description": "Only dirty file to support update file header.",
   "turboFileHeader.languages.description": "Custom Language to support.",
   "turboFileHeader.languages.items.title": "Language item.",

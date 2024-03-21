@@ -21,6 +21,7 @@
   "turboFileHeader.fileheader.items.properties.usePrevious.description": "使用上一次的值",
   "turboFileHeader.fileheader.items.properties.wholeLine.description": "是否占据一整行，即不显示 key",
   "turboFileHeader.updateHeaderForModifiedFilesOnly.description": "只对修改过但未保存的文件进行更新文件头（注意是否开启了自动保存功能）",
+  "turboFileHeader.patternMultiline.description": "匹配原文件头获取信息使用多行正则匹配模式",
   "turboFileHeader.languages.description": "自定义语言支持",
   "turboFileHeader.languages.items.title": "语言项",
   "turboFileHeader.languages.items.properties.id.description": "语言 id",

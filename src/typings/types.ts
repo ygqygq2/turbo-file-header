@@ -158,6 +158,7 @@ export interface Configuration {
   customVariables: CustomVariable[];
   fileheader: HeaderLine[];
   languages: LanguagesConfig;
+  patternMultiline: boolean;
   updateHeaderForModifiedFilesOnly: boolean;
   multilineComments: boolean;
   useJSDocStyle: boolean;

@@ -203,6 +203,11 @@
             }
           ]
         },
+        "turboFileHeader.patternMultiline": {
+          "type": "boolean",
+          "description": "%turboFileHeader.patternMultiline.description%",
+          "default": false
+        },
         "turboFileHeader.updateHeaderForModifiedFilesOnly": {
           "type": "boolean",
           "description": "%turboFileHeader.updateHeaderForModifiedFilesOnly.description%",

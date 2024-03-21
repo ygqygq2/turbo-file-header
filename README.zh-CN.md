@@ -33,6 +33,7 @@ Properties:
 | 文件头中禁用字段         | 文件头中不展示的字段                                                  | disableLabels                    | `[]`                     |
 | 自定义文件头变量         | 文件头变量支持引用其它变量                                            | customVariables                  | the below                |
 | 自定义文件头             | 自定义文件头内容覆盖默认文件头                                        | fileheader                       | `[]`                     |
+| 多行正则匹配原文件头     | 使用多行正则匹配模式获取原文件头信息                                  | patternMultiline                 | `false`                  |
 | 只支持脏文件             | 只有已更新但未保存文件支持插入/更新文件头                             | updateHeaderForModifiedFilesOnly | `false`                  |
 | 额外语言支持             | 通过配置支持新/未知语言插入/更新文件头                                | languages                        | the below                |
 | JSDoc 注释风格支持 js/ts | js/ts 文件使用 JSDoc 注释风格                                         | useJSDocStyle                    | `false`                  |
@@ -46,6 +47,7 @@ Properties:
 
 - `include` 和 `exclude` 是为了控制文件头影响范围，`addFileheader` 命令不受它们影响。
 - `author` 包含用户名/邮箱，如果文件被 VCS 追踪，将从 VCS 中获取用户信息，否则将使用备用用户名/邮箱.
+- `patternMultiline` 为 `true` 时，正则匹配会少一些，批量更新时性能好一些。为 `false` 时支持部分与新文件头相同的行和行位置不同的情况，性能影响不大。
 
 **文件头可用变量**
 
