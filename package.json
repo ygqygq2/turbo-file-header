@@ -152,6 +152,14 @@
           },
           "default": [
             {
+              "name": "description",
+              "value": ""
+            },
+            {
+              "name": "copyright",
+              "value": " * Copyright ©{{companyName}} All rights reserved"
+            },
+            {
               "name": "test1",
               "value": "{{now-1 'YYYY'}}"
             }
@@ -192,7 +200,7 @@
             },
             {
               "label": " * @description",
-              "value": "",
+              "value": "{{description}}",
               "usePrevious": true
             },
             {
@@ -201,7 +209,8 @@
             },
             {
               "label": " * @createTime",
-              "value": "{{birthtime}}"
+              "value": "{{birthtime}}",
+              "usePrevious": true
             },
             {
               "label": " * @lastModified",
@@ -209,7 +218,7 @@
             },
             {
               "label": "@copyright",
-              "value": " * Copyright ©{{companyName}} All rights reserved {{test1}}",
+              "value": "{{copyright}}",
               "wholeLine": true
             }
           ]

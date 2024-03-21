@@ -31,7 +31,7 @@ Properties:
 | `include` glob 模式      | 全局的 `include` glob 模式，项目级 `include` 优先                     | include                          | `**/this-default-glob/*` |
 | `exclude` glob 模式      | 全局的 `exclude` glob 模式，项目级 `exclude` 优先                     | exclude                          | ``                       |
 | 文件头中禁用字段         | 文件头中不展示的字段                                                  | disableLabels                    | `[]`                     |
-| 自定义文件头变量         | 文件头变量支持引用其它变量                                            | customVariable                   | `[]`                     |
+| 自定义文件头变量         | 文件头变量支持引用其它变量                                            | customVariables                   | `[]`                     |
 | 自定义文件头             | 自定义文件头内容覆盖默认文件头                                        | fileheader                       | `[]`                     |
 | 只支持脏文件             | 只有已更新但未保存文件支持插入/更新文件头                             | updateHeaderForModifiedFilesOnly | `false`                  |
 | 额外语言支持             | 通过配置支持新/未知语言插入/更新文件头                                | languages                        | the below                |
@@ -64,6 +64,60 @@ Properties:
 - `{{now}}` {string} 生成文件头时的时间
 
 ## 默认配置列表
+
+`customVariables` 设置设置:
+
+```
+[
+  {
+    "name": "description",
+    "value": ""
+  },
+  {
+    "name": "copyright",
+    "value": "Copyright ©{{companyName}} All rights reserved"
+  }
+]
+```
+
+>提示:
+- 为了配合 `fileheader` 中的使用 `usePrevious` 的字段而设置
+
+`fileheader` default settings:
+
+```
+[
+  {
+    "label": " * @file",
+    "value": "{{filePath}}"
+  },
+  {
+    "label": " * @description",
+    "value": "{{description}}",
+    "usePrevious": true
+  },
+  {
+    "label": " * @author",
+    "value": "{{authorName}} <{{authorEmail}}>"
+  },
+  {
+    "label": " * @createTime",
+    "value": "{{birthtime}}"
+  },
+  {
+    "label": " * @lastModified",
+    "value": "{{mtime}}"
+  },
+  {
+    "label": "@copyright",
+    "value": "{{copyright}}",
+    "wholeLine": true
+  }
+]
+```
+
+>提示:
+- 如果使用 `"usePrevious": true`，请先在 `customVariables` 配置自定义变量，然后在整个字段中使用该定义变量
 
 `languages` 默认配置:
 

@@ -44,11 +44,10 @@ export class FileheaderVariableBuilder {
 
   public async build(
     fileUri: vscode.Uri,
-    provider: LanguageProvider,
+    _provider: LanguageProvider,
     variables: { [key: string]: string } | undefined,
   ): Promise<{ [key: string]: string }> {
-    const { isCustomProvider, accessVariableFields } = provider;
-    console.log('🚀 ~ file: FileheaderVariableBuilder.ts:51 ~ isCustomProvider', isCustomProvider);
+    // const { isCustomProvider, accessVariableFields } = provider;
     this.fileUri = fileUri;
     const fsPath = fileUri.fsPath;
     this.workspace = vscode.workspace.getWorkspaceFolder(fileUri);
@@ -66,12 +65,21 @@ export class FileheaderVariableBuilder {
     const newVariables: { [key: string]: string } = {};
 
     for (const item of fileheader) {
-      if (!disableLabels.includes(item.label)) {
-        const matches = item.value.match(this.variableRegex);
+      const { label, value, usePrevious = false } = item;
+      // 如果没有在禁用列表里，就进行变量替换
+      if (!disableLabels.includes(label)) {
+        const matches = value.match(this.variableRegex);
         if (matches) {
           for (const match of matches) {
             // Remove the {{ and }} on both sides, leaving only the variable name
             const variable = match.slice(2, -2);
+            if (usePrevious) {
+              const previousValue = variables?.[variable];
+              if (previousValue) {
+                newVariables[variable] = previousValue;
+                continue;
+              }
+            }
             const builder = this.variableBuilders[variable];
             const result = builder
               ? (await builder()) || ''
@@ -130,17 +138,6 @@ export class FileheaderVariableBuilder {
           this.dateFormat,
         )
       : dayjs(fileStat.birthtime).format(this.dateFormat);
-    // let tmpBirthtime = birthtime;
-
-    // let originBirthtime: Dayjs | undefined = dayjs(originVariable?.birthtime, dateFormat);
-    // if (!originBirthtime.isValid()) {
-    //   originBirthtime = undefined;
-    // } else {
-    //   if (originBirthtime.isBefore(birthtime)) {
-    //     tmpBirthtime = originBirthtime;
-    //   }
-    // }
-
     return birthtime;
   };
 

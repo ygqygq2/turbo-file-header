@@ -30,14 +30,58 @@ export abstract class LanguageProvider {
     this.calculateVariableAccessInfo();
   }
 
-  public get isCustomProvider() {
-    return !!this.workspaceScopeUri;
-  }
-
   abstract readonly languages: string[];
   abstract comments: vscode.CommentRule;
   // 文件头偏移量，即文件头从这行开始插入或更新
   readonly startLineOffset: number = 0;
+
+  private isCommentLine(lineText: string, isInsideBlockComment: boolean): boolean {
+    const { blockCommentStart, blockCommentEnd } = this.getBlockComment();
+    const { lineComment } = this.comments;
+
+    // 块注释
+    if (this.comments && this.comments.blockComment && this.comments.blockComment.length) {
+      // 处于块注释中，不管有没有结束，则为注释行
+      if (isInsideBlockComment) {
+        return true;
+      }
+
+      // 块注释开始、结束都属于注释行
+      return lineText.includes(blockCommentStart) || lineText.includes(blockCommentEnd);
+    } else if (lineComment) {
+      return lineText.trim().startsWith(lineComment);
+    }
+    return false;
+  }
+
+  private updateBlockCommentState(lineText: string, isInsideBlockComment: boolean): boolean {
+    const { blockCommentStart, blockCommentEnd } = this.getBlockComment();
+
+    // 检查是否为Python或其他使用相同标记作为块注释开始和结束的语言
+    if (blockCommentStart === blockCommentEnd) {
+      // 如果找到块注释标记，并且我们当前不在块注释内，那么这表示块注释的开始
+      if (lineText.includes(blockCommentStart) && !isInsideBlockComment) {
+        isInsideBlockComment = true;
+      } else if (lineText.includes(blockCommentEnd) && isInsideBlockComment) {
+        // 如果我们已经在块注释内，并且再次遇到块注释标记，那么这表示块注释的结束
+        isInsideBlockComment = false;
+      }
+    } else {
+      // 对于开始和结束标记不同的常规情况
+      if (lineText.includes(blockCommentStart)) {
+        isInsideBlockComment = true;
+      }
+      if (lineText.includes(blockCommentEnd)) {
+        isInsideBlockComment = false;
+      }
+    }
+
+    return isInsideBlockComment;
+  }
+
+  public get isCustomProvider() {
+    return !!this.workspaceScopeUri;
+  }
 
   public getBlockComment(): { blockCommentStart: string; blockCommentEnd: string } {
     let blockCommentStart: string = '';
@@ -55,32 +99,6 @@ export abstract class LanguageProvider {
     return { blockCommentStart, blockCommentEnd };
   }
 
-  protected generateLine(
-    tpl: ITemplateFunction,
-    label: string,
-    values: (string | TemplateInterpolation)[],
-    longestLabelLength: number,
-    wholeLine = false,
-  ): Template {
-    if (values.length === 0) {
-      return tpl``;
-    }
-    const spaces = ' '.repeat(longestLabelLength - label.length);
-    const combinedValues = values.reduce(
-      (prev, curr, index) => {
-        return index === 0 ? tpl`${curr}` : tpl`${prev}${curr}`;
-      },
-      tpl``,
-    );
-    return wholeLine ? tpl`${combinedValues}\n` : tpl`${label}${spaces}    ${combinedValues}\n`;
-  }
-
-  protected abstract getTemplate(
-    tpl: ITemplateFunction,
-    variables: IFileheaderVariables,
-    useJSDocStyle?: boolean,
-  ): Template;
-
   private getTemplateInternal(variables: any, useJSDocStyle: boolean = false) {
     return this.getTemplate(getTaggedTemplateInputs, variables, useJSDocStyle);
   }
@@ -93,6 +111,27 @@ export abstract class LanguageProvider {
     const copiedStrings = Array.from(strings);
 
     return evaluateTemplate(copiedStrings, interpolations);
+  }
+
+  private calculateVariableAccessInfo() {
+    const { wildcardAccessVariables, customVariables } = this.generateWildcardAccessVariables();
+    customVariables.forEach((variable) => {
+      this.accessVariableFields.add(variable.name);
+    });
+    const addVariableAccess = (p: string) =>
+      this.accessVariableFields.add(p as keyof IFileheaderVariables);
+
+    const proxyVariables = new Proxy(wildcardAccessVariables, {
+      get(target, p, _receiver) {
+        if (p === '__isProxy') {
+          return true;
+        }
+        addVariableAccess(p as string);
+        return Reflect.get(target, p);
+      },
+    });
+
+    this.getTemplateInternal(proxyVariables);
   }
 
   protected generateWildcardAccessVariables() {
@@ -163,50 +202,6 @@ export abstract class LanguageProvider {
     return range;
   }
 
-  private isCommentLine(lineText: string, isInsideBlockComment: boolean): boolean {
-    const { blockCommentStart, blockCommentEnd } = this.getBlockComment();
-    const { lineComment } = this.comments;
-
-    // 块注释
-    if (this.comments && this.comments.blockComment && this.comments.blockComment.length) {
-      // 处于块注释中，不管有没有结束，则为注释行
-      if (isInsideBlockComment) {
-        return true;
-      }
-
-      // 块注释开始、结束都属于注释行
-      return lineText.includes(blockCommentStart) || lineText.includes(blockCommentEnd);
-    } else if (lineComment) {
-      return lineText.trim().startsWith(lineComment);
-    }
-    return false;
-  }
-
-  private updateBlockCommentState(lineText: string, isInsideBlockComment: boolean): boolean {
-    const { blockCommentStart, blockCommentEnd } = this.getBlockComment();
-
-    // 检查是否为Python或其他使用相同标记作为块注释开始和结束的语言
-    if (blockCommentStart === blockCommentEnd) {
-      // 如果找到块注释标记，并且我们当前不在块注释内，那么这表示块注释的开始
-      if (lineText.includes(blockCommentStart) && !isInsideBlockComment) {
-        isInsideBlockComment = true;
-      } else if (lineText.includes(blockCommentEnd) && isInsideBlockComment) {
-        // 如果我们已经在块注释内，并且再次遇到块注释标记，那么这表示块注释的结束
-        isInsideBlockComment = false;
-      }
-    } else {
-      // 对于开始和结束标记不同的常规情况
-      if (lineText.includes(blockCommentStart)) {
-        isInsideBlockComment = true;
-      }
-      if (lineText.includes(blockCommentEnd)) {
-        isInsideBlockComment = false;
-      }
-    }
-
-    return isInsideBlockComment;
-  }
-
   public getOriginContentWithoutFileheader(
     document: vscode.TextDocument,
     range: vscode.Range = this.getOriginFileheaderRange(document),
@@ -224,24 +219,40 @@ export abstract class LanguageProvider {
     return sourceWithoutHeader;
   }
 
-  private calculateVariableAccessInfo() {
-    const { wildcardAccessVariables, customVariables } = this.generateWildcardAccessVariables();
-    customVariables.forEach((variable) => {
-      this.accessVariableFields.add(variable.name);
-    });
-    const addVariableAccess = (p: string) =>
-      this.accessVariableFields.add(p as keyof IFileheaderVariables);
-
-    const proxyVariables = new Proxy(wildcardAccessVariables, {
-      get(target, p, _receiver) {
-        if (p === '__isProxy') {
-          return true;
-        }
-        addVariableAccess(p as string);
-        return Reflect.get(target, p);
+  protected generateLine(
+    tpl: ITemplateFunction,
+    label: string,
+    values: (string | TemplateInterpolation)[],
+    longestLabelLength: number,
+    wholeLine = false,
+  ): Template {
+    if (values.length === 0) {
+      return tpl``;
+    }
+    const spaces = ' '.repeat(longestLabelLength - label.length);
+    const combinedValues = values.reduce(
+      (prev, curr, index) => {
+        return index === 0 ? tpl`${curr}` : tpl`${prev}${curr}`;
       },
-    });
+      tpl``,
+    );
+    return wholeLine ? tpl`${combinedValues}\n` : tpl`${label}${spaces}    ${combinedValues}\n`;
+  }
 
-    this.getTemplateInternal(proxyVariables);
+  protected abstract getTemplate(
+    tpl: ITemplateFunction,
+    variables: IFileheaderVariables,
+    useJSDocStyle?: boolean,
+  ): Template;
+
+  protected replaceVariables(
+    value: string,
+    variables: { [key: string]: string },
+  ): (string | TemplateInterpolation)[] {
+    return value.split(/(\{\{\w+\}\})/g).map((part) => {
+      return part.replace(/\{\{(\w+)\}\}/, (_match, p1) => {
+        return variables[p1] || '';
+      });
+    });
   }
 }
