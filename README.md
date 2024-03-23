@@ -10,8 +10,8 @@ Turbo file header, sets file header information globally or for a project.
 ## Features
 
 - `ctrl + alt + h` generate the active document file header.
-- Command `Turbo File Header: Generate Custom Template Config File` generate custom file header template configuration file.
-- Generate file header based on the file header template configuration.
+- Supports global settings to manage header template.
+- Project to generate custom YAML format file header configuration file, easy to configure, others as long as the installation of extensions can be used directly, more consistent with unified collaborative development.
 - Use more reader-friendly comments to highlight important parts in your code.
 - Support for languages in [VSCode known identifiers](https://code.visualstudio.com/docs/languages/identifiers#_known-language-identifiers).
 - Extension configuration Multi-language display, l10n support.

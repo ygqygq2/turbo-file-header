@@ -1,7 +1,7 @@
 {
   "turboFileHeader.addFileheader.title": "Turbo File Header: 增加/更新文件头",
   "turboFileHeader.generateTemplateConfig.title": "Turbo File Header: 生成自定义模板配置文件",
-  "turboFileHeader.batchUpdateFileheader.title": "Turbo File Header: 批量增加/更新文件头（依赖自定义模板配置文件）",
+  "turboFileHeader.batchUpdateFileheader.title": "Turbo File Header: 批量增加/更新文件头",
   "configuration.title": "Turbo File Header",
   "turboFileHeader.userName.description": "备用用户名，默认来自 VCS",
   "turboFileHeader.userEmail.description": "备用用户邮箱. 默认来自 VCS",
