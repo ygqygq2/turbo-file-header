@@ -8,7 +8,7 @@ import { stat } from 'fs/promises';
 import { WILDCARD_ACCESS_VARIABLES } from '../constants';
 import { initVCSProvider } from '@/init';
 import { ConfigManager } from '@/configuration/ConfigManager';
-import { errorHandler } from '@/extension';
+import { logger } from '@/extension';
 import { CustomError, ErrorCode } from '@/error';
 import { LanguageProvider } from '@/language-providers';
 import { BaseVCSProvider } from '@/vcs-provider/BaseVCSProvider';
@@ -52,11 +52,11 @@ export class FileheaderVariableBuilder {
     try {
       this.vcsProvider = await initVCSProvider();
       if (!this.vcsProvider) {
-        errorHandler.throw(new CustomError(ErrorCode.VCSInvalid));
+        logger.throw(new CustomError(ErrorCode.VCSInvalid));
       }
       await this.vcsProvider.validate(dirname(fsPath));
     } catch (error) {
-      errorHandler.throw(new CustomError(ErrorCode.VCSInvalid, error));
+      logger.throw(new CustomError(ErrorCode.VCSInvalid, error));
     }
 
     const { fileheader, disableLabels } = this.config;
@@ -109,7 +109,7 @@ export class FileheaderVariableBuilder {
       }
       value = value.replace(match, result || '');
     } else {
-      errorHandler.handle(new CustomError(ErrorCode.UnknownVariable, builderName));
+      logger.handleError(new CustomError(ErrorCode.UnknownVariable, builderName));
     }
     return value;
   }

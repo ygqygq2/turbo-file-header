@@ -3,16 +3,15 @@ import { stat } from 'fs/promises';
 import { dirname } from 'path';
 import { exec, getFirstLine } from '../utils/utils';
 import { BaseVCSProvider } from './BaseVCSProvider';
-import { ErrorCode } from '@/error/ErrorCodeMessage.enum';
-import { CustomError } from '@/error/ErrorHandler';
-import { errorHandler } from '@/extension';
+import { logger } from '@/extension';
+import { CustomError, ErrorCode } from '@/error';
 
 export class GitVCSProvider extends BaseVCSProvider {
   public async validate(repoPath: string): Promise<void> {
     try {
       await exec('git status', { cwd: repoPath });
     } catch (error) {
-      errorHandler.handle(new CustomError(ErrorCode.GitNotInit, error));
+      logger.handleError(new CustomError(ErrorCode.GitNotInit, error));
     }
   }
   public async getAuthorName(filePath: string): Promise<string> {
@@ -24,7 +23,7 @@ export class GitVCSProvider extends BaseVCSProvider {
       // 如果结果有空格，会有单引号
       return getFirstLine(authors).replace(/'/g, '');
     } catch (error) {
-      errorHandler.handle(new CustomError(ErrorCode.GitGetUserNameFail, error));
+      logger.handleError(new CustomError(ErrorCode.GitGetUserNameFail, error));
     }
     return '';
   }
@@ -36,7 +35,7 @@ export class GitVCSProvider extends BaseVCSProvider {
       );
       return getFirstLine(emails).replace(/'/g, '');
     } catch (error) {
-      errorHandler.handle(new CustomError(ErrorCode.GitGetUserEmailFail, error));
+      logger.handleError(new CustomError(ErrorCode.GitGetUserEmailFail, error));
     }
     return '';
   }
@@ -45,7 +44,7 @@ export class GitVCSProvider extends BaseVCSProvider {
       const userName = await exec(`git config user.name`, { cwd: repoPath });
       return getFirstLine(userName);
     } catch (error) {
-      errorHandler.handle(new CustomError(ErrorCode.ShouldSetUserName, error));
+      logger.handleError(new CustomError(ErrorCode.ShouldSetUserName, error));
     }
     return '';
   }
@@ -54,7 +53,7 @@ export class GitVCSProvider extends BaseVCSProvider {
       const userEmail = await exec(`git config user.email`, { cwd: repoPath });
       return getFirstLine(userEmail);
     } catch (error) {
-      errorHandler.handle(new CustomError(ErrorCode.ShouldSetUserName, error));
+      logger.handleError(new CustomError(ErrorCode.ShouldSetUserName, error));
     }
     return '';
   }
@@ -69,7 +68,7 @@ export class GitVCSProvider extends BaseVCSProvider {
 
       return dayjs(ctimeISO);
     } catch (error) {
-      errorHandler.handle(new CustomError(ErrorCode.GitGetBirthtimeFail, error));
+      logger.handleError(new CustomError(ErrorCode.GitGetBirthtimeFail, error));
       const fileStat = await stat(filePath);
       return dayjs(fileStat.birthtime);
     }

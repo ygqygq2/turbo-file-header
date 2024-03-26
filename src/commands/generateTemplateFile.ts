@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { errorHandler, generateCustomTemplate } from '@/extension';
+import { logger, generateCustomTemplate } from '@/extension';
 import { CustomError, ErrorCode } from '@/error';
 import { Command } from '@/typings/types';
 
@@ -8,7 +8,7 @@ export const generateTemplateConfig = (): Command => {
     name: 'turboFileHeader.generateTemplateConfig',
     handler: async (args?: unknown[] | undefined) => {
       if (!args || args.length === 0) {
-        errorHandler.handle(new CustomError(ErrorCode.NeedExtensionContext));
+        logger.handleError(new CustomError(ErrorCode.NeedExtensionContext));
         return;
       }
 

@@ -3,21 +3,20 @@ import dayjs, { Dayjs } from 'dayjs';
 import { stat } from 'fs/promises';
 import { exec, getFirstLine } from '../utils/utils';
 import { BaseVCSProvider } from './BaseVCSProvider';
-import { ErrorCode } from '@/error/ErrorCodeMessage.enum';
-import { CustomError } from '@/error/ErrorHandler';
-import { errorHandler } from '@/extension';
+import { logger } from '@/extension';
+import { CustomError, ErrorCode } from '@/error';
 
 export class SVNProvider extends BaseVCSProvider {
   public async validate(repoPath: string): Promise<void> {
     try {
       await exec('svn --version');
     } catch (error) {
-      errorHandler.handle(new CustomError(ErrorCode.SVNCommandNotFound, error));
+      logger.handleError(new CustomError(ErrorCode.SVNCommandNotFound, error));
     }
     try {
       await exec('svn info', { cwd: repoPath });
     } catch (error) {
-      errorHandler.handle(new CustomError(ErrorCode.SVNNotInit, error));
+      logger.handleError(new CustomError(ErrorCode.SVNNotInit, error));
     }
   }
 
@@ -28,7 +27,7 @@ export class SVNProvider extends BaseVCSProvider {
       });
       return getFirstLine(authors);
     } catch (error) {
-      errorHandler.handle(new CustomError(ErrorCode.SVNGetUserNameFail, error));
+      logger.handleError(new CustomError(ErrorCode.SVNGetUserNameFail, error));
     }
     return '';
   }
@@ -37,7 +36,7 @@ export class SVNProvider extends BaseVCSProvider {
     try {
       return '';
     } catch (error) {
-      errorHandler.handle(new CustomError(ErrorCode.SVNGetUserEmailFail, error));
+      logger.handleError(new CustomError(ErrorCode.SVNGetUserEmailFail, error));
     }
     return '';
   }
@@ -49,7 +48,7 @@ export class SVNProvider extends BaseVCSProvider {
       });
       return getFirstLine(userName);
     } catch (error) {
-      errorHandler.handle(new CustomError(ErrorCode.SVNInfoShowUserNameFail, error));
+      logger.handleError(new CustomError(ErrorCode.SVNInfoShowUserNameFail, error));
     }
     return '';
   }
@@ -72,7 +71,7 @@ export class SVNProvider extends BaseVCSProvider {
       const dateString = dateLine.split(': ')[1];
       return dayjs(new Date(dateString));
     } catch (error) {
-      errorHandler.handle(new CustomError(ErrorCode.SVNGetBirthtimeFail, error));
+      logger.handleError(new CustomError(ErrorCode.SVNGetBirthtimeFail, error));
       const fileStat = await stat(filePath);
       return dayjs(fileStat.birthtime);
     }
@@ -101,7 +100,7 @@ export class SVNProvider extends BaseVCSProvider {
       return status.includes('M');
     } catch (error) {
       // 如果发生错误，例如命令执行失败，则认为文件未更改
-      errorHandler.handle(new CustomError(ErrorCode.SVNStatusFail, error));
+      logger.handleError(new CustomError(ErrorCode.SVNStatusFail, error));
       return false;
     }
   }

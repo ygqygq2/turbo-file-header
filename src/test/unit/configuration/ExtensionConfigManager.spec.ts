@@ -1,13 +1,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { ConfigSection, ConfigTag } from '@/constants';
+import { ConfigSection, CONFIG_TAG } from '@/constants';
 import { ConfigManager } from '@/configuration/ConfigManager';
 import { WorkspaceConfiguration, workspace } from 'vscode';
 import { ConfigReader } from '@/configuration/ConfigReader';
 
 vi.mock('vscode');
 vi.mock('@/extension', () => ({
-  errorHandler: {
-    handle: vi.fn(),
+  logger: {
+    handleError: vi.fn(),
     throw: vi.fn(),
   },
 }));
@@ -31,7 +31,7 @@ describe('ConfigManager Tests', () => {
       },
     } as unknown as WorkspaceConfiguration;
     workspace.getConfiguration = vi.fn().mockImplementation((section: string) => {
-      if (section === ConfigTag) {
+      if (section === CONFIG_TAG) {
         return mockWorkspaceConfiguration;
       } else {
         return { ...mockWorkspaceConfiguration, default: 'defaultValue' };

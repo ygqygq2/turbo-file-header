@@ -1,4 +1,7 @@
 import * as vscode from 'vscode';
+import { CHANNEL_TITLE } from '@/constants';
+import { CustomError, Logger } from '@ygqygq2/vscode-log';
+import { errorCodeMessages } from './error';
 import { getAllCommands } from '@/commands';
 import { Command } from '@/typings/types';
 import { useParser } from '@/parser';
@@ -11,7 +14,6 @@ import { ConfigManager } from './configuration/ConfigManager';
 import { FileheaderProviderLoader } from './fileheader/FileheaderProviderLoader';
 import { LanguageManager } from './languages/LanguageManager';
 import { FileHashManager } from './fileheader/FileHashManager';
-import { ErrorHandler } from './error/ErrorHandler';
 import { GenerateTemplateConfig } from './fileheader/GenerateTemplateConfig';
 import { GenerateCustomProviderClasses } from './language-providers/GenerateCustomProviderClasses';
 import { FileheaderVariableBuilder } from './fileheader/FileheaderVariableBuilder';
@@ -20,7 +22,9 @@ import { DebounceManager } from './extension-operate/DebounceManager';
 import { FileheaderProviderService } from './fileheader/FileheaderProviderService';
 import { FileMatcher } from './extension-operate/FileMatcher';
 
-export const errorHandler = ErrorHandler.getInstance();
+CustomError.configure(errorCodeMessages);
+Logger.configure(vscode.window, CHANNEL_TITLE);
+export const logger = Logger.getInstance();
 const configReader = ConfigReader.getInstance();
 export const configManager = ConfigManager.getInstance(configReader);
 const fileMatcher = new FileMatcher(configManager);

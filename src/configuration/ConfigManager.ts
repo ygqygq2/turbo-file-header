@@ -1,12 +1,11 @@
 import * as vscode from 'vscode';
 import { escapeRegexString } from '@/utils/str';
-import { ErrorCode } from '@/error/ErrorCodeMessage.enum';
-import { CustomError } from '@/error/ErrorHandler';
-import { ConfigSection, ConfigTag } from '../constants';
+import { ConfigSection, CONFIG_TAG } from '../constants';
 import { Config, ConfigurationFlatten, Tag, TagFlatten } from '../typings/types';
-import { errorHandler } from '@/extension';
+import { logger } from '@/extension';
 import { ConfigReader } from './ConfigReader';
 import { ConfigYaml } from '@/typings/types';
+import { CustomError, ErrorCode } from '@/error';
 
 export class ConfigManager {
   private static instance: ConfigManager;
@@ -54,9 +53,9 @@ export class ConfigManager {
       return this.configuration;
     }
 
-    const config = vscode.workspace.getConfiguration(ConfigTag) as Config;
+    const config = vscode.workspace.getConfiguration(CONFIG_TAG) as Config;
     if (!config) {
-      errorHandler.handle(new CustomError(ErrorCode.GetConfigurationFail));
+      logger.handleError(new CustomError(ErrorCode.GetConfigurationFail));
     }
     this.configuration = config;
     return this.configuration;

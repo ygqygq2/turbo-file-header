@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { ConfigManager } from './ConfigManager';
-import { ConfigTag } from '@/constants';
+import { CONFIG_TAG } from '@/constants';
 import { OnDidChangeCallback } from '@/typings/types';
 
 export class ConfigEvent {
@@ -18,7 +18,7 @@ export class ConfigEvent {
 
   public registerEvent = () => {
     const disposable = vscode.workspace.onDidChangeConfiguration((event) => {
-      if (!event.affectsConfiguration(ConfigTag)) {
+      if (!event.affectsConfiguration(CONFIG_TAG)) {
         return;
       }
 

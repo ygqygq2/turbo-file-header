@@ -561,6 +561,7 @@
     "vscode=1.86.0": "link:@types/vscode=1.86.0"
   },
   "dependencies": {
+    "@ygqygq2/vscode-log": "^0.0.3",
     "dayjs": "^1.11.10",
     "handlebars": "^4.7.8",
     "json5": "^2.2.3",

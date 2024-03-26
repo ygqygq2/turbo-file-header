@@ -1,8 +1,7 @@
 import * as vscode from 'vscode';
-import output from '@/error/output';
 import { LanguageProvider } from '@/language-providers';
 import { GenerateCustomProviderClasses } from '../language-providers/GenerateCustomProviderClasses';
-import { errorHandler } from '@/extension';
+import { logger } from '@/extension';
 import { CustomError, ErrorCode } from '@/error';
 import { getActiveDocumentWorkspace } from '@/utils/vscode-utils';
 import { CUSTOM_CONFIG_FILE_NAME } from '@/constants';
@@ -55,7 +54,7 @@ export class FileheaderProviderLoader {
 
       const providersPromises = dynamicProviderClasses.map(
         async ({ name, providerClass: ProviderClass }) => {
-          output.info(`Generate custom provider: ${name}`);
+          logger.info(`Generate custom provider: ${name}`);
           const activeWorkspace = await getActiveDocumentWorkspace();
           try {
             const defaultUri = vscode.Uri.file('.vscode' + CUSTOM_CONFIG_FILE_NAME);
@@ -66,8 +65,8 @@ export class FileheaderProviderLoader {
               workspaceScopeUri: uriToUse,
             });
           } catch (error) {
-            output.error(
-              errorHandler.handle(
+            logger.error(
+              logger.handleError(
                 new CustomError(ErrorCode.CustomProviderInstanceFail, name, error),
               ),
             );
@@ -82,7 +81,7 @@ export class FileheaderProviderLoader {
       ) as LanguageProvider[];
       return providers;
     } catch (error) {
-      output.error(`Failed to load custom providers: ${error}`);
+      logger.error(`Failed to load custom providers: ${error}`);
       return [];
     }
   }

@@ -1,16 +1,14 @@
 import vscode from 'vscode';
-import output from '@/error/output';
 import path from 'path';
 import { initVCSProvider } from '@/init';
-import { errorHandler } from '@/extension';
+import { logger } from '@/extension';
+import { CustomError, ErrorCode } from '@/error';
 import { convertDateFormatToRegex, hasShebang } from '@/utils/utils';
 import { addSelectionAfterString, isLineStartOrEnd } from '@/utils/vscode-utils';
-import { withProgress } from '@/utils/with-progress';
+import { updateProgress, withProgress } from '@/utils/with-progress';
 import { removeSpecialString } from '@/utils/str';
 import { FileheaderVariableBuilder } from './FileheaderVariableBuilder';
 import { FileHashManager } from './FileHashManager';
-import { CustomError } from '@/error/ErrorHandler';
-import { ErrorCode } from '@/error/ErrorCodeMessage.enum';
 import { FileheaderProviderLoader } from './FileheaderProviderLoader';
 import { LanguageProvider } from '@/language-providers';
 import { VscodeInternalProvider } from '@/language-providers/VscodeInternalProvider';
@@ -96,7 +94,7 @@ export class FileheaderManager {
         return provider;
       }
     }
-    output.info(new CustomError(ErrorCode.LanguageProviderNotFound));
+    logger.info(new CustomError(ErrorCode.LanguageProviderNotFound));
   }
 
   private async fileChanged(config: Config, document: vscode.TextDocument) {
@@ -244,7 +242,7 @@ export class FileheaderManager {
       newFile,
     );
     if (!shouldUpdate) {
-      output.info('Not need update filer header:', document.uri.fsPath);
+      logger.info('Not need update filer header:', document.uri.fsPath);
       return false;
     }
 
@@ -277,7 +275,7 @@ export class FileheaderManager {
     });
 
     await document.save();
-    output.info('File header updated:', document.uri.fsPath);
+    logger.info('File header updated:', document.uri.fsPath);
     return true;
   }
 
@@ -293,7 +291,7 @@ export class FileheaderManager {
     const provider = await this.findProvider(document);
 
     if (!provider) {
-      !allowInsert && errorHandler.handle(new CustomError(ErrorCode.LanguageNotSupport));
+      !allowInsert && logger.handleError(new CustomError(ErrorCode.LanguageNotSupport));
       return;
     }
 
@@ -310,7 +308,7 @@ export class FileheaderManager {
         originFileheaderInfo.variables,
       );
     } catch (error) {
-      errorHandler.handle(new CustomError(ErrorCode.VariableBuilderFail, error));
+      logger.handleError(new CustomError(ErrorCode.VariableBuilderFail, error));
       return;
     }
 
@@ -342,21 +340,25 @@ export class FileheaderManager {
 
   public async batchUpdateFileheader() {
     let failedFiles = (await this.fileMatcher.findFiles()) || [];
-    let reprocessedFiles: vscode.Uri[] = [];
+    const totalFiles = failedFiles.length;
+    let processedFiles = 0;
 
     await withProgress(
-      'Processing schedule',
-      async () => {
+      'Updating File Header',
+      async (progress) => {
         while (failedFiles.length > 0) {
+          let reprocessedFiles: vscode.Uri[] = [];
           for (const file of failedFiles) {
             try {
               const document = await vscode.workspace.openTextDocument(file);
               await this.updateFileheader(document);
               await document.save();
               vscode.commands.executeCommand('workbench.action.closeActiveEditor');
+              processedFiles++;
+              updateProgress(progress, processedFiles, totalFiles);
             } catch (error) {
               reprocessedFiles.push(file);
-              errorHandler.handle(
+              logger.handleError(
                 new CustomError(ErrorCode.UpdateFileHeaderFail, file.fsPath, error),
               );
             }
@@ -370,7 +372,7 @@ export class FileheaderManager {
           }
         }
       },
-      failedFiles.length,
+      totalFiles,
     );
   }
 }

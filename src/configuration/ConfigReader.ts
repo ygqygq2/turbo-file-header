@@ -4,7 +4,7 @@ import YAML from 'yaml';
 import { CUSTOM_CONFIG_FILE_NAME } from '@/constants';
 import { ConfigYaml } from '@/typings/types';
 import { getActiveDocumentWorkspace } from '@/utils/vscode-utils';
-import { errorHandler } from '@/extension';
+import { logger } from '@/extension';
 import { CustomError, ErrorCode } from '@/error';
 
 export class ConfigReader {
@@ -42,7 +42,7 @@ export class ConfigReader {
       const config: ConfigYaml = YAML.parse(configContent);
       return { ...defaultConfig, ...config };
     } catch (error) {
-      errorHandler.handle(new CustomError(ErrorCode.GetCustomConfigFail));
+      logger.handleError(new CustomError(ErrorCode.GetCustomConfigFail));
     }
     return defaultConfig;
   };

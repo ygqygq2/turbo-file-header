@@ -2,11 +2,11 @@ import * as vscode from 'vscode';
 import Handlebars from 'handlebars';
 import { IFileheaderVariables, ITemplateFunction, Provider } from '@/typings/types';
 import { LanguageProvider } from './LanguageProvider';
-import output from '@/error/output';
 import { LanguageManager } from '@/languages/LanguageManager';
 import { ConfigReader } from '../configuration/ConfigReader';
 import { ExtendedLanguageProviderOptions } from './types';
 import { ConfigManager } from '@/configuration/ConfigManager';
+import { logger } from '@/extension';
 
 interface ProviderDyClass {
   name: string;
@@ -85,7 +85,7 @@ export class GenerateCustomProviderClasses {
   public generateProviderClasses = async () => {
     const config = await this.configReader?.getConfigYaml();
     if (!config || !config.providers) {
-      output.info('No custom providers.');
+      logger.info('No custom providers.');
       return;
     }
     const dynamicProviderClasses = config.providers.flatMap((provider: Provider) => {

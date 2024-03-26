@@ -1,4 +1,4 @@
-import { ErrorCode, errorCodeMessages } from './ErrorCodeMessage.enum';
-import { CustomError, ErrorHandler } from './ErrorHandler';
+import { errorCodeEnum as ErrorCode, errorCodeMessages } from './CustomErrorCode.enum';
 
-export { ErrorCode, errorCodeMessages, CustomError, ErrorHandler };
+export { CustomError } from '@ygqygq2/vscode-log';
+export { ErrorCode, errorCodeMessages };

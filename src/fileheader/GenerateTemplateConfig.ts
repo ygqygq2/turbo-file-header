@@ -2,10 +2,9 @@ import vscode, { Uri } from 'vscode';
 import * as fs from 'fs';
 import path from 'path';
 import { CUSTOM_CONFIG_FILE_NAME } from '../constants';
-import { CustomError } from '@/error/ErrorHandler';
-import { ErrorCode } from '@/error/ErrorCodeMessage.enum';
-import { errorHandler } from '@/extension';
+import { logger } from '@/extension';
 import { getActiveDocumentWorkspace } from '@/utils/vscode-utils';
+import { CustomError, ErrorCode } from '@/error';
 
 export class GenerateTemplateConfig {
   private static instance: GenerateTemplateConfig;
@@ -18,7 +17,7 @@ export class GenerateTemplateConfig {
   public async createCustomTemplate(context: vscode.ExtensionContext) {
     const workspaces = vscode.workspace.workspaceFolders;
     if (!workspaces) {
-      errorHandler.handle(new CustomError(ErrorCode.WorkspaceFolderNotFound));
+      logger.handleError(new CustomError(ErrorCode.WorkspaceFolderNotFound));
       return;
     }
 
@@ -38,7 +37,7 @@ export class GenerateTemplateConfig {
         try {
           fs.mkdirSync(configDir, { recursive: true });
         } catch (error) {
-          errorHandler.handle(new CustomError(ErrorCode.CreateDirFail, configDir, error));
+          logger.handleError(new CustomError(ErrorCode.CreateDirFail, configDir, error));
         }
       }
 
@@ -49,7 +48,7 @@ export class GenerateTemplateConfig {
           // 将文件内容写入目标文件
           fs.writeFileSync(configPath, content);
         } catch (error) {
-          errorHandler.handle(new CustomError(ErrorCode.CreateFileFail, configPath, error));
+          logger.handleError(new CustomError(ErrorCode.CreateFileFail, configPath, error));
         }
       }
 
@@ -57,7 +56,7 @@ export class GenerateTemplateConfig {
       const document = await vscode.workspace.openTextDocument(configPath);
       vscode.window.showTextDocument(document);
     } catch (error) {
-      errorHandler.handle(new CustomError(ErrorCode.GenerateTemplateConfigFail, error));
+      logger.handleError(new CustomError(ErrorCode.GenerateTemplateConfigFail, error));
     }
 
     const document = await vscode.workspace.openTextDocument(path.resolve(configPath));

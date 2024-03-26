@@ -1,24 +1,25 @@
 import { IFileheaderVariables } from './typings/types';
 
-export const ConfigTag = 'turboFileHeader';
+export const CHANNEL_TITLE = 'Turbo File Header';
+export const CONFIG_TAG = 'turboFileHeader';
 
 export enum ConfigSection {
-  userName = ConfigTag + '.' + 'userName',
-  userEmail = ConfigTag + '.' + 'userEmail',
-  companyName = ConfigTag + '.' + 'companyName',
-  dateFormat = ConfigTag + '.' + 'dateFormat',
-  autoInsertOnCreateFile = ConfigTag + '.' + 'autoInsertOnCreateFile',
-  autoUpdateOnSave = ConfigTag + '.' + 'autoUpdateOnSave',
-  disableLabels = ConfigTag + '.' + 'disableLabels',
-  customVariables = ConfigTag + '.' + 'customVariables',
-  fileheader = ConfigTag + '.' + 'fileheader',
-  language = ConfigTag + '.' + 'language',
-  updateHeaderForModifiedFilesOnly = ConfigTag + '.' + 'updateHeaderForModifiedFilesOnly',
-  multilineComments = ConfigTag + '.' + 'multilineComments',
-  highlightPlainText = ConfigTag + '.' + 'highlightPlainText',
-  tags = ConfigTag + '.' + 'tags',
-  tagsLight = ConfigTag + '.' + 'tagsLight',
-  tagsDark = ConfigTag + '.' + 'tagsDark',
+  userName = CONFIG_TAG + '.' + 'userName',
+  userEmail = CONFIG_TAG + '.' + 'userEmail',
+  companyName = CONFIG_TAG + '.' + 'companyName',
+  dateFormat = CONFIG_TAG + '.' + 'dateFormat',
+  autoInsertOnCreateFile = CONFIG_TAG + '.' + 'autoInsertOnCreateFile',
+  autoUpdateOnSave = CONFIG_TAG + '.' + 'autoUpdateOnSave',
+  disableLabels = CONFIG_TAG + '.' + 'disableLabels',
+  customVariables = CONFIG_TAG + '.' + 'customVariables',
+  fileheader = CONFIG_TAG + '.' + 'fileheader',
+  language = CONFIG_TAG + '.' + 'language',
+  updateHeaderForModifiedFilesOnly = CONFIG_TAG + '.' + 'updateHeaderForModifiedFilesOnly',
+  multilineComments = CONFIG_TAG + '.' + 'multilineComments',
+  highlightPlainText = CONFIG_TAG + '.' + 'highlightPlainText',
+  tags = CONFIG_TAG + '.' + 'tags',
+  tagsLight = CONFIG_TAG + '.' + 'tagsLight',
+  tagsDark = CONFIG_TAG + '.' + 'tagsDark',
 }
 
 export const TEMPLATE_SYMBOL_KEY = Symbol.for('template');
