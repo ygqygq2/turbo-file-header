@@ -52,6 +52,10 @@ export class FileHashManager {
     }
 
     const hash = this.records.get(fsPath);
+    // 当前文件的 hash 没有时，说明文件没有更新，因为文件更新时会更新当前 hash
+    if (hash === undefined) {
+      return false;
+    }
     return skipCheckHash || hash !== originHash;
   }
 
