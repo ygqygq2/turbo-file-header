@@ -1,3 +1,4 @@
+import { Config } from '@/typings/types';
 import * as vscode from 'vscode';
 
 /**
@@ -106,4 +107,12 @@ export function addSelectionAfterString(document: vscode.TextDocument, string: s
       }
     }
   }
+}
+
+export function getLanguageIdByExt(config: Config, ext: string) {
+  const languagesConfig = config.languages;
+  const languageConfig = languagesConfig.find((languageConfig) =>
+    languageConfig.extensions.includes(ext),
+  );
+  return languageConfig ? languageConfig.id : undefined;
 }

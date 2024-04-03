@@ -1,23 +1,23 @@
-import vscode from 'vscode';
-import path from 'path';
-import { initVCSProvider } from '@/init';
-import { logger } from '@/extension';
-import { CustomError, ErrorCode } from '@/error';
-import { convertDateFormatToRegex, hasShebang } from '@/utils/utils';
-import { addSelectionAfterString, isLineStartOrEnd } from '@/utils/vscode-utils';
-import { updateProgress, withProgress } from '@/utils/with-progress';
-import { removeSpecialString } from '@/utils/str';
-import { FileheaderVariableBuilder } from './FileheaderVariableBuilder';
-import { FileHashManager } from './FileHashManager';
-import { FileheaderProviderLoader } from './FileheaderProviderLoader';
-import { LanguageProvider } from '@/language-providers';
-import { VscodeInternalProvider } from '@/language-providers/VscodeInternalProvider';
-import { Config, IFileheaderVariables } from '../typings/types';
 import { ConfigManager } from '@/configuration/ConfigManager';
 import { ConfigSection } from '@/constants';
-import { OriginFileheaderInfo, UpdateFileheaderManagerOptions } from './types';
-import { FileheaderProviderService } from './FileheaderProviderService';
+import { CustomError, ErrorCode } from '@/error';
+import { logger } from '@/extension';
 import { FileMatcher } from '@/extension-operate/FileMatcher';
+import { initVCSProvider } from '@/init';
+import { LanguageProvider } from '@/language-providers';
+import { VscodeInternalProvider } from '@/language-providers/VscodeInternalProvider';
+import { removeSpecialString } from '@/utils/str';
+import { convertDateFormatToRegex, hasShebang } from '@/utils/utils';
+import { addSelectionAfterString, getLanguageIdByExt, isLineStartOrEnd } from '@/utils/vscode-utils';
+import { updateProgress, withProgress } from '@/utils/with-progress';
+import path from 'path';
+import vscode from 'vscode';
+import { Config, IFileheaderVariables } from '../typings/types';
+import { FileHashManager } from './FileHashManager';
+import { FileheaderProviderLoader } from './FileheaderProviderLoader';
+import { FileheaderProviderService } from './FileheaderProviderService';
+import { FileheaderVariableBuilder } from './FileheaderVariableBuilder';
+import { OriginFileheaderInfo, UpdateFileheaderManagerOptions } from './types';
 
 export class FileheaderManager {
   private configManager: ConfigManager;
@@ -48,21 +48,13 @@ export class FileheaderManager {
     this.providers = await this.fileheaderProviderLoader.loadProviders(forceRefresh);
   }
 
-  private getLanguageIdByExt(ext: string) {
-    const config = this.configManager.getConfiguration();
-    const languagesConfig = config.languages;
-    const languageConfig = languagesConfig.find((languageConfig) =>
-      languageConfig.extensions.includes(ext),
-    );
-    return languageConfig ? languageConfig.id : undefined;
-  }
-
   private async findProvider(document: vscode.TextDocument) {
     let languageId = document.languageId;
     // 如果没有识别到自定义语言，则尝试使用后缀匹配
     if (languageId === 'plaintext') {
       const ext = path.extname(document.uri.fsPath).slice(1);
-      const tmpLanguageId = this.getLanguageIdByExt(`.${ext}`);
+      const config = this.configManager.getConfiguration();
+      const tmpLanguageId = getLanguageIdByExt(config, `.${ext}`);
       if (tmpLanguageId) {
         languageId = tmpLanguageId;
       }

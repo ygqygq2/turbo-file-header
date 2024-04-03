@@ -1,13 +1,13 @@
+import { LanguageManager } from '@/languages/LanguageManager';
 import * as vscode from 'vscode';
 import { ITemplateFunction, Template } from '../typings/types';
 import { LanguageProvider } from './LanguageProvider';
-import { LanguageManager } from '@/languages/LanguageManager';
 import { ExtendedLanguageProviderOptions } from './types';
 
 export class VscodeInternalProvider extends LanguageProvider {
   private languageManager: LanguageManager;
   public languages: string[] = [];
-  comments: vscode.CommentRule = { lineComment: '//', blockComment: ['/*', '*/'] };
+  public comments: vscode.CommentRule = { lineComment: '//', blockComment: ['/*', '*/'] };
 
   constructor(options: ExtendedLanguageProviderOptions) {
     super(options);

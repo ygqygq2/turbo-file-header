@@ -29,12 +29,16 @@
     "Other"
   ],
   "keywords": [
+    "annotation",
+    "comment",
     "fileheader",
+    "function comment",
     "copyright",
     "头部注释",
     "文件头注释",
     "项目文件注释",
-    "许可证注释"
+    "许可证注释",
+    "函数注释"
   ],
   "license": "MIT",
   "activationEvents": [
@@ -55,6 +59,10 @@
       {
         "command": "turboFileHeader.batchUpdateFileheader",
         "title": "%turboFileHeader.batchUpdateFileheader.title%"
+      },
+      {
+        "command": "turboFileHeader.addFunctionComment",
+        "title": "%turboFileHeader.addFunctionComment.title%"
       }
     ],
     "keybindings": [
@@ -62,6 +70,12 @@
         "command": "turboFileHeader.addFileheader",
         "key": "ctrl+alt+h",
         "mac": "ctrl+alt+h",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "turboFileHeader.addFunctionComment",
+        "key": "ctrl+alt+/",
+        "mac": "ctrl+alt+/",
         "when": "editorTextFocus"
       }
     ],

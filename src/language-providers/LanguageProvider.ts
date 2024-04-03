@@ -1,21 +1,23 @@
+import { ConfigManager } from '@/configuration/ConfigManager';
+import { escapeRegexString } from '@/utils/str';
 import vscode from 'vscode';
-import { evaluateTemplate, getTaggedTemplateInputs, hasShebang } from '../utils/utils';
+import {
+  TEMPLATE_NAMED_GROUP_WILDCARD_PLACEHOLDER,
+  TEMPLATE_OPTIONAL_GROUP_PLACEHOLDER,
+  WILDCARD_ACCESS_VARIABLES,
+} from '../constants';
 import {
   IFileheaderVariables,
   ITemplateFunction,
   Template,
   TemplateInterpolation,
 } from '../typings/types';
-import {
-  TEMPLATE_NAMED_GROUP_WILDCARD_PLACEHOLDER,
-  TEMPLATE_OPTIONAL_GROUP_PLACEHOLDER,
-  WILDCARD_ACCESS_VARIABLES,
-} from '../constants';
-import { escapeRegexString } from '@/utils/str';
-import { ConfigManager } from '@/configuration/ConfigManager';
+import { evaluateTemplate, getTaggedTemplateInputs, hasShebang } from '../utils/utils';
 import { LanguageProviderOptions } from './types';
 
 export abstract class LanguageProvider {
+  abstract readonly languages: string[];
+  abstract comments: vscode.CommentRule;
   protected configManager: ConfigManager;
   public readonly workspaceScopeUri?: vscode.Uri;
   public readonly accessVariableFields = new Set<string>();
@@ -30,8 +32,6 @@ export abstract class LanguageProvider {
     this.calculateVariableAccessInfo();
   }
 
-  abstract readonly languages: string[];
-  abstract comments: vscode.CommentRule;
   // 文件头偏移量，即文件头从这行开始插入或更新
   readonly startLineOffset: number = 0;
 

@@ -3,7 +3,7 @@
 [![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/ygqygq2.turbo-file-header.svg?color=07c160&label=turbo-file-header&logo=visual-studio-code)](https://marketplace.visualstudio.com/items?itemName=ygqygq2.turbo-file-header)
 ![Visual Studio Marketplace Installs](https://img.shields.io/visual-studio-marketplace/i/ygqygq2.turbo-file-header)
 
-[English](README.md)
+[English](README.md) | [Wiki](https://github.com/ygqygq2/turbo-file-header/wiki)
 
 Turbo file header, 可以全局设置文件头或者项目级设置文件头。
 

@@ -1,5 +1,5 @@
 /// <reference types="vitest" />
-import path from 'node:path';
+import path from 'path';
 
 import { defineConfig } from 'vite';
 

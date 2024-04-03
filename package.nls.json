@@ -2,6 +2,7 @@
   "turboFileHeader.addFileheader.title": "Turbo File Header: Add Fileheader",
   "turboFileHeader.generateTemplateConfig.title": "Turbo File Header: Generate Custom Template Config File",
   "turboFileHeader.batchUpdateFileheader.title": "Turbo File Header: Batch Update File Header",
+  "turboFileHeader.addFunctionComment.title": "Turbo File Header: Add Function Comment",
   "configuration.title": "Turbo File Header",
   "turboFileHeader.userName.description": "The fixed current user. The default is from your VCS",
   "turboFileHeader.userEmail.description": "The fixed current user email. the default is from your VCS",
