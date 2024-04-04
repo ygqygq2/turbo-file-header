@@ -57,8 +57,7 @@ export enum CustomErrorCode {
   // 变量转换错误 (1080 - 1089)
   UnknownVariable = 1080,
 
-  // 保留未来扩展的空间 (1900 - 1999)
-  // ...
+  // 函数参数相关错误 (1090 - 1099)
 }
 
 const extensionPrefix = '';

@@ -5,5 +5,6 @@
   "File header updated": "File header updated",
   "Please check your workspace": "Please check your workspace",
   "No custom providers": "No custom providers",
-  "No language configuration comments found for": "No language configuration comments found for"
+  "No language configuration comments found for": "No language configuration comments found for",
+  "No function found at the cursor": "No function found at the cursor",
 }
