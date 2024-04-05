@@ -1,6 +1,11 @@
 import * as vscode from 'vscode';
 
+export type ParamType = {
+  [key: string]: string;
+};
+
 export interface FunctionParamsInfo {
-  params: string[];
+  matchedFunction: boolean;
+  params: ParamType[];
   insertPosition: vscode.Position;
 }

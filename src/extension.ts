@@ -16,9 +16,9 @@ import { FileMatcher } from './extension-operate/FileMatcher';
 import { FileWatcher } from './extension-operate/FileWatcher';
 import { FileHashManager } from './fileheader/FileHashManager';
 import { FileheaderProviderLoader } from './fileheader/FileheaderProviderLoader';
-import { FileheaderProviderService } from './fileheader/FileheaderProviderService';
 import { FileheaderVariableBuilder } from './fileheader/FileheaderVariableBuilder';
 import { GenerateTemplateConfig } from './fileheader/GenerateTemplateConfig';
+import { FunctionParserLoader } from './function-params-parser/FunctionParserLoader';
 import { GenerateCustomProviderClasses } from './language-providers/GenerateCustomProviderClasses';
 import { LanguageManager } from './languages/LanguageManager';
 
@@ -39,14 +39,14 @@ const fileheaderProviderLoader = new FileheaderProviderLoader(
 );
 const fileHashMemento = new FileHashManager();
 const fileheaderVariableBuilder = new FileheaderVariableBuilder(configManager);
-const fileheaderProviderService = new FileheaderProviderService();
+const functionParserLoader = new FunctionParserLoader();
 export const fileheaderManager = new FileheaderManager(
   configManager,
   fileMatcher,
   fileheaderProviderLoader,
   fileHashMemento,
   fileheaderVariableBuilder,
-  fileheaderProviderService,
+  functionParserLoader,
 );
 const fileWatcher = new FileWatcher(configManager, fileheaderManager);
 const debounceManager = new DebounceManager();

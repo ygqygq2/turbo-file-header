@@ -1,12 +1,13 @@
-import * as vscode from 'vscode';
-import Handlebars from 'handlebars';
-import { IFileheaderVariables, ITemplateFunction, Provider } from '@/typings/types';
-import { LanguageProvider } from './LanguageProvider';
-import { LanguageManager } from '@/languages/LanguageManager';
-import { ConfigReader } from '../configuration/ConfigReader';
-import { ExtendedLanguageProviderOptions } from './types';
 import { ConfigManager } from '@/configuration/ConfigManager';
 import { logger } from '@/extension';
+import { LanguageManager } from '@/languages/LanguageManager';
+import { IFileheaderVariables, ITemplateFunction, Provider } from '@/typings/types';
+import { getBlockComment } from '@/utils/vscode-utils';
+import Handlebars from 'handlebars';
+import * as vscode from 'vscode';
+import { ConfigReader } from '../configuration/ConfigReader';
+import { LanguageProvider } from './LanguageProvider';
+import { ExtendedLanguageProviderOptions } from './types';
 
 interface ProviderDyClass {
   name: string;
@@ -63,7 +64,7 @@ export class GenerateCustomProviderClasses {
           variables: IFileheaderVariables,
           useJSDocStyle: boolean = false,
         ) {
-          const { blockCommentStart, blockCommentEnd } = this.getBlockComment();
+          const { blockCommentStart, blockCommentEnd } = getBlockComment(this.comments);
 
           const compiledTemplate = Handlebars.compile(template);
           const result = compiledTemplate(variables);

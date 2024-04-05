@@ -1,5 +1,6 @@
 import { ConfigManager } from '@/configuration/ConfigManager';
 import { escapeRegexString } from '@/utils/str';
+import { getBlockComment, isCommentLine } from '@/utils/vscode-utils';
 import vscode from 'vscode';
 import {
   TEMPLATE_NAMED_GROUP_WILDCARD_PLACEHOLDER,
@@ -16,8 +17,8 @@ import { evaluateTemplate, getTaggedTemplateInputs, hasShebang } from '../utils/
 import { LanguageProviderOptions } from './types';
 
 export abstract class LanguageProvider {
-  abstract readonly languages: string[];
-  abstract comments: vscode.CommentRule;
+  public abstract readonly languages: string[];
+  public abstract comments: vscode.CommentRule;
   protected configManager: ConfigManager;
   public readonly workspaceScopeUri?: vscode.Uri;
   public readonly accessVariableFields = new Set<string>();
@@ -35,27 +36,8 @@ export abstract class LanguageProvider {
   // 文件头偏移量，即文件头从这行开始插入或更新
   readonly startLineOffset: number = 0;
 
-  private isCommentLine(lineText: string, isInsideBlockComment: boolean): boolean {
-    const { blockCommentStart, blockCommentEnd } = this.getBlockComment();
-    const { lineComment } = this.comments;
-
-    // 块注释
-    if (this.comments && this.comments.blockComment && this.comments.blockComment.length) {
-      // 处于块注释中，不管有没有结束，则为注释行
-      if (isInsideBlockComment) {
-        return true;
-      }
-
-      // 块注释开始、结束都属于注释行
-      return lineText.includes(blockCommentStart) || lineText.includes(blockCommentEnd);
-    } else if (lineComment) {
-      return lineText.trim().startsWith(lineComment);
-    }
-    return false;
-  }
-
   private updateBlockCommentState(lineText: string, isInsideBlockComment: boolean): boolean {
-    const { blockCommentStart, blockCommentEnd } = this.getBlockComment();
+    const { blockCommentStart, blockCommentEnd } = getBlockComment(this.comments);
 
     // 检查是否为Python或其他使用相同标记作为块注释开始和结束的语言
     if (blockCommentStart === blockCommentEnd) {
@@ -81,22 +63,6 @@ export abstract class LanguageProvider {
 
   public get isCustomProvider() {
     return !!this.workspaceScopeUri;
-  }
-
-  public getBlockComment(): { blockCommentStart: string; blockCommentEnd: string } {
-    let blockCommentStart: string = '';
-    let blockCommentEnd: string = '';
-    // 确保 this.comments 和 this.comments.blockComments 都不是 undefined
-    if (this.comments && this.comments.blockComment && this.comments.blockComment.length) {
-      // 当存在块注释时使用块注释
-      blockCommentStart = this.comments.blockComment[0];
-      blockCommentEnd = this.comments.blockComment[1];
-    } else if (this.comments && this.comments.lineComment) {
-      // 当不存在块注释但存在行注释时，使用行注释作为块注释的开始和结束
-      blockCommentStart = this.comments.lineComment;
-      blockCommentEnd = this.comments.lineComment;
-    }
-    return { blockCommentStart, blockCommentEnd };
   }
 
   private getTemplateInternal(variables: any, useJSDocStyle: boolean = false) {
@@ -199,7 +165,7 @@ export abstract class LanguageProvider {
       // 更新块注释的开始和结束状态
       isInsideBlockComment = this.updateBlockCommentState(lineText, isInsideBlockComment);
       // 判断当前行是否是注释行
-      if (this.isCommentLine(lineText, isInsideBlockComment)) {
+      if (isCommentLine(this.comments, lineText, isInsideBlockComment)) {
         // endLine = i;
         endPosition = document.lineAt(i).range.end;
       } else {

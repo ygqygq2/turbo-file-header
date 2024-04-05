@@ -116,3 +116,45 @@ export function getLanguageIdByExt(config: Config, ext: string) {
   );
   return languageConfig ? languageConfig.id : undefined;
 }
+
+export function getBlockComment(comments: vscode.CommentRule): {
+  blockCommentStart: string;
+  blockCommentEnd: string;
+} {
+  let blockCommentStart: string = '';
+  let blockCommentEnd: string = '';
+  // 确保 this.comments 和 this.comments.blockComments 都不是 undefined
+  if (comments && comments.blockComment && comments.blockComment.length) {
+    // 当存在块注释时使用块注释
+    blockCommentStart = comments.blockComment[0];
+    blockCommentEnd = comments.blockComment[1];
+  } else if (comments && comments.lineComment) {
+    // 当不存在块注释但存在行注释时，使用行注释作为块注释的开始和结束
+    blockCommentStart = comments.lineComment;
+    blockCommentEnd = comments.lineComment;
+  }
+  return { blockCommentStart, blockCommentEnd };
+}
+
+export function isCommentLine(
+  comments: vscode.CommentRule,
+  lineText: string,
+  isInsideBlockComment: boolean,
+): boolean {
+  const { blockCommentStart, blockCommentEnd } = getBlockComment(comments);
+  const { lineComment } = comments;
+
+  // 块注释
+  if (comments && comments.blockComment && comments.blockComment.length) {
+    // 处于块注释中，不管有没有结束，则为注释行
+    if (isInsideBlockComment) {
+      return true;
+    }
+
+    // 块注释开始、结束都属于注释行
+    return lineText.includes(blockCommentStart) || lineText.includes(blockCommentEnd);
+  } else if (lineComment) {
+    return lineText.trim().startsWith(lineComment);
+  }
+  return false;
+}

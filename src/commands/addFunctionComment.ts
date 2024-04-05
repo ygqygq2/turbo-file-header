@@ -17,7 +17,7 @@ export const addFunctionComment = (): Command => {
         vscode.window.showErrorMessage('Turbo File Header: You should open a file first.');
         return;
       }
-      fileheaderManager.updateFileheader(currentDocument);
+      fileheaderManager.updateFunctionComment(activeEditor);
     },
   };
 };

@@ -1,4 +1,5 @@
 import { LanguageManager } from '@/languages/LanguageManager';
+import { getBlockComment } from '@/utils/vscode-utils';
 import * as vscode from 'vscode';
 import { ITemplateFunction, Template } from '../typings/types';
 import { LanguageProvider } from './LanguageProvider';
@@ -26,7 +27,7 @@ export class VscodeInternalProvider extends LanguageProvider {
     variables: { [key: string]: string },
     useJSDocStyle: boolean = false,
   ): Template {
-    const { blockCommentStart, blockCommentEnd } = this.getBlockComment();
+    const { blockCommentStart, blockCommentEnd } = getBlockComment(this.comments);
 
     const config = this.configManager.getConfiguration();
     const { fileheader } = config;

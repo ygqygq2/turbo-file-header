@@ -58,6 +58,7 @@ export enum CustomErrorCode {
   UnknownVariable = 1080,
 
   // 函数参数相关错误 (1090 - 1099)
+  NotFoundParser = 1090,
 }
 
 const extensionPrefix = '';
@@ -122,6 +123,10 @@ const variableCustomErrorCodeMessage = {
   [CustomErrorCode.UnknownVariable]: `${extensionPrefix}Unknown variable.`,
 };
 
+const functionParamsErrorCodeMessage = {
+  [CustomErrorCode.NotFoundParser]: `${extensionPrefix}No parser available for language: `,
+};
+
 export const customErrorCodeMessages: ErrorCodeMessage = {
   ...gitCustomErrorCodeMessage,
   ...vcsCustomErrorCodeMessage,
@@ -132,6 +137,7 @@ export const customErrorCodeMessages: ErrorCodeMessage = {
   ...customProviderCustomErrorCodeMessage,
   ...extensionCustomErrorCodeMessage,
   ...variableCustomErrorCodeMessage,
+  ...functionParamsErrorCodeMessage,
 };
 
 export const { errorCodeEnum, errorCodeMessages } = createErrorCodeMessages(
