@@ -1,53 +1,95 @@
-import { LanguageProvider } from '@/language-providers';
-import { getBlockComment, isCommentLine } from '@/utils/vscode-utils';
+import { isCommentLine, updateBlockCommentState } from '@/utils/vscode-utils';
 import * as vscode from 'vscode';
-import { FunctionParamsInfo } from './types';
+import { FunctionCommentInfo, FunctionParamsInfo, ParamsInfo, ReturnInfo } from './types';
 
 export abstract class FunctionParamsParser {
-  private languageProvider: LanguageProvider;
-
-  constructor(languageProvider: LanguageProvider) {
-    this.languageProvider = languageProvider;
-  }
-
   public abstract getFunctionParamsAtCursor(activeEditor: vscode.TextEditor): FunctionParamsInfo;
 
-  public generateJSDoc(functionParamsInfo: FunctionParamsInfo) {
-    const { params } = functionParamsInfo;
-    let doc = '/**\n';
-    for (const param of params) {
-      const [paramName, paramType] = Object.entries(param)[0];
-      doc += ` * @param {${paramType}} ${paramName} - description\n`;
+  public generateFunctionCommentInfo(
+    functionParamsInfo: FunctionParamsInfo,
+    originFunctionInfo: FunctionCommentInfo,
+  ): FunctionCommentInfo {
+    const { params, returnType } = functionParamsInfo;
+    const { paramsInfo, returnInfo, descriptionInfo } = originFunctionInfo;
+
+    // 合并 params 和 paramsInfo
+    const mergedParams: ParamsInfo = {};
+    for (const key in params) {
+      mergedParams[key] = {
+        type: params[key].type,
+        description: paramsInfo[key]?.description || '',
+      };
     }
-    doc += ' */\n';
-    console.log('🚀 ~ file: TypescriptProvider.ts:74 ~ doc:', doc);
-    return doc;
+
+    // 合并 returnType 和 returnInfo
+    let mergedReturnInfo: ReturnInfo;
+    if (Array.isArray(returnType)) {
+      mergedReturnInfo = returnType.reduce((acc, type, index) => {
+        acc[`return${index + 1}`] = {
+          type,
+          description: returnInfo[`return${index + 1}`]?.description || '',
+        };
+        return acc;
+      }, {} as ReturnInfo);
+    } else {
+      mergedReturnInfo = {
+        default: {
+          type: returnType || returnInfo.default?.type || '',
+          description: returnInfo.default?.description || '',
+        },
+      };
+    }
+
+    return {
+      paramsInfo: mergedParams,
+      returnInfo: mergedReturnInfo,
+      descriptionInfo,
+    };
   }
 
-  public getOriginJSDoc(document: vscode.TextDocument, insertPosition: vscode.Position) {
+  public getOriginFunctionCommentRange(
+    comments: vscode.CommentRule,
+    document: vscode.TextDocument,
+    insertPosition: vscode.Position,
+  ) {
     const endLine = insertPosition.line;
     const startLine = endLine;
-    const startPosition = new vscode.Position(startLine, 0);
-    let endPosition = new vscode.Position(endLine, 0);
+    let startPosition = new vscode.Position(startLine, 0);
+    const endPosition = new vscode.Position(endLine, 0);
 
     // 用于标记是否处于块注释内部
     let isInsideBlockComment = false;
 
     // 往上检查，直到找到非注释行
-    for (let i = endLine; i >= 0; i--) {
+    for (let i = endLine - 1; i >= 0; i--) {
       const line = document.lineAt(i);
       const lineText = line.text;
 
       // 更新块注释的开始和结束状态
-      isInsideBlockComment = this.updateBlockCommentState(lineText, isInsideBlockComment);
+      isInsideBlockComment = updateBlockCommentState(
+        comments,
+        lineText,
+        isInsideBlockComment,
+        'up',
+      );
       // 判断当前行是否是注释行
-      if (isCommentLine(this.languageProvider?.comments, lineText, isInsideBlockComment)) {
-        // endLine = i;
-        endPosition = document.lineAt(i).range.end;
+      if (isCommentLine(comments, lineText, isInsideBlockComment)) {
+        startPosition = document.lineAt(i).range.start;
       } else {
-        // 遇到非注释行且不在块注释中，且不是空行，结束循环
-        if (!isInsideBlockComment && !line.isEmptyOrWhitespace) {
-          break;
+        // 不在块注释中
+        if (!isInsideBlockComment) {
+          // 如果有多个空行，在往前最后一个空行 break
+          if (
+            line.isEmptyOrWhitespace &&
+            i - 1 >= 0 &&
+            !document.lineAt(i - 1).isEmptyOrWhitespace
+          ) {
+            break;
+          }
+          // 如果当前行不是空行，结束循环
+          if (!line.isEmptyOrWhitespace) {
+            break;
+          }
         }
       }
     }
@@ -56,48 +98,35 @@ export abstract class FunctionParamsParser {
     return range;
   }
 
-  public parseJSDoc(jsdoc: string) {
-    const paramPattern = /@param\s+\{(.+?)\}\s+(\w+)\s+-\s+(.+)/g;
-    const returnPattern = /@return\s+\{(.+?)\}\s+(.+)/g;
+  public parseFunctionComment(
+    document: vscode.TextDocument,
+    range: vscode.Range,
+  ): FunctionCommentInfo {
+    const descriptionPattern = /@description\s+(.*)/;
+    const paramPattern = /@param\s+(\w+)\s*(?:\{(.+?)\})?\s*(?:-\s*)?(.+)/g;
+    const returnPattern = /@return\s+(?:\{(.+?)\})?\s*(?:-\s*)?(.+)/;
 
-    const params: { [key: string]: string }[] = [];
+    const jsdoc = document.getText(range);
+
+    const paramsInfo: ParamsInfo = {};
     let match;
     while ((match = paramPattern.exec(jsdoc)) !== null) {
-      const [_, type, name, description] = match;
-      params.push({ [name]: `${type} - ${description}` });
+      const [_, name, type = '', description = ''] = match;
+      paramsInfo[name] = { type, description };
     }
 
-    let returnType = '';
+    let returnInfo: ReturnInfo = { default: { type: '', description: '' } };
     if ((match = returnPattern.exec(jsdoc)) !== null) {
-      const [_, type, description] = match;
-      returnType = `${type} - ${description}`;
+      const [_, type = '', description = ''] = match;
+      returnInfo = { default: { type, description } };
     }
 
-    return { params, returnType };
-  }
-
-  protected updateBlockCommentState(lineText: string, isInsideBlockComment: boolean): boolean {
-    const { blockCommentStart, blockCommentEnd } = getBlockComment(this.languageProvider?.comments);
-
-    // 检查是否为Python或其他使用相同标记作为块注释开始和结束的语言
-    if (blockCommentStart === blockCommentEnd) {
-      // 如果找到块注释标记，并且我们当前不在块注释内，那么这表示块注释的开始
-      if (lineText.includes(blockCommentStart) && !isInsideBlockComment) {
-        isInsideBlockComment = true;
-      } else if (lineText.includes(blockCommentEnd) && isInsideBlockComment) {
-        // 如果我们已经在块注释内，并且再次遇到块注释标记，那么这表示块注释的结束
-        isInsideBlockComment = false;
-      }
-    } else {
-      // 对于开始和结束标记不同的常规情况
-      if (lineText.includes(blockCommentStart)) {
-        isInsideBlockComment = true;
-      }
-      if (lineText.includes(blockCommentEnd)) {
-        isInsideBlockComment = false;
-      }
+    let descriptionInfo = '';
+    if ((match = descriptionPattern.exec(jsdoc)) !== null) {
+      const [_, description] = match;
+      descriptionInfo = description.trim();
     }
 
-    return isInsideBlockComment;
+    return { paramsInfo, returnInfo, descriptionInfo };
   }
 }

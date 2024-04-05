@@ -1,3 +1,4 @@
+import { FunctionCommentInfo } from '@/function-params-parser/types';
 import { Config } from '@/typings/types';
 import * as vscode from 'vscode';
 
@@ -157,4 +158,69 @@ export function isCommentLine(
     return lineText.trim().startsWith(lineComment);
   }
   return false;
+}
+
+export function updateBlockCommentState(
+  comments: vscode.CommentRule,
+  lineText: string,
+  isInsideBlockComment: boolean,
+  direction: 'up' | 'down' = 'down',
+): boolean {
+  const { blockCommentStart, blockCommentEnd } = getBlockComment(comments);
+
+  // 检查是否为Python或其他使用相同标记作为块注释开始和结束的语言
+  if (blockCommentStart === blockCommentEnd) {
+    // 如果找到块注释标记，并且我们当前不在块注释内，那么这表示块注释的开始
+    if (direction === 'down') {
+      if (lineText.includes(blockCommentStart) && !isInsideBlockComment) {
+        isInsideBlockComment = true;
+      } else if (lineText.includes(blockCommentEnd) && isInsideBlockComment) {
+        // 如果我们已经在块注释内，并且再次遇到块注释标记，那么这表示块注释的结束
+        isInsideBlockComment = false;
+      }
+    } else {
+      if (lineText.includes(blockCommentEnd) && !isInsideBlockComment) {
+        isInsideBlockComment = true;
+      } else if (lineText.includes(blockCommentStart) && isInsideBlockComment) {
+        isInsideBlockComment = false;
+      }
+    }
+  } else {
+    // 对于开始和结束标记不同的常规情况
+    if (direction === 'down') {
+      if (lineText.includes(blockCommentStart)) {
+        isInsideBlockComment = true;
+      }
+      if (lineText.includes(blockCommentEnd)) {
+        isInsideBlockComment = false;
+      }
+    } else {
+      if (lineText.includes(blockCommentEnd)) {
+        isInsideBlockComment = true;
+      }
+      if (lineText.includes(blockCommentStart)) {
+        isInsideBlockComment = false;
+      }
+    }
+  }
+
+  return isInsideBlockComment;
+}
+
+export function generateFunctionComment(functionCommentInfo: FunctionCommentInfo): string {
+  const { paramsInfo, returnInfo, descriptionInfo } = functionCommentInfo;
+
+  let functionComment = '/**\n';
+  functionComment += ` * @description ${descriptionInfo}\n`;
+
+  for (const returnKey in returnInfo) {
+    functionComment += ` * @return {${returnInfo[returnKey].type}} ${returnInfo[returnKey].description}\n`;
+  }
+
+  for (const paramName in paramsInfo) {
+    functionComment += ` * @param {${paramsInfo[paramName].type}} ${paramName} ${paramsInfo[paramName].description}\n`;
+  }
+
+  functionComment += ' */';
+  return functionComment;
 }

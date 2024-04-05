@@ -1,6 +1,6 @@
 import { ConfigManager } from '@/configuration/ConfigManager';
 import { escapeRegexString } from '@/utils/str';
-import { getBlockComment, isCommentLine } from '@/utils/vscode-utils';
+import { isCommentLine, updateBlockCommentState } from '@/utils/vscode-utils';
 import vscode from 'vscode';
 import {
   TEMPLATE_NAMED_GROUP_WILDCARD_PLACEHOLDER,
@@ -35,31 +35,6 @@ export abstract class LanguageProvider {
 
   // 文件头偏移量，即文件头从这行开始插入或更新
   readonly startLineOffset: number = 0;
-
-  private updateBlockCommentState(lineText: string, isInsideBlockComment: boolean): boolean {
-    const { blockCommentStart, blockCommentEnd } = getBlockComment(this.comments);
-
-    // 检查是否为Python或其他使用相同标记作为块注释开始和结束的语言
-    if (blockCommentStart === blockCommentEnd) {
-      // 如果找到块注释标记，并且我们当前不在块注释内，那么这表示块注释的开始
-      if (lineText.includes(blockCommentStart) && !isInsideBlockComment) {
-        isInsideBlockComment = true;
-      } else if (lineText.includes(blockCommentEnd) && isInsideBlockComment) {
-        // 如果我们已经在块注释内，并且再次遇到块注释标记，那么这表示块注释的结束
-        isInsideBlockComment = false;
-      }
-    } else {
-      // 对于开始和结束标记不同的常规情况
-      if (lineText.includes(blockCommentStart)) {
-        isInsideBlockComment = true;
-      }
-      if (lineText.includes(blockCommentEnd)) {
-        isInsideBlockComment = false;
-      }
-    }
-
-    return isInsideBlockComment;
-  }
 
   public get isCustomProvider() {
     return !!this.workspaceScopeUri;
@@ -163,7 +138,7 @@ export abstract class LanguageProvider {
       const lineText = line.text;
 
       // 更新块注释的开始和结束状态
-      isInsideBlockComment = this.updateBlockCommentState(lineText, isInsideBlockComment);
+      isInsideBlockComment = updateBlockCommentState(this.comments, lineText, isInsideBlockComment);
       // 判断当前行是否是注释行
       if (isCommentLine(this.comments, lineText, isInsideBlockComment)) {
         // endLine = i;

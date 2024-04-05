@@ -2,11 +2,10 @@ import { ConfigManager } from '@/configuration/ConfigManager';
 import { CustomError, ErrorCode } from '@/error';
 import { logger } from '@/extension';
 import { FileMatcher } from '@/extension-operate/FileMatcher';
-import { FunctionParamsParser } from '@/function-params-parser/FunctionParamsParser';
 import { FunctionParserLoader } from '@/function-params-parser/FunctionParserLoader';
-import { FunctionParamsInfo } from '@/function-params-parser/types';
+import { FunctionCommentInfo, FunctionParamsInfo } from '@/function-params-parser/types';
 import { LanguageProvider } from '@/language-providers';
-import { addSelectionAfterString, getBlockComment } from '@/utils/vscode-utils';
+import { addSelectionAfterString, generateFunctionComment } from '@/utils/vscode-utils';
 import { updateProgress, withProgress } from '@/utils/with-progress';
 import vscode from 'vscode';
 import { IFileheaderVariables } from '../typings/types';
@@ -26,7 +25,6 @@ export class FileheaderManager {
   private fileHashManager: FileHashManager;
   private fileheaderVariableBuilder: FileheaderVariableBuilder;
   private functionParserLoader: FunctionParserLoader;
-  private functionParamsParser: FunctionParamsParser | null = null;
 
   constructor(
     configManager: ConfigManager,
@@ -151,8 +149,10 @@ export class FileheaderManager {
 
   public async updateFunctionComment(activeEditor: vscode.TextEditor) {
     const document = activeEditor.document;
+    const editor = await vscode.window.showTextDocument(document);
     const parser = await this.functionParserLoader.loadParser(document.languageId);
     const functionParamsInfo = parser?.getFunctionParamsAtCursor(activeEditor);
+    console.log('🚀 ~ file: FileheaderManager.ts:155 ~ functionParamsInfo:', functionParamsInfo);
 
     // 查找操作文件的 provider
     const provider = await findProvider(this.configManager, this.providers, document);
@@ -161,10 +161,39 @@ export class FileheaderManager {
       return;
     }
 
-    if (functionParamsInfo?.matchedFunction) {
-      parser?.generateJSDoc(functionParamsInfo as unknown as FunctionParamsInfo);
+    const { matchedFunction, insertPosition } = functionParamsInfo || {};
+    if (matchedFunction && insertPosition) {
+      const comments = provider.comments;
+      const range = parser?.getOriginFunctionCommentRange(comments, document, insertPosition);
+      // 原来有 JSDoc 注释
+      if (range) {
+        const originFunctionInfo: FunctionCommentInfo = parser?.parseFunctionComment(
+          document,
+          range,
+        ) || {
+          paramsInfo: {},
+          returnInfo: { default: { type: '', description: '' } },
+          descriptionInfo: '',
+        };
+        const functionCommentInfo = parser?.generateFunctionCommentInfo(
+          functionParamsInfo as unknown as FunctionParamsInfo,
+          originFunctionInfo,
+        );
 
-      const { blockCommentStart, blockCommentEnd } = getBlockComment(provider?.comments);
+        if (functionCommentInfo) {
+          const functionComment = generateFunctionComment(functionCommentInfo);
+
+          await editor.edit((editBuilder) => {
+            editBuilder.replace(range, functionComment + '\n');
+          });
+
+          await document.save();
+          logger.info('Function comment updated:', document.uri.fsPath);
+          return true;
+        }
+      }
     }
+    logger.info('Not need update function comment:', document.uri.fsPath);
+    return false;
   }
 }
