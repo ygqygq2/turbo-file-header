@@ -169,9 +169,20 @@ export abstract class LanguageProvider {
         // endLine = i;
         endPosition = document.lineAt(i).range.end;
       } else {
-        // 遇到非注释行且不在块注释中，且不是空行，结束循环
-        if (!isInsideBlockComment && !line.isEmptyOrWhitespace) {
-          break;
+        // 不在块注释中
+        if (!isInsideBlockComment) {
+          // 如果有多个空行，在最后一个空行 break
+          if (
+            line.isEmptyOrWhitespace &&
+            i + 1 < document.lineCount &&
+            !document.lineAt(i + 1).isEmptyOrWhitespace
+          ) {
+            break;
+          }
+          // 如果当前行不是空行，结束循环
+          if (!line.isEmptyOrWhitespace) {
+            break;
+          }
         }
       }
     }
