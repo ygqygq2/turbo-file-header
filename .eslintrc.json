@@ -34,7 +34,7 @@
     "eqeqeq": "warn",
     "no-throw-literal": "warn",
     "semi": "off",
-    "import/no-unresolved": "error",
+    "import/no-unresolved": ["error", { "ignore": ["jest"] }],
     "no-unused-vars": "off",
     "unused-imports/no-unused-imports": "error",
     "@typescript-eslint/no-unused-vars": [
