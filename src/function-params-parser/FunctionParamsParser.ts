@@ -103,28 +103,26 @@ export abstract class FunctionParamsParser {
     range: vscode.Range,
   ): FunctionCommentInfo {
     const descriptionPattern = /@description\s+(.*)/;
-    const paramPattern = /@param\s+(\w+)\s*(?:\{(.+?)\})?\s*(?:-\s*)?(.+)/g;
-    const returnPattern = /@return\s+(?:\{(.+?)\})?\s*(?:-\s*)?(.+)/;
+    const paramPattern = /@param\s+(\w+)\s*\{(.+?)\}\s*(.*)/;
+    const returnPattern = /@return\s+(?:(\w+)\s*)?\{(.+?)\}\s*(.*)/;
 
-    const jsdoc = document.getText(range);
+    const functionCommentLines = document.getText(range).split('\n');
 
     const paramsInfo: ParamsInfo = {};
-    let match;
-    while ((match = paramPattern.exec(jsdoc)) !== null) {
-      const [_, name, type = '', description = ''] = match;
-      paramsInfo[name] = { type, description };
-    }
-
-    let returnInfo: ReturnInfo = { default: { type: '', description: '' } };
-    if ((match = returnPattern.exec(jsdoc)) !== null) {
-      const [_, type = '', description = ''] = match;
-      returnInfo = { default: { type, description } };
-    }
-
+    const returnInfo: ReturnInfo = {};
     let descriptionInfo = '';
-    if ((match = descriptionPattern.exec(jsdoc)) !== null) {
-      const [_, description] = match;
-      descriptionInfo = description.trim();
+    for (const line of functionCommentLines) {
+      let match;
+      if ((match = paramPattern.exec(line)) !== null) {
+        const [_, name, type, description = ''] = match;
+        paramsInfo[name] = { type, description };
+      } else if ((match = returnPattern.exec(line)) !== null) {
+        const [_, key = 'default', type, description = ''] = match;
+        returnInfo[key] = { type, description };
+      } else if ((match = descriptionPattern.exec(line)) !== null) {
+        const [_, description] = match;
+        descriptionInfo = description.trim();
+      }
     }
 
     return { paramsInfo, returnInfo, descriptionInfo };

@@ -6,7 +6,7 @@ import { defineConfig } from '@vscode/test-cli';
 export default defineConfig([
   {
     label: 'suiteTests',
-    files: 'out/test/suite/*.test.js',
+    files: 'out/test/suite-mocha/*.test.js',
     version: '1.86.0',
     mocha: {
       ui: 'tdd',

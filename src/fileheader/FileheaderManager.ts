@@ -152,7 +152,6 @@ export class FileheaderManager {
     const editor = await vscode.window.showTextDocument(document);
     const parser = await this.functionParserLoader.loadParser(document.languageId);
     const functionParamsInfo = parser?.getFunctionParamsAtCursor(activeEditor);
-    console.log('🚀 ~ file: FileheaderManager.ts:155 ~ functionParamsInfo:', functionParamsInfo);
 
     // 查找操作文件的 provider
     const provider = await findProvider(this.configManager, this.providers, document);
@@ -165,7 +164,7 @@ export class FileheaderManager {
     if (matchedFunction && insertPosition) {
       const comments = provider.comments;
       const range = parser?.getOriginFunctionCommentRange(comments, document, insertPosition);
-      // 原来有 JSDoc 注释
+      // 原来有函数注释
       if (range) {
         const originFunctionInfo: FunctionCommentInfo = parser?.parseFunctionComment(
           document,
@@ -181,7 +180,13 @@ export class FileheaderManager {
         );
 
         if (functionCommentInfo) {
+          const originFunctionComment = generateFunctionComment(originFunctionInfo);
           const functionComment = generateFunctionComment(functionCommentInfo);
+          // 函数注释有变化
+          if (originFunctionComment === functionComment) {
+            logger.info('Not need update function comment:', document.uri.fsPath);
+            return false;
+          }
 
           await editor.edit((editBuilder) => {
             editBuilder.replace(range, functionComment + '\n');

@@ -214,11 +214,11 @@ export function generateFunctionComment(functionCommentInfo: FunctionCommentInfo
   functionComment += ` * @description ${descriptionInfo}\n`;
 
   for (const returnKey in returnInfo) {
-    functionComment += ` * @return {${returnInfo[returnKey].type}} ${returnInfo[returnKey].description}\n`;
+    functionComment += ` * @return ${returnKey} {${returnInfo[returnKey].type}} ${returnInfo[returnKey].description}\n`;
   }
 
   for (const paramName in paramsInfo) {
-    functionComment += ` * @param {${paramsInfo[paramName].type}} ${paramName} ${paramsInfo[paramName].description}\n`;
+    functionComment += ` * @param ${paramName} {${paramsInfo[paramName].type}} ${paramsInfo[paramName].description}\n`;
   }
 
   functionComment += ' */';
