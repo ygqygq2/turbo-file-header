@@ -1,10 +1,10 @@
-import vscode, { Uri } from 'vscode';
-import * as fs from 'fs';
-import path from 'path';
-import { CUSTOM_CONFIG_FILE_NAME } from '../constants';
+import { CustomError, ErrorCode } from '@/error';
 import { logger } from '@/extension';
 import { getActiveDocumentWorkspace } from '@/utils/vscode-utils';
-import { CustomError, ErrorCode } from '@/error';
+import * as fs from 'fs';
+import path from 'path';
+import vscode, { Uri } from 'vscode';
+import { CUSTOM_CONFIG_FILE_NAME } from '../constants';
 
 export class GenerateTemplateConfig {
   private static instance: GenerateTemplateConfig;
@@ -27,7 +27,7 @@ export class GenerateTemplateConfig {
       return;
     }
 
-    const uri = (Uri as any).joinPath(context.extensionUri, 'resources', CUSTOM_CONFIG_FILE_NAME);
+    const uri = Uri.joinPath(context.extensionUri, 'resources', CUSTOM_CONFIG_FILE_NAME);
     const configDir = path.join(targetWorkspace.uri.fsPath, '.vscode');
     const configPath = path.join(configDir, CUSTOM_CONFIG_FILE_NAME);
 

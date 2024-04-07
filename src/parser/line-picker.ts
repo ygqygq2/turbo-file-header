@@ -46,7 +46,6 @@ function _pick(options: _LinePickOptions) {
   const decorationOptions: TagDecorationOptions[] = [];
 
   let match: RegExpExecArray | null | undefined;
-  // eslint-disable-next-line no-cond-assign
   while ((match = options.picker.exec(options.text))) {
     const beginIndex = match.index;
     const endIndex = match.index + match[0].length;

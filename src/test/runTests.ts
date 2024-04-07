@@ -2,8 +2,6 @@ import * as path from 'path';
 
 import { runTests } from '@vscode/test-electron';
 
-const style = process.argv[2];
-
 async function main() {
   try {
     // The folder containing the Extension Manifest package.json
@@ -12,7 +10,7 @@ async function main() {
 
     // The path to test runner
     // Passed to --extensionTestsPath
-    const extensionTestsPath = path.resolve(__dirname, `./suite-${style}/index`);
+    const extensionTestsPath = path.resolve(__dirname, `./suite/index`);
 
     // Download VS Code, unzip it and run the integration test
     await runTests({
