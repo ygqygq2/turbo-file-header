@@ -11,7 +11,17 @@
       "preLaunchTask": "${defaultBuildTask}"
     },
     {
-      "name": "Test: All",
+      "name": "Test: e2e",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/vscode/.bin/vscode-test",
+      "args": ["${workspaceFolder}/out/test/e2e"],
+      "outFiles": ["${workspaceFolder}/out/test/**/*.js"],
+      "preLaunchTask": "npm: compile",
+      "internalConsoleOptions": "openOnSessionStart"
+    },
+    {
+      "name": "Test: e2e use mocha",
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
@@ -22,6 +32,17 @@
       ],
       "outFiles": ["${workspaceFolder}/out/test/**/*.js"],
       "preLaunchTask": "${defaultBuildTask}"
+    },
+    {
+      "name": "Debug Current Unit Test File",
+      "type": "node",
+      "request": "launch",
+      "autoAttachChildProcesses": true,
+      "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
+      "program": "${workspaceRoot}/node_modules/vitest/vitest.mjs",
+      "args": ["run", "${relativeFile}"],
+      "smartStep": true,
+      "console": "integratedTerminal"
     }
   ]
 }

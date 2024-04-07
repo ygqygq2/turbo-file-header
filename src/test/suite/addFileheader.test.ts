@@ -1,4 +1,3 @@
-import { addFileheader } from '@/commands/addFileheader';
 import assert from 'assert';
 import { describe, it } from 'mocha';
 import path from 'path';
@@ -17,6 +16,7 @@ describe('e2e test for command: addFileheader', () => {
     await vscode.commands.executeCommand('turboFileHeader.addFileheader');
     // 获取新的文件内容
     const newContent = doc.getText();
+    console.log('🚀 ~ file: addFileheader.test.ts:19 ~ newContent:', newContent);
     // 检查文件内容是否已经变化
     assert.notStrictEqual(originalContent, newContent);
   });

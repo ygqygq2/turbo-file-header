@@ -532,7 +532,7 @@
     "compile-tsc": "tsc -p ./",
     "package": "vsce package --no-dependencies",
     "publish": "vsce publish --no-dependencies",
-    "copy-files": "rsync -avz src/test/suite/files/ out/test/suite/files/",
+    "copy-files": "mkdir -p out/test/suite/files && rsync -avz src/test/suite/files/ out/test/suite/files/",
     "test": "npm run copy-files && vscode-test",
     "test:suite:mocha": "tsc -p ./ && npm run copy-files && node out/test/runTests.js",
     "test:suite": "vitest suite --watch=false",
