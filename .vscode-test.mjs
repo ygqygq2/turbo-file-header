@@ -11,7 +11,7 @@ export default defineConfig([
     mocha: {
       ui: 'tdd',
       timeout: 20000,
-      require: ['ts-node/register', 'tsconfig-paths/register', './aliases.js'],
+      require: ['ts-node/register', 'tsconfig-paths/register'],
     },
   },
 ]);

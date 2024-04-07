@@ -2,15 +2,18 @@ import * as path from 'path';
 import Mocha from 'mocha';
 import { glob } from 'glob';
 
+require('tsconfig-paths/register');
+require('ts-node/register');
+
 export async function run() {
+  const testsRoot = path.resolve(__dirname, '.');
+
   // 创建 mocha 实例
   const mocha = new Mocha({
     ui: 'tdd',
     color: true,
-    timeout: 10000,
+    timeout: 20000,
   });
-
-  const testsRoot = path.resolve(__dirname, '.');
 
   // 获取所有测试文件
   const tsFiles = await glob('**/*.test.js', { cwd: testsRoot });

@@ -15,7 +15,8 @@
     "skipLibCheck": true,
     "paths": {
       "@/*": ["src/*"]
-    }
+    },
+    "types": ["node", "mocha"]
   },
   "include": ["./src"],
   "exclude": ["node_modules", ".vscode-test", "src/test/suite/files"]
