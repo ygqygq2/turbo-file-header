@@ -2,7 +2,7 @@
   "name": "turbo-file-header",
   "displayName": "Turbo File Header",
   "description": "Sets file header information globally or for a project.",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "icon": "resources/icons/icon.png",
   "repository": {
     "type": "git",
@@ -532,9 +532,10 @@
     "compile-tsc": "tsc -p ./",
     "package": "vsce package --no-dependencies",
     "publish": "vsce publish --no-dependencies",
-    "test": "tsc -p ./ && vscode-test",
+    "copy-files": "rsync -avz src/test/suite-jest/files/ out/test/suite-jest/files/",
+    "test": "tsc -p ./ && npm run copy-files && node out/test/runTests.js jest",
+    "vscode-test": "tsc -p ./ && vscode-test",
     "test:suite:mocha": "tsc -p ./ && node out/test/runTests.js mocha",
-    "test:suite:jest": "tsc -p ./ && node out/test/runTests.js jest",
     "test:suite": "vitest suite --watch=false",
     "test:unit": "vitest unit --watch=false",
     "test:coverage": "vitest run --coverage",
@@ -545,6 +546,7 @@
     "preinstall": "npx only-allow pnpm"
   },
   "devDependencies": {
+    "@jest/globals": "^29.7.0",
     "@types/glob": "^8.1.0",
     "@types/jest": "^29.5.12",
     "@types/lodash": "^4.14.202",
@@ -573,6 +575,7 @@
     "lint-staged": "^15.2.2",
     "mocha": "^10.3.0",
     "simple-git-hooks": "^2.10.0",
+    "ts-jest": "^29.1.2",
     "typescript": "^5.3.3",
     "vite": "^5.1.5",
     "vitest": "^1.3.1",

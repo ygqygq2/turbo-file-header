@@ -10,6 +10,7 @@ Turbo file header, sets file header information globally or for a project.
 ## Features
 
 - `ctrl + alt + h` generate the active document file header.
+- `ctrl + alt + /` add function comment when cursor at the function name line.
 - Supports global settings to manage header template.
 - Project to generate custom YAML format file header configuration file, easy to configure, others as long as the installation of extensions can be used directly, more consistent with unified collaborative development.
 - Use more reader-friendly comments to highlight important parts in your code.

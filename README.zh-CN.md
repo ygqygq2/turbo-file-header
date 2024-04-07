@@ -10,7 +10,8 @@ Turbo file header, 可以全局设置文件头或者项目级设置文件头。
 ## 功能
 
 - `ctrl + alt + h` 快捷键生成/更新文件头。
-- 命令 `Turbo File Header: Generate Custom Template Config File` 生成项目级自定义文件头配置文件.
+- `ctrl + alt + /` 快捷键添加函数注释，当光标在函数名行时。
+- 命令 `Turbo File Header: Generate Custom Template Config File` 生成项目级自定义文件头配置文件。
 - 支持全局配置或项目级自定义文件头模板配置生成文件头。
 - 更友好的注释高亮显示，支持自定义配置。
 - 支持各种语言[VSCode known identifiers](https://code.visualstudio.com/docs/languages/identifiers#_known-language-identifiers).

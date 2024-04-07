@@ -1,14 +1,20 @@
+/* eslint-disable no-undef */
+/* eslint-disable @typescript-eslint/no-var-requires */
+const { rootDir } = require("./jest.e2e.config");
+
+/* eslint-disable no-undef */
 module.exports = {
-  preset: "ts-jest",
-  testEnvironment: "node",
-  preset: "ts-jest/presets/default-esm", // or other ESM presets
+  preset: 'ts-jest',
+  testEnvironment: 'node',
+  rootDir: './',
   globals: {
-    "ts-jest": {
+    'ts-jest': {
       useESM: true,
     },
   },
   moduleNameMapper: {
-    "^(\\.{1,2}/.*)\\.js$": "$1",
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+    '^@/(.*)$': '<rootDir>/out/$1',
   },
-  testMatch: ["<rootDir>/tests/**/*.spec.ts"],
+  testMatch: ['<rootDir>/src/test/unit/**/*.spec.ts'],
 };
