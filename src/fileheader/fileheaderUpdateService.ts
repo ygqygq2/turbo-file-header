@@ -73,7 +73,13 @@ export async function processFileheaderInsertionOrReplacement(
   allowInsert: boolean,
   newFile: boolean,
 ) {
-  const editor = await vscode.window.showTextDocument(document);
+  let editor: vscode.TextEditor;
+  try {
+    editor = await vscode.window.showTextDocument(document);
+  } catch (error) {
+    logger.error('showTextDocument error:', error);
+    throw error;
+  }
   const { useJSDocStyle } = config;
   const isJsTs = provider.languages.some((lang) =>
     ['typescript', 'javascript', 'javascriptreact', 'typescriptreact'].includes(lang),
