@@ -12,13 +12,13 @@
     },
     {
       "name": "Test: e2e",
-      "type": "node",
+      "type": "extensionHost",
       "request": "launch",
-      "program": "${workspaceFolder}/node_modules/vscode/.bin/vscode-test",
-      "args": ["${workspaceFolder}/out/test/e2e"],
-      "outFiles": ["${workspaceFolder}/out/test/**/*.js"],
-      "preLaunchTask": "npm: compile",
-      "internalConsoleOptions": "openOnSessionStart"
+      "runtimeExecutable": "${execPath}",
+      "testConfiguration": "${workspaceFolder}/.vscode-test.mjs",
+      "args": ["--disable-extensions", "--extensionDevelopmentPath=${workspaceFolder}"],
+      "outFiles": ["${workspaceFolder}/out/**/*.js"],
+      "preLaunchTask": "${defaultBuildTask}"
     },
     {
       "name": "Test: e2e use mocha",
