@@ -1,22 +1,25 @@
-import { dirname } from 'path';
+import { CustomError, ErrorCode } from '@/error';
+import { logger } from '@/extension';
 import dayjs, { Dayjs } from 'dayjs';
 import { stat } from 'fs/promises';
+import { dirname } from 'path';
 import { exec, getFirstLine } from '../utils/utils';
 import { BaseVCSProvider } from './BaseVCSProvider';
-import { logger } from '@/extension';
-import { CustomError, ErrorCode } from '@/error';
 
 export class SVNProvider extends BaseVCSProvider {
-  public async validate(repoPath: string): Promise<void> {
+  public async validate(repoPath: string): Promise<boolean> {
     try {
       await exec('svn --version');
     } catch (error) {
       logger.handleError(new CustomError(ErrorCode.SVNCommandNotFound, error));
+      return false;
     }
     try {
       await exec('svn info', { cwd: repoPath });
+      return true;
     } catch (error) {
       logger.handleError(new CustomError(ErrorCode.SVNNotInit, error));
+      return false;
     }
   }
 

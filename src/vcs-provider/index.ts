@@ -1,11 +1,12 @@
+import { CustomError, ErrorCode } from '@/error';
+import { logger } from '@/extension';
+import { findVCSRoot } from '@/utils/utils';
+import { getActiveDocumentWorkspace } from '@/utils/vscode-utils';
+import fs from 'fs';
 import path from 'path';
-import { existsSync } from 'fs';
 import { BaseVCSProvider } from './BaseVCSProvider';
 import { GitVCSProvider } from './GitVCSProvider';
-import { logger } from '@/extension';
 import { SVNProvider } from './SvnVCSProvider';
-import { getActiveDocumentWorkspace } from '@/utils/vscode-utils';
-import { CustomError, ErrorCode } from '@/error';
 
 export async function createVCSProvider(): Promise<BaseVCSProvider | undefined> {
   const activeWorkspace = await getActiveDocumentWorkspace();
@@ -14,15 +15,21 @@ export async function createVCSProvider(): Promise<BaseVCSProvider | undefined> 
   }
   const activePath = activeWorkspace?.uri.fsPath || '';
 
-  const gitDirectoryPath = path.join(activePath, '.git');
-  const svnDirectoryPath = path.join(activePath, '.svn');
-  const isGitRepository = existsSync(gitDirectoryPath);
-  if (isGitRepository) {
-    return new GitVCSProvider();
+  const vcsRootPath = (await findVCSRoot(activePath)) || '';
+  if (!vcsRootPath) {
+    logger.throw(new CustomError(ErrorCode.NoVCSProvider));
   }
-  const isSvnRepository = existsSync(svnDirectoryPath);
-  if (isSvnRepository) {
-    return new SVNProvider();
+
+  let vcsProvider: BaseVCSProvider | undefined;
+  if (fs.existsSync(path.join(vcsRootPath, '.git'))) {
+    vcsProvider = new GitVCSProvider();
+  } else if (fs.existsSync(path.join(vcsRootPath, '.svn'))) {
+    vcsProvider = new SVNProvider();
+  }
+
+  const isValid = vcsProvider?.validate(vcsRootPath);
+  if (isValid) {
+    return vcsProvider;
   }
   logger.throw(new CustomError(ErrorCode.NoVCSProvider));
 }

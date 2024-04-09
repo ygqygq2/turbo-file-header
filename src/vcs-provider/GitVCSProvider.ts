@@ -1,17 +1,19 @@
+import { CustomError, ErrorCode } from '@/error';
+import { logger } from '@/extension';
 import dayjs, { Dayjs } from 'dayjs';
 import { stat } from 'fs/promises';
 import { dirname } from 'path';
 import { exec, getFirstLine } from '../utils/utils';
 import { BaseVCSProvider } from './BaseVCSProvider';
-import { logger } from '@/extension';
-import { CustomError, ErrorCode } from '@/error';
 
 export class GitVCSProvider extends BaseVCSProvider {
-  public async validate(repoPath: string): Promise<void> {
+  public async validate(repoPath: string): Promise<boolean> {
     try {
       await exec('git status', { cwd: repoPath });
+      return true;
     } catch (error) {
       logger.handleError(new CustomError(ErrorCode.GitNotInit, error));
+      return false;
     }
   }
   public async getAuthorName(filePath: string): Promise<string> {

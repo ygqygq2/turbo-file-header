@@ -1,8 +1,10 @@
-import { ChildProcess, exec as _exec, ExecOptions } from 'child_process';
+import { ChildProcess, ExecOptions, exec as _exec } from 'child_process';
+import crypto from 'crypto';
+import * as fs from 'fs';
+import * as path from 'path';
+import { TEMPLATE_OPTIONAL_GROUP_PLACEHOLDER, TEMPLATE_SYMBOL_KEY } from '../constants';
 import { CommandExecError } from '../error/CommandExecError';
 import { Template, TemplateInterpolation } from '../typings/types';
-import { TEMPLATE_OPTIONAL_GROUP_PLACEHOLDER, TEMPLATE_SYMBOL_KEY } from '../constants';
-import crypto from 'crypto';
 import { escapeRegexString } from './str';
 
 /**
@@ -174,4 +176,18 @@ export async function queryResultExceptDisable<T>(
     }
     throw e;
   }
+}
+
+export async function findVCSRoot(directory: string): Promise<string | null> {
+  let currentDirectory = directory;
+  while (currentDirectory !== path.parse(currentDirectory).root) {
+    if (fs.existsSync(path.join(currentDirectory, '.git'))) {
+      return currentDirectory;
+    }
+    if (fs.existsSync(path.join(currentDirectory, '.svn'))) {
+      return currentDirectory;
+    }
+    currentDirectory = path.dirname(currentDirectory);
+  }
+  return null;
 }

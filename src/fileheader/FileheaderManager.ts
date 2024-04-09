@@ -90,11 +90,16 @@ export class FileheaderManager {
       allowInsert,
       newFile,
     );
-    if (result && addSelection) {
+    if (!result) {
+      return false;
+    }
+
+    if (addSelection) {
       addSelectionAfterString(document, 'description');
     }
 
     this.updateOriginFileHash(document);
+    return true;
   }
 
   public async batchUpdateFileheader() {

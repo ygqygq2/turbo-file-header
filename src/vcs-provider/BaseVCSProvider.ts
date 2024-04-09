@@ -4,7 +4,7 @@ export abstract class BaseVCSProvider {
   /**
    * validate can use this CVSProvider
    */
-  public abstract validate(repoPath: string): Promise<void>;
+  public abstract validate(repoPath: string): Promise<boolean>;
 
   /**
    * get the author name of a file from the VCS

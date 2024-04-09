@@ -4,15 +4,8 @@ import path from 'path';
 import * as vscode from 'vscode';
 
 describe('e2e test for command: addFileheader', () => {
-  let workspaceFolder: string;
-
-  before(() => {
-    const projectRoot = path.resolve(__dirname, '../../../');
-    workspaceFolder = path.resolve(projectRoot, './sampleWorkspace');
-    vscode.workspace.updateWorkspaceFolders(0, 0, { uri: vscode.Uri.file(workspaceFolder) });
-  });
-
   it('should add file header to the current file', async () => {
+    const workspaceFolder = vscode.workspace?.workspaceFolders?.[0]?.uri.fsPath ?? '';
     // 打开一个文件
     const file = path.join(workspaceFolder, 'files', 'to-test-command-addFileheader.ts');
     const doc = await vscode.workspace.openTextDocument(file);
