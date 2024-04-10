@@ -79,10 +79,11 @@ export class FileheaderManager {
       return;
     }
 
+    const editor = await vscode.window.showTextDocument(document);
     const result = await processFileheaderInsertionOrReplacement(
       this.fileMatcher,
       this.fileHashManager,
-      document,
+      editor,
       provider,
       originFileheaderInfo,
       fileheaderVariable,

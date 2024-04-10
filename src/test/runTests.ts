@@ -1,5 +1,5 @@
-import * as path from 'path';
 import { runTests } from '@vscode/test-electron';
+import * as path from 'path';
 
 async function main() {
   try {
@@ -16,7 +16,7 @@ async function main() {
       version: '1.86.0',
       extensionDevelopmentPath,
       extensionTestsPath,
-      launchArgs: ['--disable-extensions'],
+      launchArgs: [path.resolve(__dirname, '../../sampleWorkspace'), '--disable-extensions'],
     });
   } catch (err) {
     console.error('Failed to run tests', err);

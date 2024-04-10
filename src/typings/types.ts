@@ -86,7 +86,7 @@ export type CustomVariables = {
 
 export type Command = {
   name: string;
-  handler: (args?: unknown[] | undefined) => Promise<void>;
+  handler: (context: vscode.ExtensionContext, args?: unknown[] | undefined) => Promise<void>;
 };
 
 export interface Provider {

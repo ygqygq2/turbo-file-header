@@ -5,8 +5,8 @@ import { fileheaderManager } from '@/extension';
 export const addFunctionComment = (): Command => {
   return {
     name: 'turboFileHeader.addFunctionComment',
-    handler: async (_args?: unknown[]) => {
-      const activeEditor = vscode.window.activeTextEditor;
+    handler: async (_context: vscode.ExtensionContext, args?: unknown[]) => {
+      const activeEditor = ((args ?? [])[0] as vscode.TextEditor) || vscode.window.activeTextEditor;
 
       if (!activeEditor) {
         return;

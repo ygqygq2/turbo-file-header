@@ -65,7 +65,7 @@ export async function shouldUpdate(
 export async function processFileheaderInsertionOrReplacement(
   fileMatcher: FileMatcher,
   fileHashManager: FileHashManager,
-  document: vscode.TextDocument,
+  editor: vscode.TextEditor,
   provider: LanguageProvider,
   originFileheaderInfo: OriginFileheaderInfo,
   fileheaderVariable: IFileheaderVariables,
@@ -73,13 +73,7 @@ export async function processFileheaderInsertionOrReplacement(
   allowInsert: boolean,
   newFile: boolean,
 ) {
-  let editor: vscode.TextEditor;
-  try {
-    editor = await vscode.window.showTextDocument(document);
-  } catch (error) {
-    logger.error('showTextDocument error:', error);
-    throw error;
-  }
+  const document = editor?.document;
   const { useJSDocStyle } = config;
   const isJsTs = provider.languages.some((lang) =>
     ['typescript', 'javascript', 'javascriptreact', 'typescriptreact'].includes(lang),
