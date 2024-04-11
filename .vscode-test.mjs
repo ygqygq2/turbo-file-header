@@ -7,8 +7,6 @@ import * as tmp from 'tmp';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const workspacePath = path.resolve('sampleWorkspace', 'test.code-workspace');
-const userDataDirectory = await createSettings();
 
 function createTempDir() {
   return new Promise((resolve, reject) => {
@@ -34,6 +32,9 @@ async function createSettings() {
   return userDataDirectory;
 }
 
+const workspacePath = path.resolve('sampleWorkspace', 'test.code-workspace');
+const userDataDirectory = await createSettings();
+
 // suiteTests 使用 vscode-test/mocha 测试，当前无法直接支持 ts,它需要编译成js
 // unitTests 使用 vitest 测试，直接使用 ts
 export default defineConfig([
@@ -44,7 +45,6 @@ export default defineConfig([
     extensionDevelopmentPath: __dirname,
     mocha: {
       ui: 'bdd',
-      timeout: 20000,
       require: ['ts-node/register', 'tsconfig-paths/register'],
     },
     launchArgs: [workspacePath]

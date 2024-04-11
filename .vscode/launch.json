@@ -17,9 +17,12 @@
       "runtimeExecutable": "${execPath}",
       "testConfiguration": "${workspaceFolder}/.vscode-test.mjs",
       "args": ["--disable-extensions", "--extensionDevelopmentPath=${workspaceFolder}"],
+      "env": {
+        "NODE_ENV": "test",
+        "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.json"
+      },
       "outFiles": ["${workspaceFolder}/out/**/*.js"],
-      "preLaunchTask": "npm: test-compile",
-      "cwd": "${workspaceFolder}"
+      "preLaunchTask": "npm: test-compile"
     },
     {
       "name": "Test: e2e use mocha",

@@ -533,7 +533,7 @@
     "publish": "vsce publish --no-dependencies",
     "clean": "rm -rf out/",
     "test-compile": "npm run clean && tsc -p ./ && npm run compile",
-    "test": "npm run compile && vscode-test",
+    "test": "npm run test-compile && vscode-test",
     "test:suite:mocha": "npm run test-compile && node out/test/runTests.js",
     "test:suite": "node out/test/runTests.js",
     "test:unit": "vitest unit --watch=false",

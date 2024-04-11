@@ -17,6 +17,7 @@ export async function executeCommandOnFile(
   srcFileName: string,
   shouldRetry = false,
 ) {
+  console.log(vscode.workspace.workspaceFolders);
   const ext = path.extname(srcFileName);
   const testFile = srcFileName.replace(ext, `.copy${ext}`);
   const base = getWorkspaceFolderUri(workspaceFolderName);
@@ -40,12 +41,13 @@ export async function executeCommandOnFile(
     throw error;
   } finally {
     if (fs.existsSync(testAbsPath)) {
-      try {
-        fs.unlinkSync(testAbsPath);
-        console.log('File deleted successfully');
-      } catch (error) {
-        console.error('Error deleting file:', error);
-      }
+      fs.unlink(testAbsPath, (error) => {
+        if (error) {
+          console.error('Error deleting file:', error);
+        } else {
+          console.log(`File [${testFile}] deleted successfully`);
+        }
+      });
     }
   }
 
