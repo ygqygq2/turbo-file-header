@@ -79,7 +79,7 @@ export class FileheaderManager {
       return;
     }
 
-    const editor = await vscode.window.showTextDocument(document);
+    const editor = await vscode.window.showTextDocument(document, vscode.ViewColumn.Active, true);
     const result = await processFileheaderInsertionOrReplacement(
       this.fileMatcher,
       this.fileHashManager,
@@ -155,7 +155,6 @@ export class FileheaderManager {
 
   public async updateFunctionComment(activeEditor: vscode.TextEditor) {
     const document = activeEditor.document;
-    const editor = await vscode.window.showTextDocument(document);
     const parser = await this.functionParserLoader.loadParser(document.languageId);
     const functionParamsInfo = parser?.getFunctionParamsAtCursor(activeEditor);
 
@@ -194,7 +193,7 @@ export class FileheaderManager {
             return false;
           }
 
-          await editor.edit((editBuilder) => {
+          await activeEditor.edit((editBuilder) => {
             editBuilder.replace(range, functionComment + '\n');
           });
 

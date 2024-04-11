@@ -1,18 +1,14 @@
-import * as path from 'path';
-import Mocha from 'mocha';
 import { glob } from 'glob';
-
-require('tsconfig-paths/register');
-require('ts-node/register');
+import Mocha from 'mocha';
+import * as path from 'path';
 
 export async function run() {
-  const testsRoot = path.resolve(__dirname, '.');
+  const testsRoot = path.resolve(__dirname, '..');
 
   // 创建 mocha 实例
   const mocha = new Mocha({
-    ui: 'tdd',
+    ui: 'bdd',
     color: true,
-    timeout: 20000,
   });
 
   // 获取所有测试文件
@@ -29,7 +25,7 @@ export async function run() {
     // 运行测试
     mocha.run((failures) => {
       if (failures > 0) {
-        reject();
+        reject(new Error(`${failures} tests failed.`));
       } else {
         resolve();
       }

@@ -5,8 +5,8 @@ import { dirname } from 'path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-// suiteTests 使用 vscode-test 测试，当前无法直接支持 ts,它需要编译成js
-// unitTests 直接使用 mocha 测试，直接使用 ts
+// suiteTests 使用 vscode-test/mocha 测试，当前无法直接支持 ts,它需要编译成js
+// unitTests 使用 vitest 测试，直接使用 ts
 export default defineConfig([
   {
     label: 'suiteTests',
@@ -15,7 +15,7 @@ export default defineConfig([
     extensionDevelopmentPath: __dirname,
     workspaceFolder: `${__dirname}/sampleWorkspace`,
     mocha: {
-      ui: 'tdd',
+      ui: 'bdd',
       timeout: 20000,
       require: ['ts-node/register', 'tsconfig-paths/register'],
     },

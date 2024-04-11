@@ -6,7 +6,7 @@ export default tseslint.config(
   {
     files: ['**/*.ts'],
   },
-  { ignores: ['src/test/files', 'out', 'dist', '**/*.d.ts'] },
+  { ignores: ['sampleWorkspace', 'out', 'dist', '**/*.d.ts'] },
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
   eslintPluginPrettierRecommended,

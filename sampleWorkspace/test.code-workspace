@@ -1,0 +1,9 @@
+{
+  "folders": [
+    { "path": "file-header" },
+    { "path": "file-header-project" },
+    { "path": "function-comment" },
+    { "path": "workspace" },
+  ],
+  "settings": {},
+}

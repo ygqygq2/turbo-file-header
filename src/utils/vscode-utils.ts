@@ -1,5 +1,7 @@
 import { FunctionCommentInfo } from '@/function-params-parser/types';
 import { Config } from '@/typings/types';
+import * as fs from 'fs-extra';
+import path from 'path';
 import * as vscode from 'vscode';
 
 /**
@@ -30,6 +32,22 @@ export async function getActiveDocumentWorkspace(): Promise<vscode.WorkspaceFold
 
   return activeWorkspace;
 }
+
+/**
+ * gets the workspace folder by name
+ * @param workspaceFolderName Workspace folder name
+ */
+export const getWorkspaceFolderUri = (workspaceFolderName: string) => {
+  const workspaceFolder = vscode.workspace.workspaceFolders!.find((folder) => {
+    return folder.name === workspaceFolderName;
+  });
+  if (!workspaceFolder) {
+    throw new Error(
+      'Folder not found in workspace. Did you forget to add the test folder to test.code-workspace?',
+    );
+  }
+  return workspaceFolder!.uri;
+};
 
 /**
  * 将选定的文本区域在指定行数上下移动
@@ -223,4 +241,11 @@ export function generateFunctionComment(functionCommentInfo: FunctionCommentInfo
 
   functionComment += ' */';
   return functionComment;
+}
+
+export async function getText(workspaceFolderName: string, expectedFile: string) {
+  const base = getWorkspaceFolderUri(workspaceFolderName);
+  const expectedPath = path.join(base.fsPath, expectedFile);
+  const expected = await fs.readFile(expectedPath, 'utf8');
+  return expected;
 }

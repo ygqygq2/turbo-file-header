@@ -27,13 +27,14 @@
       "request": "launch",
       "runtimeExecutable": "${execPath}",
       "args": [
-        "${workspaceFolder}/sampleWorkspace",
+        "${workspaceFolder}/sampleWorkspace/test.code-workspace",
         "--disable-extensions",
         "--extensionDevelopmentPath=${workspaceFolder}",
         "--extensionTestsPath=${workspaceFolder}/out/test/suite/index"
       ],
       "outFiles": ["${workspaceFolder}/out/test/**/*.js"],
-      "preLaunchTask": "${defaultBuildTask}"
+      "preLaunchTask": "npm: test-compile",
+      "cwd": "${workspaceFolder}"
     },
     {
       "name": "Debug Current Unit Test File",
