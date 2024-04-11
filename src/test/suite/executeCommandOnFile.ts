@@ -17,7 +17,8 @@ export async function executeCommandOnFile(
   srcFileName: string,
   shouldRetry = false,
 ) {
-  const testFile = srcFileName.replace('.ts', '.copy.ts');
+  const ext = path.extname(srcFileName);
+  const testFile = srcFileName.replace(ext, `.copy${ext}`);
   const base = getWorkspaceFolderUri(workspaceFolderName);
   const srcAbsPath = path.join(base.fsPath, srcFileName);
   const testAbsPath = path.join(base.fsPath, testFile);
@@ -25,44 +26,45 @@ export async function executeCommandOnFile(
   fs.copyFileSync(srcAbsPath, testAbsPath);
   // 打开文件
   const doc = await vscode.workspace.openTextDocument(testAbsPath);
+  await vscode.window.showTextDocument(doc);
   // 执行之前获取文件内容
   const text = doc.getText();
 
   try {
     setActiveWorkspaceByName(workspaceFolderName, testFile);
+    console.time(testFile);
+    await executeCommandWithRetry(commandName, doc, text, shouldRetry);
+    console.timeEnd(testFile);
   } catch (error) {
-    console.log(error);
+    console.error('Error executing command:', error);
     throw error;
-  }
-  console.time(testFile);
-  await vscode.commands.executeCommand(commandName);
-  // 需要些时间执行命令
-  await sleep(250);
-  let actual = doc.getText();
-
-  if (shouldRetry) {
-    for (let i = 0; i < 10; i++) {
-      if (text !== actual) {
-        break;
+  } finally {
+    if (fs.existsSync(testAbsPath)) {
+      try {
+        fs.unlinkSync(testAbsPath);
+        console.log('File deleted successfully');
+      } catch (error) {
+        console.error('Error deleting file:', error);
       }
-      await vscode.commands.executeCommand(commandName);
-      await sleep(250);
-      actual = doc.getText();
     }
   }
 
-  console.timeEnd(testFile);
-  const fileExists = fs.existsSync(testAbsPath);
-  if (fileExists) {
-    console.log(`File exists: ${fileExists}`);
-    // 删除测试文件
-    try {
-      fs.unlinkSync(testAbsPath);
-      console.log('File deleted successfully');
-    } catch (error) {
-      console.log('Error deleting file:', error);
-    }
-  }
+  return { actual: doc.getText(), source: text };
+}
 
-  return { actual, source: text };
+async function executeCommandWithRetry(
+  commandName: string,
+  doc: vscode.TextDocument,
+  originalText: string,
+  shouldRetry: boolean,
+) {
+  let actual = '';
+  let retryCount = 0;
+
+  do {
+    await vscode.commands.executeCommand(commandName);
+    await sleep(250);
+    actual = doc.getText();
+    retryCount++;
+  } while (shouldRetry && originalText === actual && retryCount < 10);
 }

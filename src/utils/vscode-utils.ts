@@ -4,14 +4,22 @@ import * as fs from 'fs-extra';
 import path from 'path';
 import * as vscode from 'vscode';
 
+async function promptForWorkspace(
+  workspaces: readonly vscode.WorkspaceFolder[],
+): Promise<vscode.WorkspaceFolder | undefined> {
+  const picked = await vscode.window.showQuickPick(
+    workspaces.map((workspace) => ({ label: workspace.name, workspace })),
+    { title: 'Select which workspace for add custom fileheader template' },
+  );
+  return picked?.workspace;
+}
+
 /**
  * 获取当前活动文档的工作区
  * 如果当前没有活动文档，则提示选择工作区
  * @returns
  */
-export async function getActiveDocumentWorkspace(
-  testWorkspace?: vscode.WorkspaceFolder,
-): Promise<vscode.WorkspaceFolder | undefined> {
+export async function getActiveDocumentWorkspace(): Promise<vscode.WorkspaceFolder | undefined> {
   const activeDocumentUri = vscode.window.activeTextEditor?.document.uri;
   let activeWorkspace: vscode.WorkspaceFolder | undefined = undefined;
 
@@ -22,15 +30,7 @@ export async function getActiveDocumentWorkspace(
     if (workspaces && workspaces.length === 1) {
       activeWorkspace = workspaces[0];
     } else if (workspaces && workspaces.length > 0) {
-      if (testWorkspace) {
-        activeWorkspace = testWorkspace;
-      } else {
-        const picked = await vscode.window.showQuickPick(
-          workspaces.map((workspace) => ({ label: workspace.name, workspace })),
-          { title: 'Select which workspace for add custom fileheader template' },
-        );
-        activeWorkspace = picked?.workspace;
-      }
+      activeWorkspace = await promptForWorkspace(workspaces);
     } else {
       return undefined;
     }

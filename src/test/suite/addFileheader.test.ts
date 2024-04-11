@@ -9,8 +9,18 @@ describe('Extension Integration Test: addFileheader', function () {
     const workspaceName = 'file-header';
     const fileName = 'no-fileheader.ts';
     const { actual } = await executeCommandOnFile(commandName, workspaceName, fileName, false);
-    console.log('🚀 ~ file: addFileheader.test.ts:14 ~ actual:', actual);
     // 有 Copyright 字符串即可
     assert.notEqual(actual.indexOf('Copyright'), -1);
+    // @description 后面有非空格字符
+    assert.match(actual, /@description\s+\S+/);
+  });
+
+  it('should add file header for [.go]', async () => {
+    const commandName = 'turboFileHeader.addFileheader';
+    const workspaceName = 'file-header';
+    const fileName = 'no-fileheader.go';
+    const { actual } = await executeCommandOnFile(commandName, workspaceName, fileName, false);
+    assert.notEqual(actual.indexOf('Copyright'), -1);
+    assert.match(actual, /@description\s+\S+/);
   });
 });
