@@ -1,5 +1,5 @@
 /*
- * @file            sampleWorkspace/file-header/no-fileheader.result.ts
+ * @file            sampleWorkspace/file-header/no-fileheader.ts
  * @description     
  * @author          ygqygq2 <ygqygq2@qq.com>
  * @createTime      2024-04-11 16:37:11

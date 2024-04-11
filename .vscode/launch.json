@@ -14,12 +14,12 @@
       "name": "Test: e2e",
       "type": "extensionHost",
       "request": "launch",
-      "trace": true,
       "runtimeExecutable": "${execPath}",
       "testConfiguration": "${workspaceFolder}/.vscode-test.mjs",
       "args": ["--disable-extensions", "--extensionDevelopmentPath=${workspaceFolder}"],
       "outFiles": ["${workspaceFolder}/out/**/*.js"],
-      "preLaunchTask": "${defaultBuildTask}",
+      "preLaunchTask": "npm: test-compile",
+      "cwd": "${workspaceFolder}"
     },
     {
       "name": "Test: e2e use mocha",
