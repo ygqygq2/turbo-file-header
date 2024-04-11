@@ -9,7 +9,9 @@ import * as vscode from 'vscode';
  * 如果当前没有活动文档，则提示选择工作区
  * @returns
  */
-export async function getActiveDocumentWorkspace(): Promise<vscode.WorkspaceFolder | undefined> {
+export async function getActiveDocumentWorkspace(
+  testWorkspace?: vscode.WorkspaceFolder,
+): Promise<vscode.WorkspaceFolder | undefined> {
   const activeDocumentUri = vscode.window.activeTextEditor?.document.uri;
   let activeWorkspace: vscode.WorkspaceFolder | undefined = undefined;
 
@@ -20,11 +22,15 @@ export async function getActiveDocumentWorkspace(): Promise<vscode.WorkspaceFold
     if (workspaces && workspaces.length === 1) {
       activeWorkspace = workspaces[0];
     } else if (workspaces && workspaces.length > 0) {
-      const picked = await vscode.window.showQuickPick(
-        workspaces.map((workspace) => ({ label: workspace.name, workspace })),
-        { title: 'Select which workspace for add custom fileheader template' },
-      );
-      activeWorkspace = picked?.workspace;
+      if (testWorkspace) {
+        activeWorkspace = testWorkspace;
+      } else {
+        const picked = await vscode.window.showQuickPick(
+          workspaces.map((workspace) => ({ label: workspace.name, workspace })),
+          { title: 'Select which workspace for add custom fileheader template' },
+        );
+        activeWorkspace = picked?.workspace;
+      }
     } else {
       return undefined;
     }
@@ -48,6 +54,39 @@ export const getWorkspaceFolderUri = (workspaceFolderName: string) => {
   }
   return workspaceFolder!.uri;
 };
+
+/**
+ * 通过打开文件来设置为活动工作空间
+ * @param workspaceFolderName
+ * @param fileName
+ */
+export async function setActiveWorkspaceByName(
+  workspaceFolderName: string,
+  fileName: string,
+): Promise<void> {
+  const workspaces = vscode.workspace.workspaceFolders;
+  if (!workspaces) {
+    throw new Error('No workspace is opened.');
+  }
+
+  const targetWorkspace = workspaces.find((workspace) => workspace.name === workspaceFolderName);
+  if (!targetWorkspace) {
+    throw new Error(`Workspace "${workspaceFolderName}" not found.`);
+  }
+
+  // 使用给定的文件名来创建文件的 URI
+  const targetFileUri = vscode.Uri.joinPath(targetWorkspace.uri, fileName);
+
+  // 检查文件是否存在
+  try {
+    await vscode.workspace.fs.stat(targetFileUri);
+  } catch (error) {
+    throw new Error(`File "${fileName}" not found in workspace "${workspaceFolderName}".`);
+  }
+
+  // 打开文件来设置活动工作区
+  await vscode.window.showTextDocument(targetFileUri);
+}
 
 /**
  * 将选定的文本区域在指定行数上下移动

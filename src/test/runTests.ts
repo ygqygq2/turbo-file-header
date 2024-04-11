@@ -3,9 +3,6 @@ import fs from 'fs-extra';
 import path from 'path';
 import * as tmp from 'tmp';
 
-require('tsconfig-paths/register');
-require('ts-node/register');
-
 async function createTempDir() {
   return new Promise<string>((resolve, reject) => {
     tmp.dir((err: any, dir: string | PromiseLike<string>) => {

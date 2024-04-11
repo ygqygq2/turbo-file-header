@@ -2,6 +2,10 @@ import { glob } from 'glob';
 import Mocha from 'mocha';
 import * as path from 'path';
 
+// 为了解析别名
+require('tsconfig-paths/register');
+require('ts-node/register');
+
 export async function run() {
   const testsRoot = path.resolve(__dirname, '..');
 
