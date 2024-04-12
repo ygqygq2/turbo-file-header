@@ -1,9 +1,11 @@
-import { CustomError, ErrorCode } from '@/error';
-import { logger } from '@/extension';
-import { getActiveDocumentWorkspace } from '@/utils/vscode-utils';
 import * as fs from 'fs';
 import path from 'path';
 import vscode, { Uri } from 'vscode';
+
+import { CustomError, ErrorCode } from '@/error';
+import { logger } from '@/extension';
+import { getActiveDocumentWorkspace } from '@/utils/vscode-utils';
+
 import { CUSTOM_CONFIG_FILE_NAME } from '../constants';
 
 export class GenerateTemplateConfig {
@@ -21,7 +23,7 @@ export class GenerateTemplateConfig {
       return;
     }
 
-    const targetWorkspace = await getActiveDocumentWorkspace();
+    const targetWorkspace = await getActiveDocumentWorkspace(context);
 
     if (!targetWorkspace) {
       return;

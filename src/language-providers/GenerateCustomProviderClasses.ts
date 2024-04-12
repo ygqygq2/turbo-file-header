@@ -1,10 +1,12 @@
+import Handlebars from 'handlebars';
+import * as vscode from 'vscode';
+
 import { ConfigManager } from '@/configuration/ConfigManager';
 import { logger } from '@/extension';
 import { LanguageManager } from '@/languages/LanguageManager';
 import { IFileheaderVariables, ITemplateFunction, Provider } from '@/typings/types';
 import { getBlockComment } from '@/utils/vscode-utils';
-import Handlebars from 'handlebars';
-import * as vscode from 'vscode';
+
 import { ConfigReader } from '../configuration/ConfigReader';
 import { LanguageProvider } from './LanguageProvider';
 import { ExtendedLanguageProviderOptions } from './types';

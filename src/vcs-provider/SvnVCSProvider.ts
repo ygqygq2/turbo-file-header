@@ -1,8 +1,10 @@
-import { CustomError, ErrorCode } from '@/error';
-import { logger } from '@/extension';
 import dayjs, { Dayjs } from 'dayjs';
 import { stat } from 'fs/promises';
 import { dirname } from 'path';
+
+import { CustomError, ErrorCode } from '@/error';
+import { logger } from '@/extension';
+
 import { exec, getFirstLine } from '../utils/utils';
 import { BaseVCSProvider } from './BaseVCSProvider';
 

@@ -35,9 +35,12 @@
         "--extensionDevelopmentPath=${workspaceFolder}",
         "--extensionTestsPath=${workspaceFolder}/out/test/suite/index"
       ],
+      "env": {
+        "NODE_ENV": "test",
+        "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.json"
+      },
       "outFiles": ["${workspaceFolder}/out/test/**/*.js"],
-      "preLaunchTask": "npm: test-compile",
-      "cwd": "${workspaceFolder}"
+      "preLaunchTask": "npm: test-compile"
     },
     {
       "name": "Debug Current Unit Test File",

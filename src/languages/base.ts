@@ -1,5 +1,6 @@
-import * as vscode from 'vscode';
 import { parse as json5Parse } from 'json5';
+import * as vscode from 'vscode';
+
 import { logger } from '@/extension';
 
 export async function loadCommentRuleFromFile(

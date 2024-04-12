@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import { logger, generateCustomTemplate } from '@/extension';
-import { CustomError, ErrorCode } from '@/error';
+
+import { generateCustomTemplate } from '@/extension';
 import { Command } from '@/typings/types';
 
 export const generateTemplateConfig = (): Command => {

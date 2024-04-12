@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
-import { Command } from '@/typings/types';
+
 import { fileheaderManager } from '@/extension';
+import { Command } from '@/typings/types';
 
 export const addFunctionComment = (): Command => {
   return {

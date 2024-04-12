@@ -1,15 +1,18 @@
-import { CustomError, ErrorCode } from '@/error';
-import { logger } from '@/extension';
-import { findVCSRoot } from '@/utils/utils';
-import { getActiveDocumentWorkspace } from '@/utils/vscode-utils';
 import fs from 'fs';
 import path from 'path';
+
+import { CustomError, ErrorCode } from '@/error';
+import { contextService, logger } from '@/extension';
+import { findVCSRoot } from '@/utils/utils';
+import { getActiveDocumentWorkspace } from '@/utils/vscode-utils';
+
 import { BaseVCSProvider } from './BaseVCSProvider';
 import { GitVCSProvider } from './GitVCSProvider';
 import { SVNProvider } from './SvnVCSProvider';
 
 export async function createVCSProvider(): Promise<BaseVCSProvider | undefined> {
-  const activeWorkspace = await getActiveDocumentWorkspace();
+  const context = contextService.getContext();
+  const activeWorkspace = await getActiveDocumentWorkspace(context);
   if (!activeWorkspace) {
     logger.throw(new CustomError(ErrorCode.WorkspaceFolderNotFound));
   }

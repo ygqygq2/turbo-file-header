@@ -1,6 +1,7 @@
-import { expect, describe, it } from 'vitest';
-import { CommandExecError } from '@/error/CommandExecError';
 import { ExecException } from 'child_process';
+import { describe, expect, it } from 'vitest';
+
+import { CommandExecError } from '@/error/CommandExecError';
 
 describe('CommandExecError', () => {
   it('should create an instance with all properties', () => {

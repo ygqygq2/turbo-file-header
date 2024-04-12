@@ -1,6 +1,8 @@
 import * as vscode from 'vscode';
-import { escapeRegexString } from '@/utils/str';
+
 import { configEvent, configManager, languageEvent, languageManager } from '@/extension';
+import { escapeRegexString } from '@/utils/str';
+
 import { TagDecorationOptions } from '.';
 
 async function parseLinePicker(languageId: string) {

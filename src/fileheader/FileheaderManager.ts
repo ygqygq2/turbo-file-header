@@ -1,3 +1,5 @@
+import vscode from 'vscode';
+
 import { ConfigManager } from '@/configuration/ConfigManager';
 import { CustomError, ErrorCode } from '@/error';
 import { logger } from '@/extension';
@@ -7,14 +9,14 @@ import { FunctionCommentInfo, FunctionParamsInfo } from '@/function-params-parse
 import { LanguageProvider } from '@/language-providers';
 import { addSelectionAfterString, generateFunctionComment } from '@/utils/vscode-utils';
 import { updateProgress, withProgress } from '@/utils/with-progress';
-import vscode from 'vscode';
+
 import { IFileheaderVariables } from '../typings/types';
 import { FileHashManager } from './FileHashManager';
 import { FileheaderProviderLoader } from './FileheaderProviderLoader';
-import { FileheaderVariableBuilder } from './FileheaderVariableBuilder';
 import { findProvider } from './fileheaderProviderLoaderService';
 import { getOriginFileheaderInfo } from './fileheaderProviderService';
 import { processFileheaderInsertionOrReplacement } from './fileheaderUpdateService';
+import { FileheaderVariableBuilder } from './FileheaderVariableBuilder';
 import { UpdateFileheaderManagerOptions } from './types';
 
 export class FileheaderManager {

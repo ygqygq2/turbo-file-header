@@ -1,4 +1,5 @@
 import { Command } from '@/typings/types';
+
 import { addFileheader } from './addFileheader';
 import { addFunctionComment } from './addFunctionComment';
 import { batchUpdateFileheader } from './batchUpdateFileheader';

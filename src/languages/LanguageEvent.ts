@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+
 import { LanguageManager } from './LanguageManager';
 import { OnDidChangeCallback } from './types';
 

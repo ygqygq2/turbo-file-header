@@ -1,5 +1,7 @@
-import { isCommentLine, updateBlockCommentState } from '@/utils/vscode-utils';
 import * as vscode from 'vscode';
+
+import { isCommentLine, updateBlockCommentState } from '@/utils/vscode-utils';
+
 import { FunctionCommentInfo, FunctionParamsInfo, ParamsInfo, ReturnInfo } from './types';
 
 export abstract class FunctionParamsParser {

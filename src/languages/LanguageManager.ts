@@ -1,8 +1,10 @@
 import * as vscode from 'vscode';
-import { Language } from './Language';
-import { AvailableCommentRules } from './types';
+
 import { ConfigManager } from '@/configuration/ConfigManager';
 import { LanguageConfig } from '@/typings/types';
+
+import { Language } from './Language';
+import { AvailableCommentRules } from './types';
 
 export class LanguageManager {
   private static instance: LanguageManager;

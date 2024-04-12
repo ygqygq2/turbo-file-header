@@ -1,3 +1,6 @@
+import { CustomError, Logger } from '@ygqygq2/vscode-log';
+import * as vscode from 'vscode';
+
 import { getAllCommands } from '@/commands';
 import { ConfigEvent } from '@/configuration/ConfigEvent';
 import { CHANNEL_TITLE } from '@/constants';
@@ -5,11 +8,11 @@ import { FileheaderManager } from '@/fileheader/FileheaderManager';
 import { LanguageEvent } from '@/languages/LanguageEvent';
 import { useParser } from '@/parser';
 import { Command } from '@/typings/types';
-import { CustomError, Logger } from '@ygqygq2/vscode-log';
-import * as vscode from 'vscode';
+
 import { ConfigManager } from './configuration/ConfigManager';
 import { ConfigReader } from './configuration/ConfigReader';
 import { errorCodeMessages } from './error';
+import { ContextService } from './extension-operate/ContextService';
 import { DebounceManager } from './extension-operate/DebounceManager';
 import { DocumentHandler } from './extension-operate/DocumentHandler';
 import { FileMatcher } from './extension-operate/FileMatcher';
@@ -52,8 +55,10 @@ const fileWatcher = new FileWatcher(configManager, fileheaderManager);
 const debounceManager = new DebounceManager();
 const documentHandler = new DocumentHandler(debounceManager, configManager, fileheaderManager);
 export const generateCustomTemplate = GenerateTemplateConfig.getInstance();
+export const contextService = new ContextService();
 
 export const activate = async (context: vscode.ExtensionContext) => {
+  contextService.setContext(context);
   const parser = useParser();
   await fileheaderManager.loadProviders();
 
@@ -64,9 +69,24 @@ export const activate = async (context: vscode.ExtensionContext) => {
   const commands: Array<Command> = getAllCommands();
   // 遍历所有命令，注册命令
   for (const { name, handler } of commands) {
-    vscode.commands.registerCommand(name, (...args: unknown[]) => {
-      handler(context, args);
-    });
+    context.subscriptions.push(
+      vscode.commands.registerCommand(name, async (...args: unknown[]) => {
+        handler(context, args);
+        if (
+          process.env.NODE_ENV === 'test' &&
+          args &&
+          args[0] &&
+          typeof args[0] === 'object' &&
+          'workspaceFolderName' in args[0]
+        ) {
+          const workspaceFolderName = (args[0] as { workspaceFolderName?: string })
+            .workspaceFolderName;
+          if (workspaceFolderName) {
+            await context.workspaceState.update('workspaceFolderName', workspaceFolderName);
+          }
+        }
+      }),
+    );
   }
 
   if (vscode.window.activeTextEditor) {

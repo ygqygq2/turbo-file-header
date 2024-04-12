@@ -1,7 +1,8 @@
-import { ChildProcess, ExecOptions, exec as _exec } from 'child_process';
+import { ChildProcess, exec as _exec, ExecOptions } from 'child_process';
 import crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
+
 import { TEMPLATE_OPTIONAL_GROUP_PLACEHOLDER, TEMPLATE_SYMBOL_KEY } from '../constants';
 import { CommandExecError } from '../error/CommandExecError';
 import { Template, TemplateInterpolation } from '../typings/types';

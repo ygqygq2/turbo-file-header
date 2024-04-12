@@ -1,17 +1,19 @@
-import vscode, { WorkspaceFolder } from 'vscode';
-import { basename, dirname, relative } from 'path';
-import { evaluate } from 'mathjs';
 import dayjs from 'dayjs';
-import upath from 'upath';
-import { Config } from '../typings/types';
 import { stat } from 'fs/promises';
-import { WILDCARD_ACCESS_VARIABLES } from '../constants';
-import { initVCSProvider } from '@/init';
+import { evaluate } from 'mathjs';
+import { basename, dirname, relative } from 'path';
+import upath from 'upath';
+import vscode, { WorkspaceFolder } from 'vscode';
+
 import { ConfigManager } from '@/configuration/ConfigManager';
-import { logger } from '@/extension';
 import { CustomError, ErrorCode } from '@/error';
+import { logger } from '@/extension';
+import { initVCSProvider } from '@/init';
 import { LanguageProvider } from '@/language-providers';
 import { BaseVCSProvider } from '@/vcs-provider/BaseVCSProvider';
+
+import { WILDCARD_ACCESS_VARIABLES } from '../constants';
+import { Config } from '../typings/types';
 import { VariableBuilder } from './types';
 
 export class FileheaderVariableBuilder {

@@ -53,5 +53,8 @@ export default defineConfig([
       .concat(['--skip-release-notes'])
       .concat(['--enable-proposed-api'])
       .concat(['--user-data-dir', userDataDirectory]),
+    env: {
+      NODE_ENV: 'test',
+    },
   },
 ]);

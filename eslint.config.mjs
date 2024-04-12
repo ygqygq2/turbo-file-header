@@ -1,10 +1,14 @@
 import eslint from '@eslint/js';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
+import simpleImportSortPlugin from 'eslint-plugin-simple-import-sort';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   {
     files: ['**/*.ts'],
+    plugins:{
+      ['simple-import-sort']: simpleImportSortPlugin,
+    }
   },
   { ignores: ['sampleWorkspace', 'out', 'dist', '**/*.d.ts'] },
   eslint.configs.recommended,
@@ -17,6 +21,8 @@ export default tseslint.config(
         { varsIgnorePattern: '^_', argsIgnorePattern: '^_' },
       ],
       '@typescript-eslint/no-explicit-any': 'warn',
+      'simple-import-sort/imports': 'warn',
+      'simple-import-sort/exports': 'warn',
     },
   },
 );

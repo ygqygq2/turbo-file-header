@@ -1,5 +1,7 @@
-import { logger } from '@/extension';
 import * as vscode from 'vscode';
+
+import { logger } from '@/extension';
+
 import { FunctionParamsParser } from './FunctionParamsParser';
 import { FunctionParamsInfo, ParamsInfo } from './types';
 

@@ -1,5 +1,7 @@
-import { getBlockComment } from '@/utils/vscode-utils';
 import * as vscode from 'vscode';
+
+import { getBlockComment } from '@/utils/vscode-utils';
+
 import { ITemplateFunction, Template } from '../typings/types';
 import { LanguageProvider } from './LanguageProvider';
 

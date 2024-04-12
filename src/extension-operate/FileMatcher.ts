@@ -1,8 +1,10 @@
+import { minimatch } from 'minimatch';
 import * as vscode from 'vscode';
+
+import { ConfigManager } from '@/configuration/ConfigManager';
+import { contextService } from '@/extension';
 import { FindFilesConfig } from '@/typings/types';
 import { getActiveDocumentWorkspace } from '@/utils/vscode-utils';
-import { minimatch } from 'minimatch';
-import { ConfigManager } from '@/configuration/ConfigManager';
 
 export interface Matcher {
   findFiles(): Promise<vscode.Uri[]>;
@@ -23,7 +25,8 @@ export class FileMatcher implements Matcher {
   };
 
   public findFiles = async (): Promise<vscode.Uri[]> => {
-    const activeWorkspace = await getActiveDocumentWorkspace();
+    const context = contextService.getContext();
+    const activeWorkspace = await getActiveDocumentWorkspace(context);
     if (!activeWorkspace) {
       return [];
     }

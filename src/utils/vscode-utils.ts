@@ -1,12 +1,19 @@
-import { FunctionCommentInfo } from '@/function-params-parser/types';
-import { Config } from '@/typings/types';
 import * as fs from 'fs-extra';
 import path from 'path';
 import * as vscode from 'vscode';
 
+import { FunctionCommentInfo } from '@/function-params-parser/types';
+import { Config } from '@/typings/types';
+
 async function promptForWorkspace(
   workspaces: readonly vscode.WorkspaceFolder[],
+  context?: vscode.ExtensionContext,
 ): Promise<vscode.WorkspaceFolder | undefined> {
+  // test 环境，根据 workspace 名称选择
+  if (process.env.NODE_ENV === 'test') {
+    const workspaceFolderName = context?.workspaceState.get<string>('workspaceFolderName') || '';
+    return getWorkspaceFolderByName(workspaceFolderName);
+  }
   const picked = await vscode.window.showQuickPick(
     workspaces.map((workspace) => ({ label: workspace.name, workspace })),
     { title: 'Select which workspace for add custom fileheader template' },
@@ -19,7 +26,9 @@ async function promptForWorkspace(
  * 如果当前没有活动文档，则提示选择工作区
  * @returns
  */
-export async function getActiveDocumentWorkspace(): Promise<vscode.WorkspaceFolder | undefined> {
+export async function getActiveDocumentWorkspace(
+  context?: vscode.ExtensionContext,
+): Promise<vscode.WorkspaceFolder | undefined> {
   const activeDocumentUri = vscode.window.activeTextEditor?.document.uri;
   let activeWorkspace: vscode.WorkspaceFolder | undefined = undefined;
 
@@ -30,7 +39,7 @@ export async function getActiveDocumentWorkspace(): Promise<vscode.WorkspaceFold
     if (workspaces && workspaces.length === 1) {
       activeWorkspace = workspaces[0];
     } else if (workspaces && workspaces.length > 0) {
-      activeWorkspace = await promptForWorkspace(workspaces);
+      activeWorkspace = await promptForWorkspace(workspaces, context);
     } else {
       return undefined;
     }
@@ -43,7 +52,7 @@ export async function getActiveDocumentWorkspace(): Promise<vscode.WorkspaceFold
  * gets the workspace folder by name
  * @param workspaceFolderName Workspace folder name
  */
-export const getWorkspaceFolderUri = (workspaceFolderName: string) => {
+export const getWorkspaceFolderByName = (workspaceFolderName: string) => {
   const workspaceFolder = vscode.workspace.workspaceFolders!.find((folder) => {
     return folder.name === workspaceFolderName;
   });
@@ -52,7 +61,7 @@ export const getWorkspaceFolderUri = (workspaceFolderName: string) => {
       'Folder not found in workspace. Did you forget to add the test folder to test.code-workspace?',
     );
   }
-  return workspaceFolder!.uri;
+  return workspaceFolder;
 };
 
 /**
@@ -283,8 +292,8 @@ export function generateFunctionComment(functionCommentInfo: FunctionCommentInfo
 }
 
 export async function getText(workspaceFolderName: string, expectedFile: string) {
-  const base = getWorkspaceFolderUri(workspaceFolderName);
-  const expectedPath = path.join(base.fsPath, expectedFile);
+  const base = getWorkspaceFolderByName(workspaceFolderName);
+  const expectedPath = path.join(base?.uri?.fsPath, expectedFile);
   const expected = await fs.readFile(expectedPath, 'utf8');
   return expected;
 }

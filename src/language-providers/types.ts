@@ -1,4 +1,5 @@
 import vscode from 'vscode';
+
 import { ConfigManager } from '@/configuration/ConfigManager';
 import { LanguageManager } from '@/languages/LanguageManager';
 

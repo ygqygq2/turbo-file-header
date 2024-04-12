@@ -1,8 +1,9 @@
-import { sleep } from '@/utils/utils';
-import { getWorkspaceFolderUri, setActiveWorkspaceByName } from '@/utils/vscode-utils';
 import * as fs from 'fs';
 import path from 'path';
 import * as vscode from 'vscode';
+
+import { sleep } from '@/utils/utils';
+import { getWorkspaceFolderByName, setActiveWorkspaceByName } from '@/utils/vscode-utils';
 
 /**
  * execute command on file
@@ -17,25 +18,33 @@ export async function executeCommandOnFile(
   srcFileName: string,
   shouldRetry = false,
 ) {
-  console.log(vscode.workspace.workspaceFolders);
+  // 设置一个环境变量 WORKSPACE_FOLDER_NAME
+  process.env.WORKSPACE_FOLDER_NAME = workspaceFolderName;
+  console.log(
+    '🚀 ~ file: executeCommandOnFile.ts:22 ~ process.env.WORKSPACE_FOLDER_NAME:',
+    process.env.WORKSPACE_FOLDER_NAME,
+  );
+
   const ext = path.extname(srcFileName);
   const testFile = srcFileName.replace(ext, `.copy${ext}`);
-  const base = getWorkspaceFolderUri(workspaceFolderName);
-  const srcAbsPath = path.join(base.fsPath, srcFileName);
-  const testAbsPath = path.join(base.fsPath, testFile);
+  const workspace = getWorkspaceFolderByName(workspaceFolderName);
+  const srcAbsPath = path.join(workspace?.uri?.fsPath, srcFileName);
+  const testAbsPath = path.join(workspace?.uri?.fsPath, testFile);
+
   // 复制文件
   fs.copyFileSync(srcAbsPath, testAbsPath);
   // 打开文件
+  setActiveWorkspaceByName(workspaceFolderName, srcFileName);
   const doc = await vscode.workspace.openTextDocument(testAbsPath);
   await vscode.window.showTextDocument(doc);
   // 执行之前获取文件内容
   const text = doc.getText();
 
   try {
-    setActiveWorkspaceByName(workspaceFolderName, testFile);
     console.time(testFile);
-    await executeCommandWithRetry(commandName, doc, text, shouldRetry);
+    const result = await executeCommandWithRetry(commandName, doc, text, shouldRetry);
     console.timeEnd(testFile);
+    return result;
   } catch (error) {
     console.error('Error executing command:', error);
     throw error;
@@ -50,8 +59,6 @@ export async function executeCommandOnFile(
       });
     }
   }
-
-  return { actual: doc.getText(), source: text };
 }
 
 async function executeCommandWithRetry(
@@ -69,4 +76,6 @@ async function executeCommandWithRetry(
     actual = doc.getText();
     retryCount++;
   } while (shouldRetry && originalText === actual && retryCount < 10);
+
+  return { actual: doc.getText(), source: originalText };
 }

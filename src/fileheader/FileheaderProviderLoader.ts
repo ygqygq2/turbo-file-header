@@ -1,14 +1,16 @@
 import * as vscode from 'vscode';
-import { LanguageProvider } from '@/language-providers';
-import { GenerateCustomProviderClasses } from '../language-providers/GenerateCustomProviderClasses';
-import { logger } from '@/extension';
-import { CustomError, ErrorCode } from '@/error';
-import { getActiveDocumentWorkspace } from '@/utils/vscode-utils';
-import { CUSTOM_CONFIG_FILE_NAME } from '@/constants';
-import { LanguageManager } from '@/languages/LanguageManager';
-import { VscodeInternalProvider } from '../language-providers/VscodeInternalProvider';
+
 import { ConfigManager } from '@/configuration/ConfigManager';
+import { CUSTOM_CONFIG_FILE_NAME } from '@/constants';
+import { CustomError, ErrorCode } from '@/error';
+import { contextService, logger } from '@/extension';
+import { LanguageProvider } from '@/language-providers';
 import { VueProvider } from '@/language-providers/VueProvider';
+import { LanguageManager } from '@/languages/LanguageManager';
+import { getActiveDocumentWorkspace } from '@/utils/vscode-utils';
+
+import { GenerateCustomProviderClasses } from '../language-providers/GenerateCustomProviderClasses';
+import { VscodeInternalProvider } from '../language-providers/VscodeInternalProvider';
 
 export class FileheaderProviderLoader {
   private configManager: ConfigManager;
@@ -55,7 +57,8 @@ export class FileheaderProviderLoader {
       const providersPromises = dynamicProviderClasses.map(
         async ({ name, providerClass: ProviderClass }) => {
           logger.info(`Generate custom provider: ${name}`);
-          const activeWorkspace = await getActiveDocumentWorkspace();
+          const context = contextService.getContext();
+          const activeWorkspace = await getActiveDocumentWorkspace(context);
           try {
             const defaultUri = vscode.Uri.file('.vscode' + CUSTOM_CONFIG_FILE_NAME);
             const uriToUse = activeWorkspace?.uri || defaultUri;

@@ -1,7 +1,9 @@
 import * as vscode from 'vscode';
+
+import { ConfigSection, CUSTOM_CONFIG_FILE_NAME } from '@/constants';
+
 import { ConfigManager } from '../configuration/ConfigManager';
 import { FileheaderManager } from '../fileheader/FileheaderManager';
-import { CUSTOM_CONFIG_FILE_NAME, ConfigSection } from '@/constants';
 import { DebounceManager } from './DebounceManager';
 
 export class DocumentHandler {

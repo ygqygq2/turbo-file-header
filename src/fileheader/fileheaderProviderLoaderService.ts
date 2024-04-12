@@ -1,11 +1,12 @@
+import path from 'path';
+import vscode from 'vscode';
+
 import { ConfigManager } from '@/configuration/ConfigManager';
 import { CustomError, ErrorCode } from '@/error';
 import { logger } from '@/extension';
 import { LanguageProvider } from '@/language-providers';
 import { VscodeInternalProvider } from '@/language-providers/VscodeInternalProvider';
 import { getLanguageIdByExt } from '@/utils/vscode-utils';
-import path from 'path';
-import vscode from 'vscode';
 
 export async function findProvider(
   configManager: ConfigManager,

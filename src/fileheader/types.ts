@@ -1,5 +1,6 @@
-import { IFileheaderVariables } from '@/typings/types';
 import * as vscode from 'vscode';
+
+import { IFileheaderVariables } from '@/typings/types';
 
 export type UpdateFileheaderManagerOptions = {
   // 是否允许插入

@@ -1,5 +1,6 @@
-import vscode from 'vscode';
 import { difference } from 'lodash';
+import vscode from 'vscode';
+
 import { getStringHash } from '../utils/utils';
 
 export class FileHashManager {

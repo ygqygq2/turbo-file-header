@@ -1,5 +1,6 @@
 import assert from 'assert';
 import { describe, it } from 'mocha';
+
 import { executeCommandOnFile } from './executeCommandOnFile';
 
 describe('Extension Integration Test: addFileheader', function () {

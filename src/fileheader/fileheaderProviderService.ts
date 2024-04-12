@@ -1,5 +1,6 @@
-import { LanguageProvider } from '@/language-providers';
 import vscode from 'vscode';
+
+import { LanguageProvider } from '@/language-providers';
 
 export function getOriginFileheaderRange(
   document: vscode.TextDocument,

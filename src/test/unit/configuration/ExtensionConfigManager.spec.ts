@@ -1,8 +1,9 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { ConfigSection, CONFIG_TAG } from '@/constants';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { workspace, WorkspaceConfiguration } from 'vscode';
+
 import { ConfigManager } from '@/configuration/ConfigManager';
-import { WorkspaceConfiguration, workspace } from 'vscode';
 import { ConfigReader } from '@/configuration/ConfigReader';
+import { CONFIG_TAG, ConfigSection } from '@/constants';
 
 vi.mock('vscode');
 vi.mock('@/extension', () => ({

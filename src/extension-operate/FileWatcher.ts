@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
-import { CUSTOM_CONFIG_FILE_NAME } from '@/constants';
+
 import { ConfigManager } from '@/configuration/ConfigManager';
+import { CUSTOM_CONFIG_FILE_NAME } from '@/constants';
 import { FileheaderManager } from '@/fileheader/FileheaderManager';
 
 export class FileWatcher {

@@ -1,5 +1,6 @@
-import { fileheaderManager } from '@/extension';
 import * as vscode from 'vscode';
+
+import { fileheaderManager } from '@/extension';
 
 export const reloadCustomTemplateProvider = () => {
   return {

@@ -1,9 +1,10 @@
+import vscode from 'vscode';
+
 import { ConfigSection } from '@/constants';
 import { initVCSProvider } from '@/init';
 import { removeSpecialString } from '@/utils/str';
 import { convertDateFormatToRegex } from '@/utils/utils';
 
-import vscode from 'vscode';
 import { Config } from '../typings/types';
 import { FileHashManager } from './FileHashManager';
 

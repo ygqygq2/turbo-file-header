@@ -1,11 +1,13 @@
 import * as vscode from 'vscode';
-import { escapeRegexString } from '@/utils/str';
-import { ConfigSection, CONFIG_TAG } from '../constants';
-import { Config, ConfigurationFlatten, Tag, TagFlatten } from '../typings/types';
-import { logger } from '@/extension';
-import { ConfigReader } from './ConfigReader';
-import { ConfigYaml } from '@/typings/types';
+
 import { CustomError, ErrorCode } from '@/error';
+import { logger } from '@/extension';
+import { ConfigYaml } from '@/typings/types';
+import { escapeRegexString } from '@/utils/str';
+
+import { CONFIG_TAG, ConfigSection } from '../constants';
+import { Config, ConfigurationFlatten, Tag, TagFlatten } from '../typings/types';
+import { ConfigReader } from './ConfigReader';
 
 export class ConfigManager {
   private static instance: ConfigManager;

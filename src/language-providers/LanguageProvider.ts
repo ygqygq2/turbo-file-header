@@ -1,7 +1,9 @@
+import vscode from 'vscode';
+
 import { ConfigManager } from '@/configuration/ConfigManager';
 import { escapeRegexString } from '@/utils/str';
 import { isCommentLine, updateBlockCommentState } from '@/utils/vscode-utils';
-import vscode from 'vscode';
+
 import {
   TEMPLATE_NAMED_GROUP_WILDCARD_PLACEHOLDER,
   TEMPLATE_OPTIONAL_GROUP_PLACEHOLDER,
@@ -40,6 +42,7 @@ export abstract class LanguageProvider {
     return !!this.workspaceScopeUri;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private getTemplateInternal(variables: any, useJSDocStyle: boolean = false) {
     return this.getTemplate(getTaggedTemplateInputs, variables, useJSDocStyle);
   }

@@ -1,6 +1,8 @@
-import { getText } from '@/utils/vscode-utils';
 import assert from 'assert';
 import { describe, it } from 'mocha';
+
+import { getText } from '@/utils/vscode-utils';
+
 import { executeCommandOnFile } from './executeCommandOnFile';
 
 describe('Extension Integration Test: addFunctionComment', function () {

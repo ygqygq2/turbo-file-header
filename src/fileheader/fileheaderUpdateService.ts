@@ -1,9 +1,11 @@
+import vscode from 'vscode';
+
 import { logger } from '@/extension';
 import { FileMatcher } from '@/extension-operate/FileMatcher';
 import { LanguageProvider } from '@/language-providers';
 import { hasShebang } from '@/utils/utils';
 import { isLineStartOrEnd } from '@/utils/vscode-utils';
-import vscode from 'vscode';
+
 import { Config, IFileheaderVariables } from '../typings/types';
 import { FileHashManager } from './FileHashManager';
 import { fileChanged, headerChanged } from './fileheaderChangeService';

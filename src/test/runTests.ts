@@ -1,5 +1,6 @@
 import { runTests } from '@vscode/test-electron';
 import path from 'path';
+
 import { createSettings } from './ready';
 
 async function main() {

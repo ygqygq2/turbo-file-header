@@ -1,6 +1,8 @@
+import * as vscode from 'vscode';
+
 import { LanguageManager } from '@/languages/LanguageManager';
 import { getBlockComment } from '@/utils/vscode-utils';
-import * as vscode from 'vscode';
+
 import { ITemplateFunction, Template } from '../typings/types';
 import { LanguageProvider } from './LanguageProvider';
 import { ExtendedLanguageProviderOptions } from './types';
