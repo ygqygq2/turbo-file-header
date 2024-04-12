@@ -11,7 +11,7 @@ import { GitVCSProvider } from './GitVCSProvider';
 import { SVNProvider } from './SvnVCSProvider';
 
 export async function createVCSProvider(): Promise<BaseVCSProvider | undefined> {
-  const context = contextService.getContext();
+  const context = contextService?.getContext();
   const activeWorkspace = await getActiveDocumentWorkspace(context);
   if (!activeWorkspace) {
     logger.throw(new CustomError(ErrorCode.WorkspaceFolderNotFound));

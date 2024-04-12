@@ -20,10 +20,6 @@ export async function executeCommandOnFile(
 ) {
   // 设置一个环境变量 WORKSPACE_FOLDER_NAME
   process.env.WORKSPACE_FOLDER_NAME = workspaceFolderName;
-  console.log(
-    '🚀 ~ file: executeCommandOnFile.ts:22 ~ process.env.WORKSPACE_FOLDER_NAME:',
-    process.env.WORKSPACE_FOLDER_NAME,
-  );
 
   const ext = path.extname(srcFileName);
   const testFile = srcFileName.replace(ext, `.copy${ext}`);
@@ -38,40 +34,38 @@ export async function executeCommandOnFile(
   const doc = await vscode.workspace.openTextDocument(testAbsPath);
   await vscode.window.showTextDocument(doc);
   // 执行之前获取文件内容
-  const text = doc.getText();
+  const originText = doc.getText();
 
   try {
     console.time(testFile);
-    const result = await executeCommandWithRetry(commandName, doc, text, shouldRetry);
+    const result = await executeCommandWithRetry({
+      commandName,
+      workspaceFolderName,
+      doc,
+      originText,
+      shouldRetry,
+    });
     console.timeEnd(testFile);
     return result;
   } catch (error) {
     console.error('Error executing command:', error);
     throw error;
-  } finally {
-    if (fs.existsSync(testAbsPath)) {
-      fs.unlink(testAbsPath, (error) => {
-        if (error) {
-          console.error('Error deleting file:', error);
-        } else {
-          console.log(`File [${testFile}] deleted successfully`);
-        }
-      });
-    }
   }
 }
 
-async function executeCommandWithRetry(
-  commandName: string,
-  doc: vscode.TextDocument,
-  originalText: string,
-  shouldRetry: boolean,
-) {
+async function executeCommandWithRetry(options: {
+  commandName: string;
+  workspaceFolderName: string;
+  doc: vscode.TextDocument;
+  originText: string;
+  shouldRetry: boolean;
+}) {
+  const { commandName, workspaceFolderName, doc, originText: originalText, shouldRetry } = options;
   let actual = '';
   let retryCount = 0;
 
   do {
-    await vscode.commands.executeCommand(commandName);
+    await vscode.commands.executeCommand(commandName, { workspaceFolderName });
     await sleep(250);
     actual = doc.getText();
     retryCount++;

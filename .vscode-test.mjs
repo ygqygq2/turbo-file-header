@@ -46,15 +46,13 @@ export default defineConfig([
     mocha: {
       ui: 'bdd',
       require: ['ts-node/register', 'tsconfig-paths/register'],
+      parallel: 1
     },
     launchArgs: [workspacePath]
       .concat(['--skip-welcome'])
       .concat(['--disable-extensions'])
       .concat(['--skip-release-notes'])
       .concat(['--enable-proposed-api'])
-      .concat(['--user-data-dir', userDataDirectory]),
-    env: {
-      NODE_ENV: 'test',
-    },
+      .concat(['--user-data-dir', userDataDirectory])
   },
 ]);

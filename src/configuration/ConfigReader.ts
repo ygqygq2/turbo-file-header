@@ -27,7 +27,7 @@ export class ConfigReader {
       },
     };
 
-    const context = contextService.getContext();
+    const context = contextService?.getContext();
     const activeWorkspace = await getActiveDocumentWorkspace(context);
     if (!activeWorkspace) {
       return defaultConfig;

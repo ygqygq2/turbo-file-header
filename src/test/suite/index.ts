@@ -13,6 +13,7 @@ export async function run() {
   const mocha = new Mocha({
     ui: 'bdd',
     color: true,
+    parallel: false,
   });
 
   // 获取所有测试文件

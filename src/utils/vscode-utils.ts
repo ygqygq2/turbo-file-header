@@ -10,8 +10,12 @@ async function promptForWorkspace(
   context?: vscode.ExtensionContext,
 ): Promise<vscode.WorkspaceFolder | undefined> {
   // test 环境，根据 workspace 名称选择
-  if (process.env.NODE_ENV === 'test') {
-    const workspaceFolderName = context?.workspaceState.get<string>('workspaceFolderName') || '';
+  const workspaceFolderName = context?.workspaceState.get<string>('workspaceFolderName') || '';
+  vscode.window.showInformationMessage(
+    '🚀 ~ file: vscode-utils.ts:14 ~ workspaceFolderName:',
+    workspaceFolderName,
+  );
+  if (workspaceFolderName) {
     return getWorkspaceFolderByName(workspaceFolderName);
   }
   const picked = await vscode.window.showQuickPick(

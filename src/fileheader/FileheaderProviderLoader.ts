@@ -57,7 +57,7 @@ export class FileheaderProviderLoader {
       const providersPromises = dynamicProviderClasses.map(
         async ({ name, providerClass: ProviderClass }) => {
           logger.info(`Generate custom provider: ${name}`);
-          const context = contextService.getContext();
+          const context = contextService?.getContext();
           const activeWorkspace = await getActiveDocumentWorkspace(context);
           try {
             const defaultUri = vscode.Uri.file('.vscode' + CUSTOM_CONFIG_FILE_NAME);

@@ -72,17 +72,11 @@ export const activate = async (context: vscode.ExtensionContext) => {
     context.subscriptions.push(
       vscode.commands.registerCommand(name, async (...args: unknown[]) => {
         handler(context, args);
-        if (
-          process.env.NODE_ENV === 'test' &&
-          args &&
-          args[0] &&
-          typeof args[0] === 'object' &&
-          'workspaceFolderName' in args[0]
-        ) {
-          const workspaceFolderName = (args[0] as { workspaceFolderName?: string })
-            .workspaceFolderName;
-          if (workspaceFolderName) {
-            await context.workspaceState.update('workspaceFolderName', workspaceFolderName);
+        if (args && args[0] && typeof args[0] === 'object') {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const obj = args[0] as { [key: string]: any };
+          for (const key in obj) {
+            await context.workspaceState.update(key, obj[key]);
           }
         }
       }),
