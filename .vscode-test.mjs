@@ -46,7 +46,6 @@ export default defineConfig([
     mocha: {
       ui: 'bdd',
       require: ['ts-node/register', 'tsconfig-paths/register'],
-      parallel: 1
     },
     launchArgs: [workspacePath]
       .concat(['--skip-welcome'])

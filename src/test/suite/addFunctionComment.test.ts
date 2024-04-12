@@ -13,9 +13,7 @@ describe('Extension Integration Test: addFunctionComment', function () {
     const fileName = 'variable-arrow-function-with-params-type.ts';
     const resultFileName = 'variable-arrow-function-with-params-type.result.ts';
     const { actual } = await executeCommandOnFile(commandName, workspaceName, fileName, false);
-    console.log('🚀 ~ file: addFunctionComment.test.ts:16 ~ actual:', actual);
     const expected = await getText(workspaceName, resultFileName);
-    console.log('🚀 ~ file: addFunctionComment.test.ts:18 ~ expected:', expected);
     assert.equal(actual, expected);
   });
 });

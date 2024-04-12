@@ -13,13 +13,12 @@ export async function run() {
   const mocha = new Mocha({
     ui: 'bdd',
     color: true,
-    parallel: false,
   });
 
   // 获取所有测试文件
   const tsFiles = await glob('**/*.test.js', { cwd: testsRoot });
   console.log('获取到以下测试文件:');
-  console.log('🚀 ~ file: index.ts:18 ~ tsFiles:', tsFiles);
+  console.log('🚀 ~ file: index.ts:21 ~ tsFiles:', tsFiles);
 
   return new Promise<void>((resolve, reject) => {
     // 添加测试文件

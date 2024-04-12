@@ -3,7 +3,7 @@ import path from 'path';
 import * as vscode from 'vscode';
 
 import { sleep } from '@/utils/utils';
-import { getWorkspaceFolderUriByName } from '@/utils/vscode-utils';
+import { getWorkspaceFolderUriByName, setActiveWorkspaceByName } from '@/utils/vscode-utils';
 
 /**
  * execute command on file
@@ -28,6 +28,7 @@ export async function executeCommandOnFile(
   fs.copyFileSync(srcAbsPath, testAbsPath);
   // 打开文件
   const doc = await vscode.workspace.openTextDocument(testAbsPath);
+  await vscode.window.showTextDocument(doc);
   // 执行之前获取文件内容
   const originText = doc.getText();
 
@@ -70,14 +71,8 @@ async function executeCommandWithRetry(options: {
   let retryCount = 0;
 
   do {
-    let activeTextEditor: vscode.TextEditor | undefined;
-    try {
-      activeTextEditor = await vscode.window.showTextDocument(doc);
-    } catch (error) {
-      console.log(error);
-      throw error;
-    }
-    await vscode.commands.executeCommand(commandName, { activeTextEditor, workspaceFolderName });
+    await vscode.commands.executeCommand(commandName, { workspaceFolderName });
+    // 需要等待一段时间才能获取到结果
     await sleep(250);
     actual = doc.getText();
     retryCount++;
