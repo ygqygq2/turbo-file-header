@@ -7,8 +7,9 @@ export const addFileheader = (): Command => {
   return {
     name: 'turboFileHeader.addFileheader',
     handler: async (_context: vscode.ExtensionContext, args?: unknown[]) => {
-      const activeEditor = ((args ?? [])[0] as vscode.TextEditor) || vscode.window.activeTextEditor;
-
+      const { activeEditor = vscode.window.activeTextEditor } = (args ?? [])[0] as {
+        activeEditor?: vscode.TextEditor;
+      };
       // if no active window is open, return
       if (!activeEditor) {
         return;

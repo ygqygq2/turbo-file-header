@@ -62,7 +62,7 @@ devDependencies:
     specifier: ^0.2.6
     version: 0.2.6
   '@types/vscode':
-    specifier: ^1.88.0
+    specifier: ^1.86.0
     version: 1.88.0
   '@vitest/coverage-v8':
     specifier: ^1.5.0

@@ -23,14 +23,13 @@ export class GenerateTemplateConfig {
       return;
     }
 
-    const targetWorkspaceUri = await getActiveDocumentWorkspaceUri(context);
-
-    if (!targetWorkspaceUri) {
+    const activeWorkspaceUri = await getActiveDocumentWorkspaceUri(context);
+    if (!activeWorkspaceUri) {
       return;
     }
 
     const uri = Uri.joinPath(context.extensionUri, 'resources', CUSTOM_CONFIG_FILE_NAME);
-    const configDir = path.join(targetWorkspaceUri.fsPath, '.vscode');
+    const configDir = path.join(activeWorkspaceUri.fsPath, '.vscode');
     const configPath = path.join(configDir, CUSTOM_CONFIG_FILE_NAME);
 
     try {

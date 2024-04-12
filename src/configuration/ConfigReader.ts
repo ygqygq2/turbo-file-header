@@ -1,12 +1,12 @@
 import fs from 'fs';
 import path from 'path';
+import * as vscode from 'vscode';
 import YAML from 'yaml';
 
 import { CUSTOM_CONFIG_FILE_NAME } from '@/constants';
 import { CustomError, ErrorCode } from '@/error';
-import { contextService, logger } from '@/extension';
+import { logger } from '@/extension';
 import { ConfigYaml } from '@/typings/types';
-import { getActiveDocumentWorkspaceUri } from '@/utils/vscode-utils';
 
 export class ConfigReader {
   private static instance: ConfigReader;
@@ -27,8 +27,8 @@ export class ConfigReader {
       },
     };
 
-    const context = contextService?.getContext();
-    const activeWorkspaceUri = await getActiveDocumentWorkspaceUri(context);
+    // 这里初始化时，很容易 undefined
+    const activeWorkspaceUri = vscode.window.activeTextEditor?.document?.uri;
     if (!activeWorkspaceUri) {
       return defaultConfig;
     }

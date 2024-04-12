@@ -1,7 +1,6 @@
 import assert from 'assert';
 import { describe, it } from 'mocha';
 
-import { cleanupTestFiles } from './common/cleanupTestFiles';
 import { executeCommandOnFile } from './common/executeCommandOnFile';
 
 describe('Extension Integration Test: addFileheader', function () {
@@ -24,9 +23,5 @@ describe('Extension Integration Test: addFileheader', function () {
     const { actual } = await executeCommandOnFile(commandName, workspaceName, fileName, false);
     assert.notEqual(actual.indexOf('Copyright'), -1);
     assert.match(actual, /@description\s+\S+/);
-  });
-
-  after(async () => {
-    await cleanupTestFiles('workspace');
   });
 });

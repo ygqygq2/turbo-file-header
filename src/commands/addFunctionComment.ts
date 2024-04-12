@@ -7,7 +7,9 @@ export const addFunctionComment = (): Command => {
   return {
     name: 'turboFileHeader.addFunctionComment',
     handler: async (_context: vscode.ExtensionContext, args?: unknown[]) => {
-      const activeEditor = ((args ?? [])[0] as vscode.TextEditor) || vscode.window.activeTextEditor;
+      const { activeEditor = vscode.window.activeTextEditor } = (args ?? [])[0] as {
+        activeEditor?: vscode.TextEditor;
+      };
 
       if (!activeEditor) {
         return;

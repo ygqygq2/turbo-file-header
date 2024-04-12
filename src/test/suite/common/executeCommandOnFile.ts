@@ -3,7 +3,7 @@ import path from 'path';
 import * as vscode from 'vscode';
 
 import { sleep } from '@/utils/utils';
-import { getWorkspaceFolderUriByName, setActiveWorkspaceByName } from '@/utils/vscode-utils';
+import { getWorkspaceFolderUriByName } from '@/utils/vscode-utils';
 
 /**
  * execute command on file
@@ -27,9 +27,7 @@ export async function executeCommandOnFile(
   // 复制文件
   fs.copyFileSync(srcAbsPath, testAbsPath);
   // 打开文件
-  setActiveWorkspaceByName(workspaceFolderName, srcFileName);
   const doc = await vscode.workspace.openTextDocument(testAbsPath);
-  await vscode.window.showTextDocument(doc);
   // 执行之前获取文件内容
   const originText = doc.getText();
 
@@ -47,6 +45,16 @@ export async function executeCommandOnFile(
   } catch (error) {
     console.error('Error executing command:', error);
     throw error;
+  } finally {
+    if (fs.existsSync(testAbsPath)) {
+      fs.unlink(testAbsPath, (error) => {
+        if (error) {
+          console.error('Error deleting file:', error);
+        } else {
+          console.log(`File [${testFile}] deleted successfully`);
+        }
+      });
+    }
   }
 }
 
@@ -62,7 +70,14 @@ async function executeCommandWithRetry(options: {
   let retryCount = 0;
 
   do {
-    await vscode.commands.executeCommand(commandName, { workspaceFolderName });
+    let activeTextEditor: vscode.TextEditor | undefined;
+    try {
+      activeTextEditor = await vscode.window.showTextDocument(doc);
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+    await vscode.commands.executeCommand(commandName, { activeTextEditor, workspaceFolderName });
     await sleep(250);
     actual = doc.getText();
     retryCount++;

@@ -2,10 +2,11 @@ import * as fs from 'fs-extra';
 import path from 'path';
 import * as vscode from 'vscode';
 
+import { logger } from '@/extension';
 import { FunctionCommentInfo } from '@/function-params-parser/types';
 import { Config } from '@/typings/types';
 
-async function promptForWorkspace(
+export async function promptForWorkspace(
   workspaces: readonly vscode.WorkspaceFolder[],
 ): Promise<vscode.WorkspaceFolder | undefined> {
   const picked = await vscode.window.showQuickPick(
@@ -23,7 +24,7 @@ async function promptForWorkspace(
 export async function getActiveDocumentWorkspaceUri(
   context?: vscode.ExtensionContext,
 ): Promise<vscode.Uri | undefined> {
-  const activeDocumentUri = vscode.window.activeTextEditor?.document.uri;
+  const activeDocumentUri = vscode.window.activeTextEditor?.document?.uri;
   let activeWorkspace: vscode.WorkspaceFolder | undefined = undefined;
 
   if (activeDocumentUri) {
@@ -37,13 +38,14 @@ export async function getActiveDocumentWorkspaceUri(
       if (workspaceFolderName) {
         return getWorkspaceFolderUriByName(workspaceFolderName);
       }
-      activeWorkspace = (await promptForWorkspace(workspaces)) || workspaces[0];
+      logger.info('No active document');
+      return undefined;
     } else {
       return undefined;
     }
   }
 
-  return activeWorkspace!.uri;
+  return activeWorkspace?.uri || undefined;
 }
 
 /**
@@ -59,7 +61,7 @@ export const getWorkspaceFolderUriByName = (workspaceFolderName: string) => {
       'Folder not found in workspace. Did you forget to add the test folder to test.code-workspace?',
     );
   }
-  return workspaceFolder!.uri;
+  return workspaceFolder?.uri || '';
 };
 
 /**

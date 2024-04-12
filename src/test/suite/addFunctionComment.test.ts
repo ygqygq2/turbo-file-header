@@ -3,7 +3,6 @@ import { describe, it } from 'mocha';
 
 import { getText } from '@/utils/vscode-utils';
 
-import { cleanupTestFiles } from './common/cleanupTestFiles';
 import { executeCommandOnFile } from './common/executeCommandOnFile';
 
 describe('Extension Integration Test: addFunctionComment', function () {
@@ -14,11 +13,9 @@ describe('Extension Integration Test: addFunctionComment', function () {
     const fileName = 'variable-arrow-function-with-params-type.ts';
     const resultFileName = 'variable-arrow-function-with-params-type.result.ts';
     const { actual } = await executeCommandOnFile(commandName, workspaceName, fileName, false);
+    console.log('🚀 ~ file: addFunctionComment.test.ts:16 ~ actual:', actual);
     const expected = await getText(workspaceName, resultFileName);
+    console.log('🚀 ~ file: addFunctionComment.test.ts:18 ~ expected:', expected);
     assert.equal(actual, expected);
-  });
-
-  after(async () => {
-    await cleanupTestFiles('workspace');
   });
 });

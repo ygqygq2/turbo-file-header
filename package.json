@@ -23,7 +23,7 @@
     "email": "ygqygq2@qq.com"
   },
   "engines": {
-    "vscode": "^1.86.0"
+    "vscode": ">=1.86.0"
   },
   "categories": [
     "Other"
@@ -554,7 +554,7 @@
     "@types/module-alias": "^2.0.4",
     "@types/node": "~20.12.7",
     "@types/tmp": "^0.2.6",
-    "@types/vscode": "^1.88.0",
+    "@types/vscode": "^1.86.0",
     "@vitest/coverage-v8": "^1.5.0",
     "@vscode/l10n": "^0.0.18",
     "@vscode/l10n-dev": "^0.0.35",
