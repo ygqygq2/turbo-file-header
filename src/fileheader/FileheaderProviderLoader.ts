@@ -7,7 +7,7 @@ import { contextService, logger } from '@/extension';
 import { LanguageProvider } from '@/language-providers';
 import { VueProvider } from '@/language-providers/VueProvider';
 import { LanguageManager } from '@/languages/LanguageManager';
-import { getActiveDocumentWorkspace } from '@/utils/vscode-utils';
+import { getActiveDocumentWorkspaceUri } from '@/utils/vscode-utils';
 
 import { GenerateCustomProviderClasses } from '../language-providers/GenerateCustomProviderClasses';
 import { VscodeInternalProvider } from '../language-providers/VscodeInternalProvider';
@@ -58,10 +58,10 @@ export class FileheaderProviderLoader {
         async ({ name, providerClass: ProviderClass }) => {
           logger.info(`Generate custom provider: ${name}`);
           const context = contextService?.getContext();
-          const activeWorkspace = await getActiveDocumentWorkspace(context);
+          const activeWorkspaceUri = await getActiveDocumentWorkspaceUri(context);
           try {
             const defaultUri = vscode.Uri.file('.vscode' + CUSTOM_CONFIG_FILE_NAME);
-            const uriToUse = activeWorkspace?.uri || defaultUri;
+            const uriToUse = activeWorkspaceUri || defaultUri;
             return new ProviderClass({
               configManager: this.configManager,
               languageManager: this.languageManager,

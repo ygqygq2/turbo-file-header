@@ -4,7 +4,7 @@ import path from 'path';
 import { CustomError, ErrorCode } from '@/error';
 import { contextService, logger } from '@/extension';
 import { findVCSRoot } from '@/utils/utils';
-import { getActiveDocumentWorkspace } from '@/utils/vscode-utils';
+import { getActiveDocumentWorkspaceUri } from '@/utils/vscode-utils';
 
 import { BaseVCSProvider } from './BaseVCSProvider';
 import { GitVCSProvider } from './GitVCSProvider';
@@ -12,11 +12,11 @@ import { SVNProvider } from './SvnVCSProvider';
 
 export async function createVCSProvider(): Promise<BaseVCSProvider | undefined> {
   const context = contextService?.getContext();
-  const activeWorkspace = await getActiveDocumentWorkspace(context);
-  if (!activeWorkspace) {
+  const activeWorkspaceUri = await getActiveDocumentWorkspaceUri(context);
+  if (!activeWorkspaceUri) {
     logger.throw(new CustomError(ErrorCode.WorkspaceFolderNotFound));
   }
-  const activePath = activeWorkspace?.uri.fsPath || '';
+  const activePath = activeWorkspaceUri!.fsPath || '';
 
   const vcsRootPath = (await findVCSRoot(activePath)) || '';
   if (!vcsRootPath) {

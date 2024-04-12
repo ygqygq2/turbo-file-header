@@ -3,7 +3,8 @@ import { describe, it } from 'mocha';
 
 import { getText } from '@/utils/vscode-utils';
 
-import { executeCommandOnFile } from './executeCommandOnFile';
+import { cleanupTestFiles } from './common/cleanupTestFiles';
+import { executeCommandOnFile } from './common/executeCommandOnFile';
 
 describe('Extension Integration Test: addFunctionComment', function () {
   this.timeout(20000);
@@ -15,5 +16,9 @@ describe('Extension Integration Test: addFunctionComment', function () {
     const { actual } = await executeCommandOnFile(commandName, workspaceName, fileName, false);
     const expected = await getText(workspaceName, resultFileName);
     assert.equal(actual, expected);
+  });
+
+  after(async () => {
+    await cleanupTestFiles('workspace');
   });
 });

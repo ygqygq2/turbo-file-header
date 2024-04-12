@@ -4,7 +4,7 @@ import vscode, { Uri } from 'vscode';
 
 import { CustomError, ErrorCode } from '@/error';
 import { logger } from '@/extension';
-import { getActiveDocumentWorkspace } from '@/utils/vscode-utils';
+import { getActiveDocumentWorkspaceUri } from '@/utils/vscode-utils';
 
 import { CUSTOM_CONFIG_FILE_NAME } from '../constants';
 
@@ -23,14 +23,14 @@ export class GenerateTemplateConfig {
       return;
     }
 
-    const targetWorkspace = await getActiveDocumentWorkspace(context);
+    const targetWorkspaceUri = await getActiveDocumentWorkspaceUri(context);
 
-    if (!targetWorkspace) {
+    if (!targetWorkspaceUri) {
       return;
     }
 
     const uri = Uri.joinPath(context.extensionUri, 'resources', CUSTOM_CONFIG_FILE_NAME);
-    const configDir = path.join(targetWorkspace.uri.fsPath, '.vscode');
+    const configDir = path.join(targetWorkspaceUri.fsPath, '.vscode');
     const configPath = path.join(configDir, CUSTOM_CONFIG_FILE_NAME);
 
     try {

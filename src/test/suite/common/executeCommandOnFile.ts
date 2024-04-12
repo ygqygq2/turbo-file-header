@@ -3,7 +3,7 @@ import path from 'path';
 import * as vscode from 'vscode';
 
 import { sleep } from '@/utils/utils';
-import { getWorkspaceFolderByName, setActiveWorkspaceByName } from '@/utils/vscode-utils';
+import { getWorkspaceFolderUriByName, setActiveWorkspaceByName } from '@/utils/vscode-utils';
 
 /**
  * execute command on file
@@ -18,14 +18,11 @@ export async function executeCommandOnFile(
   srcFileName: string,
   shouldRetry = false,
 ) {
-  // 设置一个环境变量 WORKSPACE_FOLDER_NAME
-  process.env.WORKSPACE_FOLDER_NAME = workspaceFolderName;
-
   const ext = path.extname(srcFileName);
   const testFile = srcFileName.replace(ext, `.copy${ext}`);
-  const workspace = getWorkspaceFolderByName(workspaceFolderName);
-  const srcAbsPath = path.join(workspace?.uri?.fsPath, srcFileName);
-  const testAbsPath = path.join(workspace?.uri?.fsPath, testFile);
+  const workspace = getWorkspaceFolderUriByName(workspaceFolderName);
+  const srcAbsPath = path.join(workspace.fsPath, srcFileName);
+  const testAbsPath = path.join(workspace.fsPath, testFile);
 
   // 复制文件
   fs.copyFileSync(srcAbsPath, testAbsPath);

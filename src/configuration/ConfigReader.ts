@@ -6,7 +6,7 @@ import { CUSTOM_CONFIG_FILE_NAME } from '@/constants';
 import { CustomError, ErrorCode } from '@/error';
 import { contextService, logger } from '@/extension';
 import { ConfigYaml } from '@/typings/types';
-import { getActiveDocumentWorkspace } from '@/utils/vscode-utils';
+import { getActiveDocumentWorkspaceUri } from '@/utils/vscode-utils';
 
 export class ConfigReader {
   private static instance: ConfigReader;
@@ -28,12 +28,12 @@ export class ConfigReader {
     };
 
     const context = contextService?.getContext();
-    const activeWorkspace = await getActiveDocumentWorkspace(context);
-    if (!activeWorkspace) {
+    const activeWorkspaceUri = await getActiveDocumentWorkspaceUri(context);
+    if (!activeWorkspaceUri) {
       return defaultConfig;
     }
 
-    const configPath = path.join(activeWorkspace.uri.fsPath, '.vscode', CUSTOM_CONFIG_FILE_NAME);
+    const configPath = path.join(activeWorkspaceUri.fsPath, '.vscode', CUSTOM_CONFIG_FILE_NAME);
     if (!fs.existsSync(configPath)) {
       return defaultConfig;
     }
