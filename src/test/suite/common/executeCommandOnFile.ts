@@ -72,8 +72,8 @@ async function executeCommandWithRetry(options: {
 
   do {
     await vscode.commands.executeCommand(commandName, { workspaceFolderName });
-    // 需要等待一段时间才能获取到结果
-    await sleep(250);
+    // 需要等待一段时间才能获取到结果，而且性能低的时候需要更长时间
+    await sleep(1000);
     actual = doc.getText();
     retryCount++;
   } while (shouldRetry && originalText === actual && retryCount < 10);
