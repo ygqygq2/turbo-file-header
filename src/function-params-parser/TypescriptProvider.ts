@@ -18,16 +18,16 @@ function splitParams(paramsStr: string): ParamsInfo {
     } else if (char === ',' && bracketCount === 0) {
       const paramStr = paramsStr.slice(paramStartIndex, i);
       const colonIndex = paramStr.indexOf(':');
-      const name = paramStr.slice(0, colonIndex).trim();
-      const type = paramStr.slice(colonIndex + 1).trim();
+      const name = paramStr.slice(0, colonIndex !== -1 ? colonIndex : paramStr.length).trim();
+      const type = colonIndex !== -1 ? paramStr.slice(colonIndex + 1).trim() : 'any';
       params[name] = { type, description: '' };
       paramStartIndex = i + 1;
     }
   }
   const paramStr = paramsStr.slice(paramStartIndex);
   const colonIndex = paramStr.indexOf(':');
-  const name = paramStr.slice(0, colonIndex).trim();
-  const type = paramStr.slice(colonIndex + 1).trim();
+  const name = paramStr.slice(0, colonIndex !== -1 ? colonIndex : paramStr.length).trim();
+  const type = colonIndex !== -1 ? paramStr.slice(colonIndex + 1).trim() : 'any';
   params[name] = { type, description: '' };
   return params;
 }

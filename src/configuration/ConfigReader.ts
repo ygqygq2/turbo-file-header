@@ -5,8 +5,8 @@ import YAML from 'yaml';
 
 import { CUSTOM_CONFIG_FILE_NAME } from '@/constants';
 import { CustomError, ErrorCode } from '@/error';
-import { ConfigYaml } from '@/typings/types';
 import { logger } from '@/extension';
+import { ConfigYaml } from '@/typings/types';
 
 export class ConfigReader {
   private static instance: ConfigReader;

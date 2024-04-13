@@ -1,10 +1,10 @@
 /**
- * @description 
+ * @description test
  * @return default {string} 
  * @param a {string} 
- * @param b {string} 
+ * @param b {number} 
  */
-const func1 = (a: string, b: string): string => {
+const func2 = (a: string, b: number): string => {
   console.log(a + b);
   return a + b;
 };

@@ -3,7 +3,7 @@ import path from 'path';
 import * as vscode from 'vscode';
 
 import { sleep } from '@/utils/utils';
-import { getWorkspaceFolderUriByName, setActiveWorkspaceByName } from '@/utils/vscode-utils';
+import { getWorkspaceFolderUriByName } from '@/utils/vscode-utils';
 
 /**
  * execute command on file
@@ -16,6 +16,7 @@ export async function executeCommandOnFile(
   commandName: string,
   workspaceFolderName: string,
   srcFileName: string,
+  cursorLine: number,
   shouldRetry = false,
 ) {
   const ext = path.extname(srcFileName);
@@ -29,6 +30,13 @@ export async function executeCommandOnFile(
   // 打开文件
   const doc = await vscode.workspace.openTextDocument(testAbsPath);
   await vscode.window.showTextDocument(doc);
+  // 定位光标行，行从 0 开始
+  if (cursorLine > 0) {
+    const editor = vscode.window.activeTextEditor;
+    if (editor) {
+      editor.selection = new vscode.Selection(cursorLine, 0, cursorLine, 0);
+    }
+  }
   // 执行之前获取文件内容
   const originText = doc.getText();
 

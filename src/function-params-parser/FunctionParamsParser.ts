@@ -68,12 +68,7 @@ export abstract class FunctionParamsParser {
       const lineText = line.text;
 
       // 更新块注释的开始和结束状态
-      isInsideBlockComment = updateBlockCommentState(
-        comments,
-        lineText,
-        isInsideBlockComment,
-        'up',
-      );
+      isInsideBlockComment = updateBlockCommentState(comments, lineText, isInsideBlockComment, 'up');
       // 判断当前行是否是注释行
       if (isCommentLine(comments, lineText, isInsideBlockComment)) {
         startPosition = document.lineAt(i).range.start;
@@ -81,11 +76,8 @@ export abstract class FunctionParamsParser {
         // 不在块注释中
         if (!isInsideBlockComment) {
           // 如果有多个空行，在往前最后一个空行 break
-          if (
-            line.isEmptyOrWhitespace &&
-            i - 1 >= 0 &&
-            !document.lineAt(i - 1).isEmptyOrWhitespace
-          ) {
+          if (line.isEmptyOrWhitespace && i - 1 >= 0 && !document.lineAt(i - 1).isEmptyOrWhitespace) {
+            startPosition = document.lineAt(i + 1).range.start;
             break;
           }
           // 如果当前行不是空行，结束循环
@@ -100,10 +92,7 @@ export abstract class FunctionParamsParser {
     return range;
   }
 
-  public parseFunctionComment(
-    document: vscode.TextDocument,
-    range: vscode.Range,
-  ): FunctionCommentInfo {
+  public parseFunctionComment(document: vscode.TextDocument, range: vscode.Range): FunctionCommentInfo {
     const descriptionPattern = /@description\s+(.*)/;
     const paramPattern = /@param\s+(\w+)\s*\{(.+?)\}\s*(.*)/;
     const returnPattern = /@return\s+(?:(\w+)\s*)?\{(.+?)\}\s*(.*)/;
@@ -116,10 +105,10 @@ export abstract class FunctionParamsParser {
     for (const line of functionCommentLines) {
       let match;
       if ((match = paramPattern.exec(line)) !== null) {
-        const [_, name, type, description = ''] = match;
+        const [_, name, type = 'any', description = ''] = match;
         paramsInfo[name] = { type, description };
       } else if ((match = returnPattern.exec(line)) !== null) {
-        const [_, key = 'default', type, description = ''] = match;
+        const [_, key = 'default', type = 'any', description = ''] = match;
         returnInfo[key] = { type, description };
       } else if ((match = descriptionPattern.exec(line)) !== null) {
         const [_, description] = match;

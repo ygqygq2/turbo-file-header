@@ -23,6 +23,7 @@ export default tseslint.config(
       '@typescript-eslint/no-explicit-any': 'warn',
       'simple-import-sort/imports': 'warn',
       'simple-import-sort/exports': 'warn',
+      'prettier/prettier': 'warn'
     },
   },
 );

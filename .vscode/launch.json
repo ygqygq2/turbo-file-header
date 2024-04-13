@@ -8,7 +8,8 @@
       "runtimeExecutable": "${execPath}",
       "args": ["--disable-extensions", "--extensionDevelopmentPath=${workspaceFolder}"],
       "outFiles": ["${workspaceFolder}/out/**/*.js"],
-      "preLaunchTask": "${defaultBuildTask}"
+      "preLaunchTask": "${defaultBuildTask}",
+      "sourceMaps": true
     },
     {
       "name": "Test: e2e",
@@ -22,7 +23,8 @@
         "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.json"
       },
       "outFiles": ["${workspaceFolder}/out/**/*.js"],
-      "preLaunchTask": "npm: test-compile"
+      "preLaunchTask": "npm: test-compile",
+      "sourceMaps": true
     },
     {
       "name": "Test: e2e use mocha",
@@ -40,7 +42,8 @@
         "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.json"
       },
       "outFiles": ["${workspaceFolder}/out/test/**/*.js"],
-      "preLaunchTask": "npm: test-compile"
+      "preLaunchTask": "npm: test-compile",
+      "sourceMaps": true
     },
     {
       "name": "Debug Current Unit Test File",
