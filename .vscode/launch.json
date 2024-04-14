@@ -6,7 +6,11 @@
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
-      "args": ["--disable-extensions", "--extensionDevelopmentPath=${workspaceFolder}"],
+      "args": [
+        "${workspaceRoot}/sampleWorkspace/test.code-workspace",
+        "--disable-extensions",
+        "--extensionDevelopmentPath=${workspaceFolder}"
+      ],
       "outFiles": ["${workspaceFolder}/out/**/*.js"],
       "preLaunchTask": "${defaultBuildTask}",
       "sourceMaps": true
@@ -16,13 +20,16 @@
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
-      "testConfiguration": "${workspaceFolder}/.vscode-test.mjs",
-      "args": ["--disable-extensions", "--extensionDevelopmentPath=${workspaceFolder}"],
+      "testConfiguration": "${workspaceFolder}/.vscode-test-debug.mjs",
+      "args": [
+        "${workspaceFolder}/sampleWorkspace/test.code-workspace",
+        "--extensionDevelopmentPath=${workspaceFolder}",
+        "--disable-extensions"
+      ],
       "env": {
-        "NODE_ENV": "test",
+        "mode": "debug",
         "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.json"
       },
-      "outFiles": ["${workspaceFolder}/out/**/*.js"],
       "preLaunchTask": "npm: test-compile",
       "sourceMaps": true
     },

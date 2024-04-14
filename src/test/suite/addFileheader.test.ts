@@ -25,7 +25,13 @@ describe('Extension Integration Test: addFileheader', function () {
       const cursorLine = fileInfo.cursorLine;
       it(`should add file header for [${fileName}]`, async () => {
         const commandName = 'turboFileHeader.addFileheader';
-        const { actual } = await executeCommandOnFile(commandName, workspaceName, fileName, cursorLine, false);
+        const { actual } = await executeCommandOnFile(
+          commandName,
+          workspaceName,
+          fileName,
+          cursorLine,
+          false,
+        );
         // 有 Copyright 字符串即可
         assert.notEqual(actual.indexOf('Copyright'), -1);
         // @description 后面有非空格字符

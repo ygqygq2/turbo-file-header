@@ -27,11 +27,17 @@ describe('Extension Integration Test: addFunctionComment', function () {
     files.forEach((fileInfo) => {
       const fileName = fileInfo.fileName;
       const cursorLine = fileInfo.cursorLine;
-      it(`should add function comment for [.ts] in file ${fileName}`, async () => {
+      const ext = path.extname(fileName);
+      it(`should add function comment for [${ext}] in file ${fileName}`, async () => {
         const commandName = 'turboFileHeader.addFunctionComment';
-        const ext = path.extname(fileName);
         const resultFileName = fileName.replace(ext, `.result${ext}`);
-        const { actual } = await executeCommandOnFile(commandName, workspaceName, fileName, cursorLine, false);
+        const { actual } = await executeCommandOnFile(
+          commandName,
+          workspaceName,
+          fileName,
+          cursorLine,
+          false,
+        );
         const expected = await getText(workspaceName, resultFileName);
         assert.equal(actual, expected);
       });

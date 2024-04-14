@@ -527,7 +527,7 @@
     "esbuild": "npm run esbuild-base -- --sourcemap",
     "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
     "watch": "npm run esbuild --watch",
-    "pretest": "npm run compile && npm run lint",
+    "pretest": "npm run lint",
     "compile": "npm run esbuild-base -- --sourcemap",
     "package": "vsce package --no-dependencies",
     "publish": "vsce publish --no-dependencies",

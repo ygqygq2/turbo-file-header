@@ -50,7 +50,11 @@ export class FileheaderManager {
 
   public async updateFileheader(
     document: vscode.TextDocument,
-    { allowInsert = true, addSelection = false, newFile = false }: UpdateFileheaderManagerOptions = {},
+    {
+      allowInsert = true,
+      addSelection = false,
+      newFile = false,
+    }: UpdateFileheaderManagerOptions = {},
   ) {
     const config = this.configManager.getConfiguration();
     const provider = await findProvider(this.configManager, this.providers, document);
@@ -60,7 +64,11 @@ export class FileheaderManager {
       return;
     }
 
-    const originFileheaderInfo = getOriginFileheaderInfo(document, provider, config.patternMultiline);
+    const originFileheaderInfo = getOriginFileheaderInfo(
+      document,
+      provider,
+      config.patternMultiline,
+    );
     let fileheaderVariable: IFileheaderVariables;
     try {
       fileheaderVariable = await this.fileheaderVariableBuilder?.build(
@@ -117,7 +125,9 @@ export class FileheaderManager {
               updateProgress(progress, processedFiles, totalFiles);
             } catch (error) {
               reprocessedFiles.push(file);
-              logger.handleError(new CustomError(ErrorCode.UpdateFileHeaderFail, file.fsPath, error));
+              logger.handleError(
+                new CustomError(ErrorCode.UpdateFileHeaderFail, file.fsPath, error),
+              );
             }
           }
 
@@ -163,7 +173,10 @@ export class FileheaderManager {
       const range = parser?.getOriginFunctionCommentRange(comments, document, insertPosition);
       // 原来有函数注释
       if (range) {
-        const originFunctionInfo: FunctionCommentInfo = parser?.parseFunctionComment(document, range) || {
+        const originFunctionInfo: FunctionCommentInfo = parser?.parseFunctionComment(
+          document,
+          range,
+        ) || {
           paramsInfo: {},
           returnInfo: { default: { type: '', description: '' } },
           descriptionInfo: '',
