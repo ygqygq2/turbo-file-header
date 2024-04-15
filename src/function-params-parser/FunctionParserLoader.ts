@@ -1,3 +1,4 @@
+import { ConfigManager } from '@/configuration/ConfigManager';
 import { CustomError, ErrorCode } from '@/error';
 import { logger } from '@/extension';
 
@@ -5,10 +6,20 @@ import { FunctionParamsParser } from './FunctionParamsParser';
 import { TypescriptParser } from './TypescriptProvider';
 
 export class FunctionParserLoader {
+  private configManager: ConfigManager;
   private parsersCache: { [languageId: string]: FunctionParamsParser } = {};
 
+  constructor(configManager: ConfigManager) {
+    this.configManager = configManager;
+  }
+
   // 创建一个映射，将每种语言映射到相应的解析器类
-  private parserClasses: { [languageId: string]: new () => FunctionParamsParser } = {
+  private parserClasses: {
+    [languageId: string]: new (
+      configManager: ConfigManager,
+      languageId: string,
+    ) => FunctionParamsParser;
+  } = {
     typescript: TypescriptParser,
     typescriptreact: TypescriptParser,
     javascript: TypescriptParser,
@@ -29,7 +40,7 @@ export class FunctionParserLoader {
     }
 
     // 创建解析器实例并添加到缓存中
-    this.parsersCache[languageId] = new ParserClass();
+    this.parsersCache[languageId] = new ParserClass(this.configManager, languageId);
 
     return this.parsersCache[languageId];
   }

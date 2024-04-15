@@ -1,11 +1,17 @@
 import * as vscode from 'vscode';
 
+import { ConfigManager } from '@/configuration/ConfigManager';
 import { logger } from '@/extension';
+import { LanguageFunctionCommentSettings } from '@/typings/types';
 
 import { FunctionParamsParser } from './FunctionParamsParser';
 import { FunctionParamsInfo, ParamsInfo } from './types';
 
-function splitParams(paramsStr: string): ParamsInfo {
+function splitParams(
+  paramsStr: string,
+  languageSettings: LanguageFunctionCommentSettings,
+): ParamsInfo {
+  const { defaultParamType = 'any' } = languageSettings;
   let bracketCount = 0;
   let paramStartIndex = 0;
   const params: ParamsInfo = {};
@@ -19,7 +25,7 @@ function splitParams(paramsStr: string): ParamsInfo {
       const paramStr = paramsStr.slice(paramStartIndex, i);
       const colonIndex = paramStr.indexOf(':');
       const name = paramStr.slice(0, colonIndex !== -1 ? colonIndex : paramStr.length).trim();
-      const type = colonIndex !== -1 ? paramStr.slice(colonIndex + 1).trim() : 'any';
+      const type = colonIndex !== -1 ? paramStr.slice(colonIndex + 1).trim() : defaultParamType;
       params[name] = { type, description: '' };
       paramStartIndex = i + 1;
     }
@@ -27,12 +33,16 @@ function splitParams(paramsStr: string): ParamsInfo {
   const paramStr = paramsStr.slice(paramStartIndex);
   const colonIndex = paramStr.indexOf(':');
   const name = paramStr.slice(0, colonIndex !== -1 ? colonIndex : paramStr.length).trim();
-  const type = colonIndex !== -1 ? paramStr.slice(colonIndex + 1).trim() : 'any';
+  const type = colonIndex !== -1 ? paramStr.slice(colonIndex + 1).trim() : defaultParamType;
   params[name] = { type, description: '' };
   return params;
 }
 
-function matchFunction(functionDefinition: string): { matched: boolean; type: string } {
+function matchFunction(
+  functionDefinition: string,
+  languageSettings: LanguageFunctionCommentSettings,
+): { matched: boolean; type: string } {
+  const { defaultReturnType = 'auto' } = languageSettings;
   const functionRegex = /\bfunction\b\s*([A-Za-z_]\w*?)\s*[^()]*\(([\s\S]*?)\)/m;
   const arrowFunctionRegex = /(?:([A-Za-z_]\w*)\s*=\s*)?\(([\s\S]*?)\)\s*:\s*(\w+)\s*=>/m;
   const anonymousArrowFunctionRegex = /\((.*?)\)\s*=>/m;
@@ -47,20 +57,29 @@ function matchFunction(functionDefinition: string): { matched: boolean; type: st
     objFunctionRegex.exec(functionDefinition);
 
   if (match) {
-    const returnType = match[3] || 'void';
+    const returnType = match[3] || defaultReturnType;
     return { matched: true, type: returnType };
   }
 
-  return { matched: false, type: 'void' };
+  return { matched: false, type: defaultReturnType };
 }
 
 export class TypescriptParser extends FunctionParamsParser {
-  public getFunctionParamsAtCursor(activeEditor: vscode.TextEditor): FunctionParamsInfo {
+  constructor(configManager: ConfigManager, languageId: string) {
+    super(configManager, languageId);
+  }
+
+  public getFunctionParamsAtCursor(
+    activeEditor: vscode.TextEditor,
+    languageSettings: LanguageFunctionCommentSettings = this.languageSettings,
+  ): FunctionParamsInfo {
+    const { defaultReturnType = 'auto' } = languageSettings;
+
     const cursorLine = activeEditor.selection.start.line;
     const document = activeEditor.document;
     let functionParams: ParamsInfo = {};
     let matchedFunction = false;
-    let returnType = 'void';
+    let returnType = defaultReturnType;
 
     let functionDefinition = '';
     let bracketCount = 0;
@@ -91,14 +110,14 @@ export class TypescriptParser extends FunctionParamsParser {
       }
     }
 
-    const { matched, type } = matchFunction(functionDefinition);
+    const { matched, type } = matchFunction(functionDefinition, this.languageSettings);
     if (matched) {
       matchedFunction = true;
       returnType = type;
       // 过滤出函数括号里的内容
       const functionParamsStr = functionDefinition.match(/\(([\s\S]*?)\)/)?.[1] || '';
       // 分离出参数
-      functionParams = splitParams(functionParamsStr);
+      functionParams = splitParams(functionParamsStr, this.languageSettings);
     }
 
     if (Object.keys(functionParams).length > 0) {

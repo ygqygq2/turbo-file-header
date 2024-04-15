@@ -34,10 +34,11 @@ Properties:
 | Disable fields in file header     | The fields that you want to disable in file header                   | disableLabels                    | `[]`                     |
 | Custom variable                   | Support use other variable                                           | customVariables                  | the below                |
 | File header content               | File header content, overwrite the default file header content       | fileheader                       | the below                |
-| Multiline regex pattern           | Match the original file header using multiline regex pattern.        | patternMultiline                 | `false`                  |
+| Multiline regex pattern           | Match the original file header using multiline regex pattern         | patternMultiline                 | `false`                  |
 | Only dirty file or not to support | Only dirty file to support update file header                        | updateHeaderForModifiedFilesOnly | `false`                  |
 | Extra languages support           | To support new or unknown languages                                  | languages                        | the below                |
 | JSDoc style for js/ts             | File header user JSDoc style comments                                | useJSDocStyle                    | `false`                  |
+| Function comment settings         | Function comment settings for languages                              | functionComment                  | the below                |
 | Multiline comment highlighter     | Whether the multiline comment highlighter should be active           | multilineComments                | `true`                   |
 | plaintext comment highlighter     | Whether the plaintext comment highlighter should be active           | highlightPlainText               | `false`                  |
 | Use tags to color the comments    | Tags which are used to color the comments                            | tags                             | the below                |
@@ -144,6 +145,21 @@ Properties:
     },
   },
 ]
+```
+
+`functionComment` default settings:
+
+```
+{
+  "languagesSettings": [
+    {
+      "languageId": "typescript",
+      "defaultReturnName": "default",
+      "defaultReturnType": "auto",
+      "defaultParamType": "any"
+    }
+  ]
+}
 ```
 
 `tags` default settings:

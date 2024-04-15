@@ -38,6 +38,7 @@ Properties:
 | 只支持脏文件             | 只有已更新但未保存文件支持插入/更新文件头                             | updateHeaderForModifiedFilesOnly | `false`                  |
 | 额外语言支持             | 通过配置支持新/未知语言插入/更新文件头                                | languages                        | the below                |
 | JSDoc 注释风格支持 js/ts | js/ts 文件使用 JSDoc 注释风格                                         | useJSDocStyle                    | `false`                  |
+| 函数注释设置             | 针对不同语言的函数注释设置                                            | functionComment                  | the below                |
 | 块注释高亮支持           | 块注释支持高亮功能                                                    | multilineComments                | `true`                   |
 | 纯文件高亮支持           | 纯文件支持高亮功能                                                    | highlightPlainText               | `false`                  |
 | 配置 `tags`              | 使用 `tags` 配置注释高亮                                              | tags                             | the below                |
@@ -144,6 +145,21 @@ Properties:
     },
   },
 ]
+```
+
+`functionComment` default settings:
+
+```
+{
+  "languagesSettings": [
+    {
+      "languageId": "typescript",
+      "defaultReturnName": "default",
+      "defaultReturnType": "auto",
+      "defaultParamType": "any"
+    }
+  ]
+}
 ```
 
 `tags` default settings:

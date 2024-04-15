@@ -27,7 +27,6 @@
         "--disable-extensions"
       ],
       "env": {
-        "mode": "debug",
         "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.json"
       },
       "preLaunchTask": "npm: test-compile",
@@ -45,7 +44,6 @@
         "--extensionTestsPath=${workspaceFolder}/out/test/suite/index"
       ],
       "env": {
-        "NODE_ENV": "test",
         "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.json"
       },
       "outFiles": ["${workspaceFolder}/out/test/**/*.js"],

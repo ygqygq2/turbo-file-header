@@ -42,7 +42,7 @@ const fileheaderProviderLoader = new FileheaderProviderLoader(
 );
 const fileHashMemento = new FileHashManager();
 const fileheaderVariableBuilder = new FileheaderVariableBuilder(configManager);
-const functionParserLoader = new FunctionParserLoader();
+const functionParserLoader = new FunctionParserLoader(configManager);
 export const fileheaderManager = new FileheaderManager(
   configManager,
   fileMatcher,

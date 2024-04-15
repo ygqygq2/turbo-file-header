@@ -1,11 +1,44 @@
 import * as vscode from 'vscode';
 
+import { ConfigManager } from '@/configuration/ConfigManager';
+import { LanguageFunctionCommentSettings } from '@/typings/types';
 import { isCommentLine, updateBlockCommentState } from '@/utils/vscode-utils';
 
 import { FunctionCommentInfo, FunctionParamsInfo, ParamsInfo, ReturnInfo } from './types';
 
 export abstract class FunctionParamsParser {
-  public abstract getFunctionParamsAtCursor(activeEditor: vscode.TextEditor): FunctionParamsInfo;
+  protected configManager: ConfigManager;
+  protected languageId: string;
+  protected languageSettings: LanguageFunctionCommentSettings;
+
+  constructor(configManager: ConfigManager, languageId: string) {
+    this.configManager = configManager;
+    this.languageId = languageId;
+    this.languageSettings = this.getLanguageSettings();
+  }
+
+  public abstract getFunctionParamsAtCursor(
+    activeEditor: vscode.TextEditor,
+    languageSettings?: LanguageFunctionCommentSettings,
+  ): FunctionParamsInfo;
+
+  protected getLanguageSettings() {
+    const configuration = this.configManager.getConfiguration();
+    const languagesSettings = configuration.functionComment?.languagesSettings || [];
+    const currentLanguageSetting = languagesSettings.find(
+      (settings) => settings.languageId === this.languageId,
+    );
+    if (!currentLanguageSetting) {
+      return {
+        languageId: this.languageId,
+        defaultReturnName: 'default',
+        defaultReturnType: 'auto',
+        defaultParamType: 'any',
+      };
+    }
+
+    return currentLanguageSetting;
+  }
 
   public generateFunctionCommentInfo(
     functionParamsInfo: FunctionParamsInfo,
@@ -114,13 +147,18 @@ export abstract class FunctionParamsParser {
     const paramsInfo: ParamsInfo = {};
     const returnInfo: ReturnInfo = {};
     let descriptionInfo = '';
+    const {
+      defaultReturnName = 'default',
+      defaultReturnType = 'auto',
+      defaultParamType = 'any',
+    } = this.languageSettings;
     for (const line of functionCommentLines) {
       let match;
       if ((match = paramPattern.exec(line)) !== null) {
-        const [_, name, type = 'any', description = ''] = match;
+        const [_, name, type = defaultParamType as string, description = ''] = match;
         paramsInfo[name] = { type, description };
       } else if ((match = returnPattern.exec(line)) !== null) {
-        const [_, key = 'default', type = 'any', description = ''] = match;
+        const [_, key = defaultReturnName, type = defaultReturnType, description = ''] = match;
         returnInfo[key] = { type, description };
       } else if ((match = descriptionPattern.exec(line)) !== null) {
         const [_, description] = match;

@@ -146,6 +146,19 @@ export interface HeaderLine {
   wholeLine?: boolean;
 }
 
+export interface LanguageFunctionCommentSettings {
+  languageId: string;
+  defaultReturnName?: string;
+  defaultReturnType?: string;
+  defaultParamType?: string;
+}
+
+export type LanguagesSettings = LanguageFunctionCommentSettings[];
+
+export interface FunctionComment {
+  languagesSettings: LanguagesSettings;
+}
+
 export interface Configuration {
   userName: string;
   userEmail: string;
@@ -163,6 +176,7 @@ export interface Configuration {
   updateHeaderForModifiedFilesOnly: boolean;
   multilineComments: boolean;
   useJSDocStyle: boolean;
+  functionComment: FunctionComment;
   highlightPlainText: boolean;
   tags: Tag[];
   tagsLight: Tag[];

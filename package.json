@@ -2,7 +2,7 @@
   "name": "turbo-file-header",
   "displayName": "Turbo File Header",
   "description": "Sets file header information globally or for a project.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "icon": "resources/icons/icon.png",
   "repository": {
     "type": "git",
@@ -309,6 +309,49 @@
           "description": "%turboFileHeader.useJSDocStyle.description%",
           "default": false
         },
+        "turboFileHeader.functionComment": {
+          "type": "object",
+          "description": "%turboFileHeader.functionComment.description%",
+          "properties": {
+            "languagesSettings": {
+              "type": "array",
+              "description": "%turboFileHeader.functionComment.languagesSettings.description%",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "languageId": {
+                    "type": "string"
+                  },
+                  "defaultReturnName": {
+                    "type": "string",
+                    "default": "default",
+                    "description": "%turboFileHeader.functionComment.languagesSettings.javascript.defaultReturnName.description%"
+                  },
+                  "defaultReturnType": {
+                    "type": "string",
+                    "default": "auto",
+                    "description": "%turboFileHeader.functionComment.languagesSettings.javascript.defaultReturnType.description%"
+                  },
+                  "defaultParamType": {
+                    "type": "string",
+                    "default": "any",
+                    "description": "%turboFileHeader.functionComment.languagesSettings.javascript.defaultParamType.description%"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "languagesSettings": [
+              {
+                "languageId": "typescript",
+                "defaultReturnName": "default",
+                "defaultReturnType": "auto",
+                "defaultParamType": "any"
+              }
+            ]
+          }
+        },
         "turboFileHeader.multilineComments": {
           "type": "boolean",
           "description": "%turboFileHeader.multilineComments.description%",
@@ -534,6 +577,7 @@
     "clean": "rimraf out/",
     "test-compile": "npm run clean && tsc -p ./ && npm run compile",
     "test": "npm run test-compile && vscode-test",
+    "test-grep": "npm run test-compile && vscode-test -g",
     "test:suite:mocha": "npm run test-compile && node out/test/runTests.js",
     "test:suite": "node out/test/runTests.js",
     "test:unit": "vitest unit --watch=false",
