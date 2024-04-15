@@ -50,19 +50,20 @@ export async function executeCommandOnFile(
       shouldRetry,
     });
     console.timeEnd(testFile);
+    // 关闭文件
+
     return result;
   } catch (error) {
     console.error('Error executing command:', error);
     throw error;
   } finally {
     if (fs.existsSync(testAbsPath)) {
-      fs.unlink(testAbsPath, (error) => {
-        if (error) {
-          console.error('Error deleting file:', error);
-        } else {
-          console.log(`File [${testFile}] deleted successfully`);
-        }
-      });
+      try {
+        await fs.promises.unlink(testAbsPath);
+        console.log(`File [${testFile}] deleted successfully`);
+      } catch (error) {
+        console.error('Error deleting file:', error);
+      }
     }
   }
 }
@@ -74,7 +75,7 @@ async function executeCommandWithRetry(options: {
   originText: string;
   shouldRetry: boolean;
 }) {
-  const { commandName, workspaceFolderName, doc, originText: originalText, shouldRetry } = options;
+  const { commandName, workspaceFolderName, doc, originText, shouldRetry } = options;
   let actual = '';
   let retryCount = 0;
 
@@ -84,7 +85,7 @@ async function executeCommandWithRetry(options: {
     await sleep(1000);
     actual = doc.getText();
     retryCount++;
-  } while (shouldRetry && originalText === actual && retryCount < 10);
+  } while (shouldRetry && originText === actual && retryCount < 10);
 
-  return { actual: doc.getText(), source: originalText };
+  return { actual, source: originText };
 }

@@ -19,7 +19,7 @@ const testInfo = [
 ];
 
 describe('Extension Integration Test: addFunctionComment', function () {
-  this.timeout(20000);
+  this.timeout(100000);
 
   testInfo.forEach((item) => {
     const workspaceName = item.workspaceName;

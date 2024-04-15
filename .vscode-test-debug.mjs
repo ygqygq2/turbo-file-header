@@ -9,10 +9,6 @@ export default defineConfig([
     mocha: {
       ui: 'bdd',
       require: ['ts-node/register', 'tsconfig-paths/register'],
-    },
-    launchArgs: ['--skip-welcome']
-      .concat(['--disable-extensions'])
-      .concat(['--skip-release-notes'])
-      .concat(['--enable-proposed-api']),
+    }
   },
 ]);
