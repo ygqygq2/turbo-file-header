@@ -8,10 +8,9 @@ import { TestInfo } from '../types';
 import { executeCommandOnFile } from './executeCommandOnFile';
 
 export function functionCommentTester(testInfo: TestInfo) {
-  describe('Extension Integration Test: addFunctionComment', function () {
-    this.timeout(100000);
-
-    testInfo.forEach((item) => {
+  testInfo.forEach((item) => {
+    describe(`Extension Integration Test: addFunctionComment for [${item.testName}]`, function () {
+      this.timeout(100000);
       const workspaceName = item.workspaceName;
       const files = item.files;
       files.forEach((fileInfo) => {

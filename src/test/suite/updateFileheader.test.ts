@@ -3,6 +3,7 @@ import { TestInfo } from './types';
 
 const testInfo: TestInfo = [
   {
+    testName: 'updateFileheader',
     workspaceName: 'file-header',
     files: [
       { fileName: 'fileheader-update.js', cursorLine: 0 },

@@ -577,7 +577,7 @@
     "clean": "rimraf out/",
     "test-compile": "npm run clean && tsc -p ./ && npm run compile",
     "test": "npm run test-compile && vscode-test",
-    "test-grep": "npm run test-compile && vscode-test -g",
+    "test-grep": "vscode-test -f",
     "test:suite:mocha": "npm run test-compile && node out/test/runTests.js",
     "test:suite": "node out/test/runTests.js",
     "test:unit": "vitest unit --watch=false",

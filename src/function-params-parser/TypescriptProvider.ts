@@ -43,18 +43,34 @@ function matchFunction(
   languageSettings: LanguageFunctionCommentSettings,
 ): { matched: boolean; type: string } {
   const { defaultReturnType = 'auto' } = languageSettings;
-  const functionRegex = /\bfunction\b\s*([A-Za-z_]\w*?)\s*[^()]*\(([\s\S]*?)\)/m;
+  // 普通函数
+  const functionRegex = /function\s+([A-Za-z_]\w*?)\s*\(([\s\S]*?)\)\s*:\s*(\w+)/m;
+  // 箭头函数
   const arrowFunctionRegex = /(?:([A-Za-z_]\w*)\s*=\s*)?\(([\s\S]*?)\)\s*:\s*(\w+)\s*=>/m;
+  // 匿名箭头函数
   const anonymousArrowFunctionRegex = /\((.*?)\)\s*=>/m;
+  // 类方法
   const classFunctionRegex = /^(\s*\w*?\s+)?\s*([A-Za-z_]\w*?)[^()]*\(([\s\S]*?)\)\s*.*?{/m;
+  // 对象方法
   const objFunctionRegex = /^\s*([A-Za-z_]\w*?)\s*:\s*\bfunction\b[^()]*\(([\s\S]*?)\)/m;
+  // 类的 getter 和 setter 方法
+  const classGetterSetterRegex =
+    /(get|set)\s+([A-Za-z_]\w*?)[^()]*\(([\s\S]*?)\)\s*:\s*(\w+)\s*.*?{/m;
+  // 对象的简写方法
+  const objectShorthandMethodRegex = /([A-Za-z_]\w*?)\s*\(([\s\S]*?)\)\s*:\s*(\w+)\s*.*?{/m;
+  // Generator 函数
+  const generatorFunctionRegex =
+    /\bfunction\s*\*\s*([A-Za-z_]\w*?)\s*[^()]*\(([\s\S]*?)\)\s*:\s*(\w+)/m;
 
   const match =
     functionRegex.exec(functionDefinition) ||
     arrowFunctionRegex.exec(functionDefinition) ||
     anonymousArrowFunctionRegex.exec(functionDefinition) ||
     classFunctionRegex.exec(functionDefinition) ||
-    objFunctionRegex.exec(functionDefinition);
+    objFunctionRegex.exec(functionDefinition) ||
+    classGetterSetterRegex.exec(functionDefinition) ||
+    objectShorthandMethodRegex.exec(functionDefinition) ||
+    generatorFunctionRegex.exec(functionDefinition);
 
   if (match) {
     const returnType = match[3] || defaultReturnType;

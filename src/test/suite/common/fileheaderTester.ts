@@ -5,10 +5,9 @@ import { TestInfo } from '../types';
 import { executeCommandOnFile } from './executeCommandOnFile';
 
 export function fileheaderTester(testInfo: TestInfo) {
-  describe('Extension Integration Test: addFileheader', function () {
-    this.timeout(100000);
-
-    testInfo.forEach((item) => {
+  testInfo.forEach((item) => {
+    describe(`Extension Integration Test: addFileheader for [${item.testName}]`, function () {
+      this.timeout(100000);
       const workspaceName = item.workspaceName;
       const files = item.files;
       files.forEach((fileInfo) => {

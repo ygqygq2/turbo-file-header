@@ -3,6 +3,7 @@ import { TestInfo } from './types';
 
 const testInfo: TestInfo = [
   {
+    testName: 'arrowFunction',
     workspaceName: 'function-comment',
     files: [
       { fileName: 'variable-arrow-function-with-params-type.ts', cursorLine: 0 },
