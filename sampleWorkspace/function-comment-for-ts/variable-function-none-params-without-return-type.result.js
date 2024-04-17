@@ -2,6 +2,6 @@
  * @description 
  * @return default {auto} 
  */
-function func() {
+const func = function() {
   return 'test'
 }

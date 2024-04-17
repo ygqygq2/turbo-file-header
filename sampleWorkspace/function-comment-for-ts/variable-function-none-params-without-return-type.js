@@ -1,3 +1,3 @@
-function func() {
+const func = function() {
   return 'test'
 }

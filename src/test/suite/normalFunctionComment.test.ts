@@ -13,9 +13,6 @@ const testInfo: TestInfo = [
       { fileName: 'function-with-params-type.ts', cursorLine: 0 },
       { fileName: 'function-without-params-type.js', cursorLine: 0 },
       { fileName: 'function-without-params-type.ts', cursorLine: 0 },
-      { fileName: 'variable-function-with-params-type.ts', cursorLine: 0 },
-      { fileName: 'variable-function-without-params-type.js', cursorLine: 0 },
-      { fileName: 'variable-function-without-params-type.ts', cursorLine: 0 },
     ],
   },
 ];

@@ -4,7 +4,6 @@ import * as vscode from 'vscode';
 import { ConfigManager } from '@/configuration/ConfigManager';
 import { logger } from '@/extension';
 import { LanguageFunctionCommentSettings } from '@/typings/types';
-import { extractComplexType } from '@/utils/utils';
 
 import { FunctionParamsParser } from './FunctionParamsParser';
 import { FunctionParamsInfo, ParamsInfo } from './types';
@@ -44,29 +43,34 @@ function matchFunctionPattern(
   functionDefinition: string,
   languageSettings: LanguageFunctionCommentSettings,
   regex: RegExp,
-  extractComplexTypeArgs: [RegExp | string, RegExp | string],
 ) {
   const { defaultReturnType = 'auto' } = languageSettings;
   const match = regex.exec(functionDefinition);
   if (match) {
-    const returnType =
-      extractComplexType(functionDefinition, ...extractComplexTypeArgs) || defaultReturnType;
+    const returnType = match[1] || defaultReturnType;
     return { matched: true, type: returnType };
   }
   return { matched: false, type: defaultReturnType };
 }
 
-// 普通函数/类方法
+// 普通具名函数/类方法
 function matchNormalFunction(
   functionDefinition: string,
   languageSettings: LanguageFunctionCommentSettings,
 ) {
   const functionRegex =
-    /\b(?:public|private|protected|function)?\s*\w*\s*\((?:[^)]*:\s*[^)]+)?\)\s*(?::\s*\w+)?\s*\{/m;
-  return matchFunctionPattern(functionDefinition, languageSettings, functionRegex, [
-    /.*?\)\s*(?=\{)/,
-    '{',
-  ]);
+    /\b(?:public|private|protected)?\s*\w*\s*\((?:[^)]*:\s*[^)]*)?\)\s*(?::\s*(\w+))?\s*\{/m;
+
+  return matchFunctionPattern(functionDefinition, languageSettings, functionRegex);
+}
+
+// 匿名函数
+function matchAnonymousFunction(
+  functionDefinition: string,
+  languageSettings: LanguageFunctionCommentSettings,
+) {
+  const functionRegex = /function\s*\([^)]*\)\s*(?::\s*(\w+))?\s*\{/m;
+  return matchFunctionPattern(functionDefinition, languageSettings, functionRegex);
 }
 
 // 箭头函数（带括号）
@@ -74,11 +78,8 @@ function matchArrowFunctionWithParentheses(
   functionDefinition: string,
   languageSettings: LanguageFunctionCommentSettings,
 ) {
-  const functionRegex = /\([^)]*\)\s*=>/m;
-  return matchFunctionPattern(functionDefinition, languageSettings, functionRegex, [
-    /\)\s*:/,
-    /=>/,
-  ]);
+  const functionRegex = /\)\s*:\s*([^=]*?)\s*=>|(\)\s*=>)/m;
+  return matchFunctionPattern(functionDefinition, languageSettings, functionRegex);
 }
 
 // 箭头函数（不带括号）
@@ -100,11 +101,8 @@ function matchGetterAndSetter(
   functionDefinition: string,
   languageSettings: LanguageFunctionCommentSettings,
 ) {
-  const functionRegex = /(get|set)\s+\w*\s*\([^)]*\)\s*(?=\{)/m;
-  return matchFunctionPattern(functionDefinition, languageSettings, functionRegex, [
-    /\)\s*:?/,
-    '{',
-  ]);
+  const functionRegex = /(get|set)\s+\w*\s*\([^)]*\)\s*(?::\s*(\w+))?\s*\{/m;
+  return matchFunctionPattern(functionDefinition, languageSettings, functionRegex);
 }
 
 // Generator 函数
@@ -112,11 +110,8 @@ function matchGeneratorFunction(
   functionDefinition: string,
   languageSettings: LanguageFunctionCommentSettings,
 ) {
-  const functionRegex = /\b(?:function\s*)?\*\s*\w*\s*\([^)]*\)\s*\{/m;
-  return matchFunctionPattern(functionDefinition, languageSettings, functionRegex, [
-    /\)\s*:?/,
-    '{',
-  ]);
+  const functionRegex = /\b(?:function\s*)?\*\s*\w*\s*\([^)]*\)\s*(?::\s*(\w+))?\s*\{/m;
+  return matchFunctionPattern(functionDefinition, languageSettings, functionRegex);
 }
 
 function matchFunction(
@@ -125,6 +120,7 @@ function matchFunction(
 ): { matched: boolean; type: string } {
   const matchFunctions = [
     matchNormalFunction,
+    matchAnonymousFunction,
     matchArrowFunctionWithParentheses,
     matchArrowFunctionWithoutParentheses,
     matchGetterAndSetter,

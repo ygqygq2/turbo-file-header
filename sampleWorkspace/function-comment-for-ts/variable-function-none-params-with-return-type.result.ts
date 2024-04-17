@@ -2,6 +2,6 @@
  * @description 
  * @return default {string} 
  */
-function func(): string {
+const func = function(): string {
   return 'test'
 }
