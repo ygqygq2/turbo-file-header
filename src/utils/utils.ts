@@ -1,4 +1,4 @@
-import { ChildProcess, exec as _exec, ExecOptions } from 'child_process';
+import { exec as _exec, ChildProcess, ExecOptions } from 'child_process';
 import crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -191,4 +191,124 @@ export async function findVCSRoot(directory: string): Promise<string | null> {
     currentDirectory = path.dirname(currentDirectory);
   }
   return null;
+}
+
+function handleBothRegex(start: RegExp, end: RegExp, str: string): string {
+  const matchStart = str.match(start);
+  const matchEnd = str.match(end);
+  const startIndex = matchStart ? (matchStart.index as number) + matchStart[0].length : 0;
+  const endIndex = matchEnd ? (matchEnd.index as number) : str.length;
+  return str.slice(startIndex, endIndex).trim();
+}
+
+function handleStartRegex(start: RegExp, end: string, str: string): string {
+  const matchStart = str.match(start);
+  const startIndex = matchStart ? (matchStart.index as number) + matchStart[0].length : 0;
+  return extractUntilChar(str.slice(startIndex), end);
+}
+
+function handleEndRegex(start: string, end: RegExp, str: string): string {
+  const matchEnd = str.match(end);
+  const endIndex = matchEnd ? (matchEnd.index as number) : str.length;
+  return extractFromChar(str.slice(0, endIndex), start);
+}
+
+function handleBothString(start: string, end: string, str: string): string {
+  return extractBetweenChars(str, start, end);
+}
+
+// 从开始提取字符串，直到遇到指定的结束字符
+function extractUntilChar(str: string, end: string): string {
+  let result = '';
+  let balanceNumber = 0;
+  let inTypeDeclaration = false;
+
+  for (let i = 0; i < str.length; i++) {
+    const char = str[i];
+    if (char === ':') {
+      inTypeDeclaration = true;
+    } else if (char === '{') {
+      inTypeDeclaration = false;
+    }
+
+    if ((char === '(' || char === '<' || char === '[' || char === '{') && inTypeDeclaration) {
+      balanceNumber++;
+    } else if (char === ')' || char === '>' || char === ']' || char === '}') {
+      balanceNumber--;
+    }
+
+    if (balanceNumber === 0 && char === end) {
+      break; // 不包括结束字符
+    }
+
+    result += char;
+  }
+  return result.trim();
+}
+
+// 从指定字符提取直到最后
+function extractFromChar(str: string, start: string): string {
+  let result = '';
+  let begin = false;
+
+  for (let i = 0; i < str.length; i++) {
+    const char = str[i];
+
+    if (!begin && char === start) {
+      begin = true;
+    }
+
+    if (begin) {
+      result += char;
+    }
+  }
+
+  return result.trim();
+}
+
+// 开始、结束都是指定字符
+function extractBetweenChars(str: string, start: string, end: string): string {
+  let result = '';
+  let balanceNumber = 0;
+  let begin = false;
+
+  for (let i = 0; i < str.length; i++) {
+    const char = str[i];
+
+    if (!begin && char === start) {
+      begin = true;
+    }
+
+    if (begin) {
+      // result 没内容才能加 1
+      if ((char === '(' || char === '<' || char === '[' || char === '{') && result.length === 0) {
+        balanceNumber++;
+      } else if (char === ')' || char === '>' || char === ']' || char === '}') {
+        balanceNumber--;
+      }
+
+      if (balanceNumber === 0 && char === end) {
+        break; // 不包括结束字符
+      }
+
+      result += char;
+    }
+  }
+  return result.trim();
+}
+
+export function extractComplexType(
+  str: string,
+  start: RegExp | string,
+  end: RegExp | string,
+): string {
+  if (typeof start === 'object' && typeof end === 'object') {
+    return handleBothRegex(start, end, str);
+  } else if (typeof start === 'object') {
+    return handleStartRegex(start, end as string, str);
+  } else if (typeof end === 'object') {
+    return handleEndRegex(start as string, end, str);
+  } else {
+    return handleBothString(start as string, end as string, str);
+  }
 }

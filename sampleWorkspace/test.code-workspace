@@ -2,7 +2,7 @@
   "folders": [
     { "path": "file-header" },
     { "path": "file-header-project" },
-    { "path": "function-comment" },
+    { "path": "function-comment-for-ts" },
     { "path": "workspace" },
   ],
   "settings": {},

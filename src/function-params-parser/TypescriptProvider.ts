@@ -1,8 +1,10 @@
+/* eslint-disable no-useless-escape */
 import * as vscode from 'vscode';
 
 import { ConfigManager } from '@/configuration/ConfigManager';
 import { logger } from '@/extension';
 import { LanguageFunctionCommentSettings } from '@/typings/types';
+import { extractComplexType } from '@/utils/utils';
 
 import { FunctionParamsParser } from './FunctionParamsParser';
 import { FunctionParamsInfo, ParamsInfo } from './types';
@@ -17,9 +19,9 @@ function splitParams(
   const params: ParamsInfo = {};
   for (let i = 0; i < paramsStr.length; i++) {
     const char = paramsStr[i];
-    if (char === '(' || char === '[' || char === '{') {
+    if (char === '(' || char === '[' || char === '{' || char === '<') {
       bracketCount++;
-    } else if (char === ')' || char === ']' || char === '}') {
+    } else if (char === ')' || char === ']' || char === '}' || char === '>') {
       bracketCount--;
     } else if (char === ',' && bracketCount === 0) {
       const paramStr = paramsStr.slice(paramStartIndex, i);
@@ -38,46 +40,105 @@ function splitParams(
   return params;
 }
 
+function matchFunctionPattern(
+  functionDefinition: string,
+  languageSettings: LanguageFunctionCommentSettings,
+  regex: RegExp,
+  extractComplexTypeArgs: [RegExp | string, RegExp | string],
+) {
+  const { defaultReturnType = 'auto' } = languageSettings;
+  const match = regex.exec(functionDefinition);
+  if (match) {
+    const returnType =
+      extractComplexType(functionDefinition, ...extractComplexTypeArgs) || defaultReturnType;
+    return { matched: true, type: returnType };
+  }
+  return { matched: false, type: defaultReturnType };
+}
+
+// 普通函数/类方法
+function matchNormalFunction(
+  functionDefinition: string,
+  languageSettings: LanguageFunctionCommentSettings,
+) {
+  const functionRegex =
+    /\b(?:public|private|protected|function)?\s*\w*\s*\((?:[^)]*:\s*[^)]+)?\)\s*(?::\s*\w+)?\s*\{/m;
+  return matchFunctionPattern(functionDefinition, languageSettings, functionRegex, [
+    /.*?\)\s*(?=\{)/,
+    '{',
+  ]);
+}
+
+// 箭头函数（带括号）
+function matchArrowFunctionWithParentheses(
+  functionDefinition: string,
+  languageSettings: LanguageFunctionCommentSettings,
+) {
+  const functionRegex = /\([^)]*\)\s*=>/m;
+  return matchFunctionPattern(functionDefinition, languageSettings, functionRegex, [
+    /\)\s*:/,
+    /=>/,
+  ]);
+}
+
+// 箭头函数（不带括号）
+function matchArrowFunctionWithoutParentheses(
+  functionDefinition: string,
+  languageSettings: LanguageFunctionCommentSettings,
+) {
+  const { defaultReturnType = 'auto' } = languageSettings;
+  const functionRegex = /^[^\(\)=]*\s*=>/m;
+  const match = functionRegex.exec(functionDefinition);
+  if (match) {
+    return { matched: true, type: defaultReturnType };
+  }
+  return { matched: false, type: defaultReturnType };
+}
+
+// 类的 getter 和 setter 方法
+function matchGetterAndSetter(
+  functionDefinition: string,
+  languageSettings: LanguageFunctionCommentSettings,
+) {
+  const functionRegex = /(get|set)\s+\w*\s*\([^)]*\)\s*(?=\{)/m;
+  return matchFunctionPattern(functionDefinition, languageSettings, functionRegex, [
+    /\)\s*:?/,
+    '{',
+  ]);
+}
+
+// Generator 函数
+function matchGeneratorFunction(
+  functionDefinition: string,
+  languageSettings: LanguageFunctionCommentSettings,
+) {
+  const functionRegex = /\b(?:function\s*)?\*\s*\w*\s*\([^)]*\)\s*\{/m;
+  return matchFunctionPattern(functionDefinition, languageSettings, functionRegex, [
+    /\)\s*:?/,
+    '{',
+  ]);
+}
+
 function matchFunction(
   functionDefinition: string,
   languageSettings: LanguageFunctionCommentSettings,
 ): { matched: boolean; type: string } {
-  const { defaultReturnType = 'auto' } = languageSettings;
-  // 普通函数
-  const functionRegex = /function\s+([A-Za-z_]\w*?)\s*\(([\s\S]*?)\)\s*:\s*(\w+)/m;
-  // 箭头函数
-  const arrowFunctionRegex = /(?:([A-Za-z_]\w*)\s*=\s*)?\(([\s\S]*?)\)\s*:\s*(\w+)\s*=>/m;
-  // 匿名箭头函数
-  const anonymousArrowFunctionRegex = /\((.*?)\)\s*=>/m;
-  // 类方法
-  const classFunctionRegex = /^(\s*\w*?\s+)?\s*([A-Za-z_]\w*?)[^()]*\(([\s\S]*?)\)\s*.*?{/m;
-  // 对象方法
-  const objFunctionRegex = /^\s*([A-Za-z_]\w*?)\s*:\s*\bfunction\b[^()]*\(([\s\S]*?)\)/m;
-  // 类的 getter 和 setter 方法
-  const classGetterSetterRegex =
-    /(get|set)\s+([A-Za-z_]\w*?)[^()]*\(([\s\S]*?)\)\s*:\s*(\w+)\s*.*?{/m;
-  // 对象的简写方法
-  const objectShorthandMethodRegex = /([A-Za-z_]\w*?)\s*\(([\s\S]*?)\)\s*:\s*(\w+)\s*.*?{/m;
-  // Generator 函数
-  const generatorFunctionRegex =
-    /\bfunction\s*\*\s*([A-Za-z_]\w*?)\s*[^()]*\(([\s\S]*?)\)\s*:\s*(\w+)/m;
+  const matchFunctions = [
+    matchNormalFunction,
+    matchArrowFunctionWithParentheses,
+    matchArrowFunctionWithoutParentheses,
+    matchGetterAndSetter,
+    matchGeneratorFunction,
+  ];
 
-  const match =
-    functionRegex.exec(functionDefinition) ||
-    arrowFunctionRegex.exec(functionDefinition) ||
-    anonymousArrowFunctionRegex.exec(functionDefinition) ||
-    classFunctionRegex.exec(functionDefinition) ||
-    objFunctionRegex.exec(functionDefinition) ||
-    classGetterSetterRegex.exec(functionDefinition) ||
-    objectShorthandMethodRegex.exec(functionDefinition) ||
-    generatorFunctionRegex.exec(functionDefinition);
-
-  if (match) {
-    const returnType = match[3] || defaultReturnType;
-    return { matched: true, type: returnType };
+  for (const func of matchFunctions) {
+    const result = func(functionDefinition, languageSettings);
+    if (result.matched) {
+      return result;
+    }
   }
 
-  return { matched: false, type: defaultReturnType };
+  return { matched: false, type: languageSettings.defaultReturnType || 'auto' };
 }
 
 export class TypescriptParser extends FunctionParamsParser {
@@ -133,7 +194,9 @@ export class TypescriptParser extends FunctionParamsParser {
       // 过滤出函数括号里的内容
       const functionParamsStr = functionDefinition.match(/\(([\s\S]*?)\)/)?.[1] || '';
       // 分离出参数
-      functionParams = splitParams(functionParamsStr, this.languageSettings);
+      if (functionParamsStr.trim() !== '') {
+        functionParams = splitParams(functionParamsStr, this.languageSettings);
+      }
     }
 
     if (Object.keys(functionParams).length > 0) {

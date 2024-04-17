@@ -4,7 +4,7 @@
  * @param a {any} 
  * @param b {any} 
  */
-(a, b) => {
+const func = function(a, b) {
   console.log(a + b);
   return a + b;
-};
+}

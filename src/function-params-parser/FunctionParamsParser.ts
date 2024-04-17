@@ -139,8 +139,8 @@ export abstract class FunctionParamsParser {
     range: vscode.Range,
   ): FunctionCommentInfo {
     const descriptionPattern = /@description\s+(.*)/;
-    const paramPattern = /@param\s+(\w+)\s*\{(.+?)\}\s*(.*)/;
-    const returnPattern = /@return\s+(?:(\w+)\s*)?\{(.+?)\}\s*(.*)/;
+    const paramPattern = /@param\s+(\w+)\s*\{((?:[^}]|\}(?!\s*$))*)\}\s*(.*)/;
+    const returnPattern = /@return\s+(?:(\w+)\s*)?\{((?:[^}]|\}(?!\s*$))*)\}\s*(.*)/;
 
     const functionCommentLines = document.getText(range).split('\n');
 
