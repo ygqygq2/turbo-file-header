@@ -59,6 +59,7 @@ export enum CustomErrorCode {
 
   // 函数参数相关错误 (1090 - 1099)
   NotFoundParser = 1090,
+  ParserFunctionFail = 1091,
 }
 
 const extensionPrefix = '';
@@ -125,6 +126,7 @@ const variableCustomErrorCodeMessage = {
 
 const functionParamsErrorCodeMessage = {
   [CustomErrorCode.NotFoundParser]: `${extensionPrefix}No parser available for language: `,
+  [CustomErrorCode.ParserFunctionFail]: `${extensionPrefix}Failed to parse function: `,
 };
 
 export const customErrorCodeMessages: ErrorCodeMessage = {

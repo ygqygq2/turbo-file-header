@@ -627,12 +627,14 @@
   },
   "dependencies": {
     "@ygqygq2/vscode-log": "^0.0.3",
+    "acorn": "^8.11.3",
     "dayjs": "^1.11.10",
     "handlebars": "^4.7.8",
     "json5": "^2.2.3",
     "lodash": "^4.17.21",
     "mathjs": "^12.4.1",
     "minimatch": "^9.0.4",
+    "ts-morph": "^22.0.0",
     "upath": "^2.0.1",
     "yaml": "^2.4.1"
   }

@@ -1,3 +1,4 @@
+import { ErrorCode } from '@/error';
 /* eslint-disable no-useless-escape */
 import * as vscode from 'vscode';
 
@@ -5,8 +6,8 @@ import { ConfigManager } from '@/configuration/ConfigManager';
 import { logger } from '@/extension';
 import { LanguageFunctionCommentSettings } from '@/typings/types';
 
-import { CustomError, ErrorCode } from '@/error';
-import { Project } from 'ts-morph';
+import { CustomError } from '@/error';
+import * as acorn from 'acorn';
 import { FunctionParamsParser } from './FunctionParamsParser';
 import { splitParams } from './ts-splitParams';
 import { FunctionParamsInfo, ParamsInfo } from './types';
@@ -15,14 +16,19 @@ function matchFunction(
   functionDefinition: string,
   languageSettings: LanguageFunctionCommentSettings,
 ): { matched: boolean; type: string } {
-  let returnType: string = languageSettings.defaultReturnType || 'auto';
-  const project = new Project();
   try {
-    const sourceFile = project.createSourceFile('temp.ts', functionDefinition);
-    const functions = sourceFile.getFunctions();
-    if (functions.length > 0) {
-      returnType = functions[0].getReturnType().getText();
-      return { matched: true, type: returnType };
+    const ast = acorn.parse(functionDefinition, {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+    });
+    // 检查AST的第一个元素是否为函数
+    if (
+      (ast.body[0] as acorn.Node).type === 'FunctionDeclaration' ||
+      (ast.body[0] as acorn.Node).type === 'ArrowFunctionExpression' ||
+      (ast.body[0] as acorn.Node).type === 'FunctionExpression' ||
+      (ast.body[0] as acorn.Node).type === 'MethodDefinition' // 类方法，包括构造函数和get/set方法
+    ) {
+      return { matched: true, type: languageSettings.defaultReturnType || 'auto' };
     }
   } catch (error) {
     logger.handleError(new CustomError(ErrorCode.ParserFunctionFail, error));
@@ -31,7 +37,7 @@ function matchFunction(
   return { matched: false, type: languageSettings.defaultReturnType || 'auto' };
 }
 
-export class TypescriptParser extends FunctionParamsParser {
+export class JavascriptParser extends FunctionParamsParser {
   constructor(configManager: ConfigManager, languageId: string) {
     super(configManager, languageId);
   }

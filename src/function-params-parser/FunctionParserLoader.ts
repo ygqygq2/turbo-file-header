@@ -3,6 +3,7 @@ import { CustomError, ErrorCode } from '@/error';
 import { logger } from '@/extension';
 
 import { FunctionParamsParser } from './FunctionParamsParser';
+import { JavascriptParser } from './JavascriptProvider';
 import { TypescriptParser } from './TypescriptProvider';
 
 export class FunctionParserLoader {
@@ -22,8 +23,8 @@ export class FunctionParserLoader {
   } = {
     typescript: TypescriptParser,
     typescriptreact: TypescriptParser,
-    javascript: TypescriptParser,
-    javascriptreact: TypescriptParser,
+    javascript: JavascriptParser,
+    javascriptreact: JavascriptParser,
     // 添加其他的语言和解析器类...
   };
 
