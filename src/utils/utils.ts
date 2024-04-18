@@ -1,4 +1,4 @@
-import { exec as _exec, ChildProcess, ExecOptions } from 'child_process';
+import { ChildProcess, exec as _exec, ExecOptions } from 'child_process';
 import crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';

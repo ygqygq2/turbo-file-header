@@ -1,4 +1,5 @@
 import { LanguageFunctionCommentSettings } from '@/typings/types';
+
 import { ParamsInfo } from './types';
 
 export function splitParams(

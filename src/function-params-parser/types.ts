@@ -1,3 +1,4 @@
+import ts from 'typescript';
 import * as vscode from 'vscode';
 
 export type ParamType = { type: string; description: string };
@@ -25,3 +26,12 @@ export interface FunctionCommentInfo {
   returnInfo: ReturnInfo;
   descriptionInfo: string;
 }
+
+export type TsFunctionNode =
+  | ts.FunctionDeclaration
+  | ts.FunctionExpression
+  | ts.ArrowFunction
+  | ts.MethodDeclaration
+  | ts.GetAccessorDeclaration
+  | ts.SetAccessorDeclaration
+  | ts.ConstructorDeclaration;

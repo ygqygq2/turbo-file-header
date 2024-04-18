@@ -8,34 +8,63 @@ import { LanguageFunctionCommentSettings } from '@/typings/types';
 
 import { FunctionParamsParser } from './FunctionParamsParser';
 import { splitParams } from './ts-splitParams';
-import { FunctionParamsInfo, ParamsInfo } from './types';
+import { FunctionParamsInfo, ParamsInfo, TsFunctionNode } from './types';
+
+function getRealType(node: TsFunctionNode): string {
+  let returnType = '';
+  const program = ts.createProgram({
+    rootNames: ['temp.ts'],
+    options: {},
+  });
+
+  const checker = program.getTypeChecker();
+  const returnTypeNode = node.type;
+
+  if (returnTypeNode) {
+    const tsType = checker.getTypeAtLocation(returnTypeNode);
+    returnType = checker.typeToString(tsType);
+  }
+
+  return returnType;
+}
 
 function matchFunction(
   functionDefinition: string,
   languageSettings: LanguageFunctionCommentSettings,
 ): { matched: boolean; type: string } {
+  const { typesUsingDefaultReturnType = [], useTypeAlias = true } = languageSettings;
   let returnType: string = languageSettings.defaultReturnType || 'auto';
   let matched = false;
-  const program = ts.createProgram(['temp.ts'], {});
+
   const sourceFile = ts.createSourceFile(
     'temp.ts',
     functionDefinition,
     ts.ScriptTarget.Latest,
     true,
+    ts.ScriptKind.TS,
   );
-  const typeChecker = program.getTypeChecker();
 
   const visitor: ts.Visitor = (node: ts.Node): ts.VisitResult<ts.Node> => {
     if (
       ts.isFunctionDeclaration(node) ||
+      ts.isFunctionExpression(node) ||
       ts.isArrowFunction(node) ||
-      ts.isMethodDeclaration(node)
+      ts.isMethodDeclaration(node) ||
+      ts.isGetAccessor(node) ||
+      ts.isSetAccessor(node) ||
+      ts.isConstructorDeclaration(node)
     ) {
-      const signature = typeChecker.getSignatureFromDeclaration(node);
-      if (signature) {
-        returnType = typeChecker.typeToString(typeChecker.getReturnTypeOfSignature(signature));
-        matched = true;
+      matched = true;
+      let returnTypeTmp;
+      if (useTypeAlias) {
+        returnTypeTmp = node.type?.getText();
+      } else {
+        returnTypeTmp = getRealType(node);
       }
+      if (returnTypeTmp && !typesUsingDefaultReturnType.includes(returnTypeTmp)) {
+        returnType = returnTypeTmp;
+      }
+      return node;
     }
     return ts.visitEachChild(node, visitor, undefined);
   };

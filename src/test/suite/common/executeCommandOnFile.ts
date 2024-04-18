@@ -85,7 +85,7 @@ async function executeCommandWithRetry(options: {
     await sleep(1000);
     actual = doc.getText();
     retryCount++;
-  } while (shouldRetry && originText === actual && retryCount < 10);
+  } while (shouldRetry && originText === actual && retryCount < 3);
 
   return { actual, source: originText };
 }

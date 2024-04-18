@@ -25,7 +25,7 @@ export function functionCommentTester(testInfo: TestInfo) {
             workspaceName,
             fileName,
             cursorLine,
-            true,
+            false,
           );
           const expected = await getText(workspaceName, resultFileName);
           assert.equal(actual, expected);

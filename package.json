@@ -318,24 +318,33 @@
               "description": "%turboFileHeader.functionComment.languagesSettings.description%",
               "items": {
                 "type": "object",
-                "properties": {
-                  "languageId": {
-                    "type": "string"
-                  },
-                  "defaultReturnName": {
-                    "type": "string",
-                    "default": "default",
-                    "description": "%turboFileHeader.functionComment.languagesSettings.javascript.defaultReturnName.description%"
-                  },
-                  "defaultReturnType": {
-                    "type": "string",
-                    "default": "auto",
-                    "description": "%turboFileHeader.functionComment.languagesSettings.javascript.defaultReturnType.description%"
-                  },
-                  "defaultParamType": {
-                    "type": "string",
-                    "default": "any",
-                    "description": "%turboFileHeader.functionComment.languagesSettings.javascript.defaultParamType.description%"
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "languageId": {
+                      "type": "string",
+                      "markdownDescription": "%turboFileHeader.functionComment.languagesSettings.items.properties.languageId.markdownDescription%"
+                    },
+                    "defaultReturnName": {
+                      "type": "string",
+                      "default": "default",
+                      "description": "%turboFileHeader.functionComment.languagesSettings.items.properties.defaultReturnName.description%"
+                    },
+                    "defaultReturnType": {
+                      "type": "string",
+                      "default": "auto",
+                      "description": "%turboFileHeader.functionComment.languagesSettings.items.properties.defaultReturnType.description%"
+                    },
+                    "defaultParamType": {
+                      "type": "string",
+                      "default": "any",
+                      "description": "%turboFileHeader.functionComment.languagesSettings.items.properties.defaultParamType.description%"
+                    },
+                    "typesUsingDefaultReturnType": {
+                      "type": "array",
+                      "default": [],
+                      "description": "%turboFileHeader.functionComment.languagesSettings.items.properties.typesUsingDefaultReturnType.description%"
+                    }
                   }
                 }
               }
@@ -347,7 +356,9 @@
                 "languageId": "typescript",
                 "defaultReturnName": "default",
                 "defaultReturnType": "auto",
-                "defaultParamType": "any"
+                "defaultParamType": "any",
+                "typesUsingDefaultReturnType": ["void", "never", "unknown", "any"],
+                "useTypeAlias": true
               }
             ]
           }
