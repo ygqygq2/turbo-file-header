@@ -23,7 +23,7 @@
     "email": "ygqygq2@qq.com"
   },
   "engines": {
-    "vscode": ">=1.72.0"
+    "vscode": "^1.88.0"
   },
   "categories": [
     "Other"
@@ -633,8 +633,7 @@
     "typescript": "^5.4.5",
     "typescript-eslint": "^7.7.0",
     "vite": "^5.2.9",
-    "vitest": "^1.5.0",
-    "vscode=1.88.0": "link:@types/vscode=1.88.0"
+    "vitest": "^1.5.0"
   },
   "dependencies": {
     "@ygqygq2/vscode-log": "^0.0.3",
