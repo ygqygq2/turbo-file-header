@@ -1,13 +1,11 @@
-import { ErrorCode } from '@/error';
-/* eslint-disable no-useless-escape */
+import { Project, SyntaxKind } from 'ts-morph';
 import * as vscode from 'vscode';
 
 import { ConfigManager } from '@/configuration/ConfigManager';
+import { CustomError, ErrorCode } from '@/error';
 import { logger } from '@/extension';
 import { LanguageFunctionCommentSettings } from '@/typings/types';
 
-import { CustomError } from '@/error';
-import * as acorn from 'acorn';
 import { FunctionParamsParser } from './FunctionParamsParser';
 import { splitParams } from './ts-splitParams';
 import { FunctionParamsInfo, ParamsInfo } from './types';
@@ -16,25 +14,30 @@ function matchFunction(
   functionDefinition: string,
   languageSettings: LanguageFunctionCommentSettings,
 ): { matched: boolean; type: string } {
+  const returnType: string = languageSettings.defaultReturnType || 'auto';
+  const project = new Project();
   try {
-    const ast = acorn.parse(functionDefinition, {
-      ecmaVersion: 'latest',
-      sourceType: 'module',
-    });
-    // 检查AST的第一个元素是否为函数
-    if (
-      (ast.body[0] as acorn.Node).type === 'FunctionDeclaration' ||
-      (ast.body[0] as acorn.Node).type === 'ArrowFunctionExpression' ||
-      (ast.body[0] as acorn.Node).type === 'FunctionExpression' ||
-      (ast.body[0] as acorn.Node).type === 'MethodDefinition' // 类方法，包括构造函数和get/set方法
-    ) {
-      return { matched: true, type: languageSettings.defaultReturnType || 'auto' };
+    const sourceFile = project.createSourceFile('temp.js', functionDefinition);
+    // 普通函数
+    const functions = sourceFile.getFunctions();
+    // 箭头函数
+    const arrowFunctions = sourceFile
+      .getStatements()
+      .flatMap((s) => s.getDescendantsOfKind(SyntaxKind.ArrowFunction));
+    // 类方法
+    const classMethods = sourceFile.getClasses().flatMap((c) => c.getMethods());
+    // 构造方法
+    const constructors = sourceFile.getClasses().flatMap((c) => c.getConstructors());
+
+    const allFunctions = [...functions, ...arrowFunctions, ...classMethods, ...constructors];
+    if (allFunctions.length > 0) {
+      return { matched: true, type: returnType };
     }
   } catch (error) {
     logger.handleError(new CustomError(ErrorCode.ParserFunctionFail, error));
   }
 
-  return { matched: false, type: languageSettings.defaultReturnType || 'auto' };
+  return { matched: false, type: returnType };
 }
 
 export class JavascriptParser extends FunctionParamsParser {

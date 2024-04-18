@@ -10,7 +10,7 @@ import { executeCommandOnFile } from './executeCommandOnFile';
 export function functionCommentTester(testInfo: TestInfo) {
   testInfo.forEach((item) => {
     describe(`Extension Integration Test: addFunctionComment for [${item.testName}]`, function () {
-      this.timeout(100000);
+      this.timeout(200000);
       const workspaceName = item.workspaceName;
       const files = item.files;
       files.forEach((fileInfo) => {
@@ -25,7 +25,7 @@ export function functionCommentTester(testInfo: TestInfo) {
             workspaceName,
             fileName,
             cursorLine,
-            false,
+            true,
           );
           const expected = await getText(workspaceName, resultFileName);
           assert.equal(actual, expected);

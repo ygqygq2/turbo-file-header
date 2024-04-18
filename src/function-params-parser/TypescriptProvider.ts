@@ -1,12 +1,11 @@
-/* eslint-disable no-useless-escape */
+import { Project, SyntaxKind } from 'ts-morph';
 import * as vscode from 'vscode';
 
 import { ConfigManager } from '@/configuration/ConfigManager';
+import { CustomError, ErrorCode } from '@/error';
 import { logger } from '@/extension';
 import { LanguageFunctionCommentSettings } from '@/typings/types';
 
-import { CustomError, ErrorCode } from '@/error';
-import { Project } from 'ts-morph';
 import { FunctionParamsParser } from './FunctionParamsParser';
 import { splitParams } from './ts-splitParams';
 import { FunctionParamsInfo, ParamsInfo } from './types';
@@ -19,9 +18,20 @@ function matchFunction(
   const project = new Project();
   try {
     const sourceFile = project.createSourceFile('temp.ts', functionDefinition);
+    // 普通函数
     const functions = sourceFile.getFunctions();
-    if (functions.length > 0) {
-      returnType = functions[0].getReturnType().getText();
+    // 箭头函数
+    const arrowFunctions = sourceFile
+      .getStatements()
+      .flatMap((s) => s.getDescendantsOfKind(SyntaxKind.ArrowFunction));
+    // 类方法
+    const classMethods = sourceFile.getClasses().flatMap((c) => c.getMethods());
+    // 构造方法
+    const constructors = sourceFile.getClasses().flatMap((c) => c.getConstructors());
+
+    const allFunctions = [...functions, ...arrowFunctions, ...classMethods, ...constructors];
+    if (allFunctions.length > 0) {
+      returnType = allFunctions[0].getReturnType().getText();
       return { matched: true, type: returnType };
     }
   } catch (error) {

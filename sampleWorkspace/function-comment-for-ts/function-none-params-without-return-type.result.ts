@@ -1,6 +1,6 @@
 /**
  * @description 
- * @return default {auto} 
+ * @return default {string} 
  */
 function func() {
   return 'test'

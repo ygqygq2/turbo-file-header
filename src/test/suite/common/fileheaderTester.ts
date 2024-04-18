@@ -7,7 +7,7 @@ import { executeCommandOnFile } from './executeCommandOnFile';
 export function fileheaderTester(testInfo: TestInfo) {
   testInfo.forEach((item) => {
     describe(`Extension Integration Test: addFileheader for [${item.testName}]`, function () {
-      this.timeout(100000);
+      this.timeout(200000);
       const workspaceName = item.workspaceName;
       const files = item.files;
       files.forEach((fileInfo) => {

@@ -1,6 +1,6 @@
 /**
  * @description 
- * @return default {auto} 
+ * @return default {any} 
  * @param a {any} 
  * @param b {any} 
  */

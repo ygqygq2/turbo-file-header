@@ -1,10 +1,9 @@
 /**
  * @description test
- * @return default {string} returnValue
- * @param a {string} stringA
- * @param b {string} stringB
+ * @return default {{ code: any; }} 
+ * @param a {any} 
+ * @param b {any} 
  */
-export function a(a: string, b: {key: string}): string {
-  console.log(a + b);
-  return a + b;
-};
+export function func(a: string, b: number) {
+  return { code: a + b }
+}
