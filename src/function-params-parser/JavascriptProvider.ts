@@ -22,8 +22,15 @@ function matchFunction(
       normalFunction: () => sourceFile.getFunctions(),
       arrowFunction: () =>
         sourceFile.getStatements().flatMap((s) => s.getDescendantsOfKind(SyntaxKind.ArrowFunction)),
+      variableFunction: () =>
+        sourceFile
+          .getVariableDeclarations()
+          .filter((v) => v.getInitializerIfKind(SyntaxKind.FunctionExpression)),
       classMethod: () => sourceFile.getClasses().flatMap((c) => c.getMethods()),
       constructMethod: () => sourceFile.getClasses().flatMap((c) => c.getConstructors()),
+      getSetFunction: () =>
+        sourceFile.getClasses().flatMap((c) => [...c.getGetAccessors(), ...c.getSetAccessors()]),
+      generatorFunction: () => sourceFile.getFunctions().filter((f) => f.isGenerator()),
     };
 
     for (const [_tag, getFunctions] of Object.entries(functionTypes)) {
