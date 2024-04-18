@@ -10,12 +10,14 @@
   "words": [
     "astro",
     "birthtime",
+    "dbus",
     "ncipollo",
     "ovsx",
     "POSIX",
     "softprops",
     "strikethrough",
     "upath",
-    "vsix"
+    "vsix",
+    "xvfb"
   ]
 }
