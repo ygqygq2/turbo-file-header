@@ -1,4 +1,4 @@
-import { Project, SyntaxKind } from 'ts-morph';
+import * as ts from 'typescript';
 import * as vscode from 'vscode';
 
 import { ConfigManager } from '@/configuration/ConfigManager';
@@ -15,30 +15,38 @@ function matchFunction(
   languageSettings: LanguageFunctionCommentSettings,
 ): { matched: boolean; type: string } {
   let returnType: string = languageSettings.defaultReturnType || 'auto';
-  const project = new Project();
-  try {
-    const sourceFile = project.createSourceFile('temp.ts', functionDefinition);
-    // 普通函数
-    const functions = sourceFile.getFunctions();
-    // 箭头函数
-    const arrowFunctions = sourceFile
-      .getStatements()
-      .flatMap((s) => s.getDescendantsOfKind(SyntaxKind.ArrowFunction));
-    // 类方法
-    const classMethods = sourceFile.getClasses().flatMap((c) => c.getMethods());
-    // 构造方法
-    const constructors = sourceFile.getClasses().flatMap((c) => c.getConstructors());
+  let matched = false;
+  const program = ts.createProgram(['temp.ts'], {});
+  const sourceFile = ts.createSourceFile(
+    'temp.ts',
+    functionDefinition,
+    ts.ScriptTarget.Latest,
+    true,
+  );
+  const typeChecker = program.getTypeChecker();
 
-    const allFunctions = [...functions, ...arrowFunctions, ...classMethods, ...constructors];
-    if (allFunctions.length > 0) {
-      returnType = allFunctions[0].getReturnType().getText();
-      return { matched: true, type: returnType };
+  const visitor: ts.Visitor = (node: ts.Node): ts.VisitResult<ts.Node> => {
+    if (
+      ts.isFunctionDeclaration(node) ||
+      ts.isArrowFunction(node) ||
+      ts.isMethodDeclaration(node)
+    ) {
+      const signature = typeChecker.getSignatureFromDeclaration(node);
+      if (signature) {
+        returnType = typeChecker.typeToString(typeChecker.getReturnTypeOfSignature(signature));
+        matched = true;
+      }
     }
+    return ts.visitEachChild(node, visitor, undefined);
+  };
+
+  try {
+    ts.visitNode(sourceFile, visitor);
   } catch (error) {
     logger.handleError(new CustomError(ErrorCode.ParserFunctionFail, error));
   }
 
-  return { matched: false, type: languageSettings.defaultReturnType || 'auto' };
+  return { matched, type: returnType };
 }
 
 export class TypescriptParser extends FunctionParamsParser {

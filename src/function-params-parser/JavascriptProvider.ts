@@ -18,20 +18,19 @@ function matchFunction(
   const project = new Project();
   try {
     const sourceFile = project.createSourceFile('temp.js', functionDefinition);
-    // 普通函数
-    const functions = sourceFile.getFunctions();
-    // 箭头函数
-    const arrowFunctions = sourceFile
-      .getStatements()
-      .flatMap((s) => s.getDescendantsOfKind(SyntaxKind.ArrowFunction));
-    // 类方法
-    const classMethods = sourceFile.getClasses().flatMap((c) => c.getMethods());
-    // 构造方法
-    const constructors = sourceFile.getClasses().flatMap((c) => c.getConstructors());
+    const functionTypes = {
+      normalFunction: () => sourceFile.getFunctions(),
+      arrowFunction: () =>
+        sourceFile.getStatements().flatMap((s) => s.getDescendantsOfKind(SyntaxKind.ArrowFunction)),
+      classMethod: () => sourceFile.getClasses().flatMap((c) => c.getMethods()),
+      constructMethod: () => sourceFile.getClasses().flatMap((c) => c.getConstructors()),
+    };
 
-    const allFunctions = [...functions, ...arrowFunctions, ...classMethods, ...constructors];
-    if (allFunctions.length > 0) {
-      return { matched: true, type: returnType };
+    for (const [_tag, getFunctions] of Object.entries(functionTypes)) {
+      const functions = getFunctions();
+      if (functions.length > 0) {
+        return { matched: true, type: returnType };
+      }
     }
   } catch (error) {
     logger.handleError(new CustomError(ErrorCode.ParserFunctionFail, error));
