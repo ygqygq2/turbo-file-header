@@ -29,6 +29,9 @@ dependencies:
   ts-morph:
     specifier: ^22.0.0
     version: 22.0.0
+  typescript:
+    specifier: ^5.4.5
+    version: 5.4.5
   upath:
     specifier: ^2.0.1
     version: 2.0.1
@@ -127,9 +130,6 @@ devDependencies:
   tsconfig-paths:
     specifier: ^4.2.0
     version: 4.2.0
-  typescript:
-    specifier: ^5.4.5
-    version: 5.4.5
   typescript-eslint:
     specifier: ^7.7.0
     version: 7.7.0(eslint@9.0.0)(typescript@5.4.5)
@@ -3230,7 +3230,6 @@ packages:
     resolution: {integrity: sha512-vcI4UpRgg81oIRUFwR0WSIHKt11nJ7SAVlYNIu+QpqeyXP+gpQJy/Z4+F0aGxSE4MqwjyXvW/TzgkLAx2AGHwQ==}
     engines: {node: '>=14.17'}
     hasBin: true
-    dev: true
 
   /uc.micro@2.1.0:
     resolution: {integrity: sha512-ARDJmphmdvUk6Glw7y9DQ2bFkKBHwQHLi2lsaH6PPmz/Ka9sFOBsBluozhDltWmnv9u/cF6Rt87znRTPV+yp/A==}

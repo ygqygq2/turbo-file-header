@@ -156,7 +156,9 @@ Properties:
       "languageId": "typescript",
       "defaultReturnName": "default",
       "defaultReturnType": "auto",
-      "defaultParamType": "any"
+      "defaultParamType": "any",
+      "typesUsingDefaultReturnType": ["void", "never", "unknown", "any"],
+      "useTypeAlias": true
     }
   ]
 }

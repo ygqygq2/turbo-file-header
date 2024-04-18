@@ -2,7 +2,7 @@
   "name": "turbo-file-header",
   "displayName": "Turbo File Header",
   "description": "Sets file header information globally or for a project.",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "icon": "resources/icons/icon.png",
   "repository": {
     "type": "git",
@@ -630,7 +630,6 @@
     "tmp": "^0.2.3",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.4.5",
     "typescript-eslint": "^7.7.0",
     "vite": "^5.2.9",
     "vitest": "^1.5.0"
@@ -644,6 +643,7 @@
     "mathjs": "^12.4.1",
     "minimatch": "^9.0.4",
     "ts-morph": "^22.0.0",
+    "typescript": "^5.4.5",
     "upath": "^2.0.1",
     "yaml": "^2.4.1"
   }
