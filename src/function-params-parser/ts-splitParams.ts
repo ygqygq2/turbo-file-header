@@ -21,7 +21,9 @@ export function splitParams(
       const colonIndex = paramStr.indexOf(':');
       const name = paramStr.slice(0, colonIndex !== -1 ? colonIndex : paramStr.length).trim();
       const type = colonIndex !== -1 ? paramStr.slice(colonIndex + 1).trim() : defaultParamType;
-      params[name] = { type, description: '' };
+      if (name) {
+        params[name] = { type, description: '' };
+      }
       paramStartIndex = i + 1;
     }
   }
@@ -29,6 +31,8 @@ export function splitParams(
   const colonIndex = paramStr.indexOf(':');
   const name = paramStr.slice(0, colonIndex !== -1 ? colonIndex : paramStr.length).trim();
   const type = colonIndex !== -1 ? paramStr.slice(colonIndex + 1).trim() : defaultParamType;
-  params[name] = { type, description: '' };
+  if (name) {
+    params[name] = { type, description: '' };
+  }
   return params;
 }

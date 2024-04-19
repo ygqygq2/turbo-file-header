@@ -7,11 +7,11 @@ import { logger } from '@/extension';
 import { LanguageFunctionCommentSettings } from '@/typings/types';
 
 import { FunctionParamsParser } from './FunctionParamsParser';
-import { splitParams } from './ts-splitParams';
 import { FunctionParamsInfo, ParamsInfo, TsFunctionNode } from './types';
 
-function getRealType(node: TsFunctionNode): string {
+function getRealType(node: TsFunctionNode): { returnType: string; params: ParamsInfo } {
   let returnType = '';
+  const params: ParamsInfo = {};
   const program = ts.createProgram({
     rootNames: ['temp.ts'],
     options: {},
@@ -25,16 +25,28 @@ function getRealType(node: TsFunctionNode): string {
     returnType = checker.typeToString(tsType);
   }
 
-  return returnType;
+  node.parameters.forEach((param) => {
+    const paramName = param.name.getText();
+    const tsType = param.type ? checker.getTypeAtLocation(param.type) : null;
+    const paramType = tsType ? checker.typeToString(tsType) : '';
+    params[paramName] = { type: paramType, description: '' };
+  });
+
+  return { returnType, params };
 }
 
 function matchFunction(
   functionDefinition: string,
   languageSettings: LanguageFunctionCommentSettings,
-): { matched: boolean; type: string } {
-  const { typesUsingDefaultReturnType = [], useTypeAlias = true } = languageSettings;
+): { matched: boolean; returnType: string; params: ParamsInfo } {
+  const {
+    typesUsingDefaultReturnType = [],
+    useTypeAlias = true,
+    defaultParamType = 'any',
+  } = languageSettings;
   let returnType: string = languageSettings.defaultReturnType || 'auto';
   let matched = false;
+  let params: ParamsInfo = {};
 
   const sourceFile = ts.createSourceFile(
     'temp.ts',
@@ -58,12 +70,20 @@ function matchFunction(
       let returnTypeTmp;
       if (useTypeAlias) {
         returnTypeTmp = node.type?.getText();
+        node.parameters.forEach((param) => {
+          const paramName = param.name.getText();
+          const paramType = param.type ? param.type.getText() : defaultParamType;
+          params[paramName] = { type: paramType, description: '' };
+        });
       } else {
-        returnTypeTmp = getRealType(node);
+        const { returnType: realReturnType, params: realPrams } = getRealType(node);
+        returnTypeTmp = realReturnType;
+        params = realPrams;
       }
       if (returnTypeTmp && !typesUsingDefaultReturnType.includes(returnTypeTmp)) {
         returnType = returnTypeTmp;
       }
+
       return node;
     }
     return ts.visitEachChild(node, visitor, undefined);
@@ -75,12 +95,45 @@ function matchFunction(
     logger.handleError(new CustomError(ErrorCode.ParserFunctionFail, error));
   }
 
-  return { matched, type: returnType };
+  return { matched, returnType, params };
 }
 
 export class TypescriptParser extends FunctionParamsParser {
   constructor(configManager: ConfigManager, languageId: string) {
     super(configManager, languageId);
+  }
+
+  private getFunctionString(document: vscode.TextDocument, startLine: number) {
+    let functionDefinition = '';
+    let bracketCount = 0; // 大括号计数
+    let parenthesisCount = 0; // 小括号计数
+
+    for (let i = startLine; i < document.lineCount; i++) {
+      const line = document.lineAt(i);
+      functionDefinition += line.text + '\n';
+
+      if (line.text.includes('=>') && !line.text.match(/=>\s*{/)) {
+        break;
+      }
+
+      for (const char of line.text) {
+        if (char === '(') {
+          parenthesisCount++;
+        } else if (char === ')') {
+          parenthesisCount--;
+        } else if (char === '{') {
+          bracketCount++;
+        } else if (char === '}') {
+          bracketCount--;
+        }
+      }
+
+      if (bracketCount === 0 && parenthesisCount === 0) {
+        break;
+      }
+    }
+
+    return functionDefinition;
   }
 
   public getFunctionParamsAtCursor(
@@ -89,63 +142,34 @@ export class TypescriptParser extends FunctionParamsParser {
   ): FunctionParamsInfo {
     const { defaultReturnType = 'auto' } = languageSettings;
 
-    const cursorLine = activeEditor.selection.start.line;
-    const document = activeEditor.document;
     let functionParams: ParamsInfo = {};
     let matchedFunction = false;
     let returnType = defaultReturnType;
-
-    let functionDefinition = '';
-    let bracketCount = 0;
+    const document = activeEditor.document;
+    const cursorLine = activeEditor.selection.start.line;
     let startLine = cursorLine;
     // 如果光标所在行为空行或者注释，则从下一行开始
     const cursorLineText = document.lineAt(cursorLine).text.trim();
     if (cursorLineText === '' || cursorLineText === '//' || cursorLineText === '*/') {
       startLine = cursorLine + 1;
     }
-    for (let i = startLine; i < document.lineCount; i++) {
-      const line = document.lineAt(i);
-      functionDefinition += line.text + '\n';
 
-      if (line.text.includes('=>')) {
-        break;
-      }
-
-      for (const char of line.text) {
-        if (char === '{') {
-          bracketCount++;
-        } else if (char === '}') {
-          bracketCount--;
-        }
-      }
-
-      if (bracketCount === 0) {
-        break;
-      }
-    }
-
-    const { matched, type } = matchFunction(functionDefinition, this.languageSettings);
+    const functionDefinition = this.getFunctionString(document, startLine);
+    const {
+      matched,
+      returnType: returnTypeTmp,
+      params,
+    } = matchFunction(functionDefinition, this.languageSettings);
     if (matched) {
       matchedFunction = true;
-      returnType = type;
-      // 过滤出函数括号里的内容
-      const functionParamsStr = functionDefinition.match(/\(([\s\S]*?)\)/)?.[1] || '';
-      // 分离出参数
-      if (functionParamsStr.trim() !== '') {
-        functionParams = splitParams(functionParamsStr, this.languageSettings);
-      }
+      returnType = returnTypeTmp;
+      functionParams = params;
     }
 
-    if (Object.keys(functionParams).length > 0) {
-      return {
-        matchedFunction,
-        returnType,
-        params: functionParams,
-        insertPosition: new vscode.Position(startLine, 0),
-      };
+    if (!matchFunction) {
+      logger.info(vscode.l10n.t('No function found at the cursor'));
     }
 
-    logger.info(vscode.l10n.t('No function found at the cursor'));
     return {
       matchedFunction,
       returnType,
