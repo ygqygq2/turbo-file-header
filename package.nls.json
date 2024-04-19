@@ -1,4 +1,5 @@
 {
+  "description": "Sets file header information globally or for a project, generate function comment quickly, support multiple languages.",
   "turboFileHeader.addFileheader.title": "Turbo File Header: Add Fileheader",
   "turboFileHeader.generateTemplateConfig.title": "Turbo File Header: Generate Custom Template Config File",
   "turboFileHeader.batchUpdateFileheader.title": "Turbo File Header: Batch Update File Header",

@@ -1,8 +1,8 @@
 {
   "name": "turbo-file-header",
   "displayName": "Turbo File Header",
-  "description": "Sets file header information globally or for a project.",
-  "version": "0.2.2",
+  "description": "%description%",
+  "version": "0.2.3",
   "icon": "resources/icons/icon.png",
   "repository": {
     "type": "git",

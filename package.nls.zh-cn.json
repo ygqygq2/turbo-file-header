@@ -1,4 +1,5 @@
 {
+  "description": "可以全局或者项目级设置代码文件头注释，可以快速生成函数注释，支持多语言，最好用",
   "turboFileHeader.addFileheader.title": "Turbo File Header: 增加/更新文件头",
   "turboFileHeader.generateTemplateConfig.title": "Turbo File Header: 生成自定义模板配置文件",
   "turboFileHeader.batchUpdateFileheader.title": "Turbo File Header: 批量增加/更新文件头",
