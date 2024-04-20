@@ -10,6 +10,22 @@ import { FunctionParamsParser } from './FunctionParamsParser';
 import { splitParams } from './ts-splitParams';
 import { FunctionParamsInfo, ParamsInfo } from './types';
 
+function matchClassMethod(functionDefinition: string): boolean {
+  const classMethodPattern =
+    /(public|private|protected)?\s*(async)?\s*([a-zA-Z0-9_]+)\s*\((.*?)\)\s*{[\s\S]*?}/m;
+  return classMethodPattern.test(functionDefinition);
+}
+
+function matchConstructFunction(functionDefinition: string): boolean {
+  const constructorPattern = /constructor\s*\((.*?)\)\s*{[\s\S]*?}/m;
+  return constructorPattern.test(functionDefinition);
+}
+
+function matchGetterSetterFunction(functionDefinition: string): boolean {
+  const getterSetterPattern = /(get|set)\s+(\w+)\s*\((.*?)\)\s*{[\s\S]*?}/m;
+  return getterSetterPattern.test(functionDefinition);
+}
+
 function matchFunction(
   functionDefinition: string,
   languageSettings: LanguageFunctionCommentSettings,
@@ -26,10 +42,11 @@ function matchFunction(
         sourceFile
           .getVariableDeclarations()
           .filter((v) => v.getInitializerIfKind(SyntaxKind.FunctionExpression)),
-      classMethod: () => sourceFile.getClasses().flatMap((c) => c.getMethods()),
-      constructMethod: () => sourceFile.getClasses().flatMap((c) => c.getConstructors()),
+      classMethod: () => (matchClassMethod(functionDefinition) ? [functionDefinition] : []),
+      constructMethod: () =>
+        matchConstructFunction(functionDefinition) ? [functionDefinition] : [],
       getSetFunction: () =>
-        sourceFile.getClasses().flatMap((c) => [...c.getGetAccessors(), ...c.getSetAccessors()]),
+        matchGetterSetterFunction(functionDefinition) ? [functionDefinition] : [],
       generatorFunction: () => sourceFile.getFunctions().filter((f) => f.isGenerator()),
     };
 
@@ -111,20 +128,14 @@ export class JavascriptParser extends FunctionParamsParser {
       const functionParamsStr = functionDefinition.match(/\(([\s\S]*?)\)/)?.[1] || '';
       // 分离出参数
       if (functionParamsStr.trim() !== '') {
-        functionParams = splitParams(functionParamsStr, this.languageSettings);
+        functionParams = splitParams(functionParamsStr, languageSettings);
       }
     }
 
-    if (Object.keys(functionParams).length > 0) {
-      return {
-        matchedFunction,
-        returnType,
-        params: functionParams,
-        insertPosition: new vscode.Position(startLine, 0),
-      };
+    if (!matchFunction) {
+      logger.info(vscode.l10n.t('No function found at the cursor'));
     }
 
-    logger.info(vscode.l10n.t('No function found at the cursor'));
     return {
       matchedFunction,
       returnType,

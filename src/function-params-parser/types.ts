@@ -3,15 +3,8 @@ import * as vscode from 'vscode';
 
 export type ParamType = { type: string; description: string };
 
-export interface FunctionParamsInfo {
-  matchedFunction: boolean;
-  returnType: string | string[];
-  params: ParamsInfo;
-  insertPosition: vscode.Position;
-}
-
 export interface ParamsInfo {
-  [key: string]: { type: string; description: string };
+  [key: string]: { type: string; description: string; optional?: boolean; defaultValue?: string };
 }
 
 export interface ReturnInfo {
@@ -19,6 +12,13 @@ export interface ReturnInfo {
     type: string;
     description: string;
   };
+}
+
+export interface FunctionParamsInfo {
+  matchedFunction: boolean;
+  returnType: string | ReturnInfo;
+  params: ParamsInfo;
+  insertPosition: vscode.Position;
 }
 
 export interface FunctionCommentInfo {
@@ -35,3 +35,9 @@ export type TsFunctionNode =
   | ts.GetAccessorDeclaration
   | ts.SetAccessorDeclaration
   | ts.ConstructorDeclaration;
+
+export interface FunctionMatchResult {
+  matched: boolean;
+  returnType: string;
+  params: ParamsInfo;
+}

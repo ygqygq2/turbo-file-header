@@ -3,7 +3,7 @@ import { TestInfo } from './types';
 
 const testInfo: TestInfo = [
   {
-    testName: 'anonymousFunction',
+    testName: 'ts-anonymousFunction',
     workspaceName: 'function-comment-for-ts',
     files: [
       { fileName: 'variable-function-none-params-with-return-type.ts', cursorLine: 0 },

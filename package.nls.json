@@ -42,6 +42,7 @@
   "turboFileHeader.functionComment.languagesSettings.items.properties.defaultReturnType.description": "Function default return type.",
   "turboFileHeader.functionComment.languagesSettings.items.properties.defaultParamType.description": "Function default param type.",
   "turboFileHeader.functionComment.languagesSettings.items.properties.typesUsingDefaultReturnType.description": "What type use defaultReturnType to display",
+  "turboFileHeader.functionComment.languagesSettings.items.properties.useTypeAlias.description": "Return type use type alias.",
   "turboFileHeader.multilineComments.description": "Whether the multiline comment highlighter should be active.",
   "turboFileHeader.highlightPlainText.description": "Whether the plaintext comment highlighter should be active.",
   "turboFileHeader.tags.description": "Tags which are used to color the comments.",

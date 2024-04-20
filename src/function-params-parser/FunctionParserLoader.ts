@@ -3,6 +3,7 @@ import { CustomError, ErrorCode } from '@/error';
 import { logger } from '@/extension';
 
 import { FunctionParamsParser } from './FunctionParamsParser';
+import { GoParser } from './GoProvider';
 import { JavascriptParser } from './JavascriptProvider';
 import { TypescriptParser } from './TypescriptProvider';
 
@@ -25,7 +26,7 @@ export class FunctionParserLoader {
     typescriptreact: TypescriptParser,
     javascript: JavascriptParser,
     javascriptreact: JavascriptParser,
-    // 添加其他的语言和解析器类...
+    go: GoParser,
   };
 
   public async loadParser(languageId: string): Promise<FunctionParamsParser | null> {

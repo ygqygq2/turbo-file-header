@@ -51,28 +51,32 @@ export abstract class FunctionParamsParser {
     const mergedParams: ParamsInfo = {};
     for (const key in params) {
       mergedParams[key] = {
-        type: params[key].type,
+        // 因为默认值无法确认类型，所以以用户修改的类型为准
+        type:
+          (params[key]?.defaultValue ? paramsInfo[key]?.type : params[key].type) ??
+          params[key].type,
         description: paramsInfo[key]?.description || '',
+        ...(params[key]?.optional && { optional: true }),
+        ...(params[key]?.defaultValue && { defaultValue: params[key].defaultValue }),
       };
     }
 
     // 合并 returnType 和 returnInfo
-    let mergedReturnInfo: ReturnInfo;
-    if (Array.isArray(returnType)) {
-      mergedReturnInfo = returnType.reduce((acc, type, index) => {
-        acc[`return${index + 1}`] = {
-          type,
-          description: returnInfo[`return${index + 1}`]?.description || '',
-        };
-        return acc;
-      }, {} as ReturnInfo);
-    } else {
+    let mergedReturnInfo: ReturnInfo = {};
+    if (typeof returnType === 'string') {
       mergedReturnInfo = {
         default: {
           type: returnType || returnInfo.default?.type || '',
           description: returnInfo.default?.description || '',
         },
       };
+    } else {
+      for (const key in returnType) {
+        mergedReturnInfo[key] = {
+          type: returnType[key].type,
+          description: returnInfo[key]?.description || '',
+        };
+      }
     }
 
     return {
@@ -139,7 +143,8 @@ export abstract class FunctionParamsParser {
     range: vscode.Range,
   ): FunctionCommentInfo {
     const descriptionPattern = /@description\s+(.*)/;
-    const paramPattern = /@param\s+(\w+)\s*\{((?:[^}]|\}(?!\s*$))*)\}\s*(.*)/;
+    const paramPattern =
+      /@param\s+(?:\[(\w+)(?:=(.*?))?\]|(\w+))\s*\{((?:[^}]|\}(?!\s*$))*)\}\s*(.*)/;
     const returnPattern = /@return\s+(?:(\w+)\s*)?\{((?:[^}]|\}(?!\s*$))*)\}\s*(.*)/;
 
     const functionCommentLines = document.getText(range).split('\n');
@@ -155,8 +160,21 @@ export abstract class FunctionParamsParser {
     for (const line of functionCommentLines) {
       let match;
       if ((match = paramPattern.exec(line)) !== null) {
-        const [_, name, type = defaultParamType as string, description = ''] = match;
-        paramsInfo[name] = { type, description };
+        const [
+          _,
+          optionalName,
+          defaultValue,
+          name,
+          type = defaultParamType as string,
+          description = '',
+        ] = match;
+        const realName = optionalName || name;
+        paramsInfo[realName] = {
+          type,
+          description,
+          ...(defaultValue && { defaultValue }),
+          ...(!defaultValue && optionalName && { optional: true }),
+        };
       } else if ((match = returnPattern.exec(line)) !== null) {
         const [_, key = defaultReturnName, type = defaultReturnType, description = ''] = match;
         returnInfo[key] = { type, description };

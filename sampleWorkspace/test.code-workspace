@@ -3,6 +3,7 @@
     { "path": "file-header" },
     { "path": "file-header-project" },
     { "path": "function-comment-for-ts" },
+    { "path": "function-comment-for-go" },
     { "path": "workspace" },
   ],
   "settings": {},

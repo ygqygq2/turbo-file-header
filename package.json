@@ -344,6 +344,11 @@
                       "type": "array",
                       "default": [],
                       "description": "%turboFileHeader.functionComment.languagesSettings.items.properties.typesUsingDefaultReturnType.description%"
+                    },
+                    "useTypeAlias": {
+                      "type": "boolean",
+                      "default": true,
+                      "description": "%turboFileHeader.functionComment.languagesSettings.items.properties.useTypeAlias.description%"
                     }
                   }
                 }

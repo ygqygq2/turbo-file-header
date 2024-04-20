@@ -284,7 +284,13 @@ export function generateFunctionComment(functionCommentInfo: FunctionCommentInfo
   }
 
   for (const paramName in paramsInfo) {
-    functionComment += ` * @param ${paramName} {${paramsInfo[paramName].type}} ${paramsInfo[paramName].description}\n`;
+    if (paramsInfo[paramName]?.defaultValue) {
+      functionComment += ` * @param [${paramName}=${paramsInfo[paramName].defaultValue}] {${paramsInfo[paramName].type}} ${paramsInfo[paramName].description} \n`;
+    } else if (paramsInfo[paramName]?.optional) {
+      functionComment += ` * @param [${paramName}] {${paramsInfo[paramName].type}} ${paramsInfo[paramName].description}\n`;
+    } else {
+      functionComment += ` * @param ${paramName} {${paramsInfo[paramName].type}} ${paramsInfo[paramName].description}\n`;
+    }
   }
 
   functionComment += ' */';

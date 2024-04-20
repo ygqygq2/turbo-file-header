@@ -7,7 +7,8 @@ import { logger } from '@/extension';
 import { LanguageFunctionCommentSettings } from '@/typings/types';
 
 import { FunctionParamsParser } from './FunctionParamsParser';
-import { FunctionParamsInfo, ParamsInfo, TsFunctionNode } from './types';
+import { splitParams } from './ts-splitParams';
+import { FunctionMatchResult, FunctionParamsInfo, ParamsInfo, TsFunctionNode } from './types';
 
 function getRealType(node: TsFunctionNode): { returnType: string; params: ParamsInfo } {
   let returnType = '';
@@ -35,10 +36,55 @@ function getRealType(node: TsFunctionNode): { returnType: string; params: Params
   return { returnType, params };
 }
 
+function matchClassMethod(
+  functionDefinition: string,
+  languageSettings: LanguageFunctionCommentSettings,
+): FunctionMatchResult {
+  const classMethodPattern =
+    /(public|private|protected)?\s*(async)?\s*([a-zA-Z0-9_]+)\s*\(((?:[^()]|\((?:[^()]|\([^()]*\))*\))*)\)(?:\s*:\s*([a-zA-Z0-9_]+))?\s*{[\s\S]*?}/m;
+  const match = classMethodPattern.exec(functionDefinition);
+  if (match) {
+    // 方法括号里面的字符串，匹配最外层括号
+    const functionParamsStr = match[4];
+    const functionParams = splitParams(functionParamsStr, languageSettings);
+    return { matched: true, returnType: match[5], params: functionParams };
+  }
+  return { matched: false, returnType: '', params: {} };
+}
+
+function matchConstructFunction(
+  functionDefinition: string,
+  languageSettings: LanguageFunctionCommentSettings,
+): FunctionMatchResult {
+  const constructFunctionPattern = /constructor\s*\((.*?)\)\s*{[\s\S]*?}/m;
+  const match = constructFunctionPattern.exec(functionDefinition);
+  if (match) {
+    const functionParamsStr = match[1];
+    const functionParams = splitParams(functionParamsStr, languageSettings);
+    return { matched: true, returnType: '', params: functionParams };
+  }
+  return { matched: false, returnType: '', params: {} };
+}
+
+function matchGetterSetterFunction(
+  functionDefinition: string,
+  languageSettings: LanguageFunctionCommentSettings,
+): FunctionMatchResult {
+  const getterSetterPattern =
+    /(get|set)\s*([a-zA-Z0-9_]+)\s*\((.*?)\)\s*:\s*([a-zA-Z0-9_]+)\s*{[\s\S]*?}/m;
+  const match = getterSetterPattern.exec(functionDefinition);
+  if (match) {
+    const functionParamsStr = match[3];
+    const functionParams = splitParams(functionParamsStr, languageSettings);
+    return { matched: true, returnType: match[4], params: functionParams };
+  }
+  return { matched: false, returnType: '', params: {} };
+}
+
 function matchFunction(
   functionDefinition: string,
   languageSettings: LanguageFunctionCommentSettings,
-): { matched: boolean; returnType: string; params: ParamsInfo } {
+): FunctionMatchResult {
   const {
     typesUsingDefaultReturnType = [],
     useTypeAlias = true,
@@ -60,11 +106,11 @@ function matchFunction(
     if (
       ts.isFunctionDeclaration(node) ||
       ts.isFunctionExpression(node) ||
-      ts.isArrowFunction(node) ||
-      ts.isMethodDeclaration(node) ||
-      ts.isGetAccessor(node) ||
-      ts.isSetAccessor(node) ||
-      ts.isConstructorDeclaration(node)
+      ts.isArrowFunction(node)
+      // ts.isMethodDeclaration(node) ||
+      // ts.isGetAccessor(node) ||
+      // ts.isSetAccessor(node) ||
+      // ts.isConstructorDeclaration(node)
     ) {
       matched = true;
       let returnTypeTmp;
@@ -74,6 +120,12 @@ function matchFunction(
           const paramName = param.name.getText();
           const paramType = param.type ? param.type.getText() : defaultParamType;
           params[paramName] = { type: paramType, description: '' };
+          if (param.questionToken) {
+            params[paramName].optional = true;
+          }
+          if (param.initializer) {
+            params[paramName].defaultValue = param.initializer.getText();
+          }
         });
       } else {
         const { returnType: realReturnType, params: realPrams } = getRealType(node);
@@ -95,6 +147,22 @@ function matchFunction(
     logger.handleError(new CustomError(ErrorCode.ParserFunctionFail, error));
   }
 
+  if (!matched) {
+    const matchFunctions = [matchClassMethod, matchConstructFunction, matchGetterSetterFunction];
+    for (const matchFunction of matchFunctions) {
+      const {
+        matched: matchedTmp,
+        returnType: returnTypeTmp,
+        params: paramsTmp,
+      } = matchFunction(functionDefinition, languageSettings);
+      if (matchedTmp) {
+        if (returnTypeTmp && !typesUsingDefaultReturnType.includes(returnTypeTmp)) {
+          returnType = returnTypeTmp;
+        }
+        return { matched: matchedTmp, returnType, params: paramsTmp };
+      }
+    }
+  }
   return { matched, returnType, params };
 }
 
@@ -159,7 +227,7 @@ export class TypescriptParser extends FunctionParamsParser {
       matched,
       returnType: returnTypeTmp,
       params,
-    } = matchFunction(functionDefinition, this.languageSettings);
+    } = matchFunction(functionDefinition, languageSettings);
     if (matched) {
       matchedFunction = true;
       returnType = returnTypeTmp;

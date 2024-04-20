@@ -42,6 +42,7 @@
   "turboFileHeader.functionComment.languagesSettings.items.properties.defaultReturnType.description": "默认函数返回类型",
   "turboFileHeader.functionComment.languagesSettings.items.properties.defaultParamType.description": "默认函数参数返回类型",
   "turboFileHeader.functionComment.languagesSettings.items.properties.typesUsingDefaultReturnType.description": "哪些类型使用 defaultReturnType 显示",
+  "turboFileHeader.functionComment.languagesSettings.items.properties.useTypeAlias.description": "返回类型使用类型别名",
   "turboFileHeader.multilineComments.description": "是否启用多行注释高亮",
   "turboFileHeader.highlightPlainText.description": "是否启用纯文本注释高亮",
   "turboFileHeader.tags.description": "哪些标签将被用于着色注释",
