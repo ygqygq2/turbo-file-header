@@ -1,10 +1,15 @@
 import ts from 'typescript';
 import * as vscode from 'vscode';
 
-export type ParamType = { type: string; description: string };
+export type ParamInfo = {
+  type: string;
+  description: string;
+  optional?: boolean;
+  defaultValue?: string;
+};
 
 export interface ParamsInfo {
-  [key: string]: { type: string; description: string; optional?: boolean; defaultValue?: string };
+  [key: string]: ParamInfo;
 }
 
 export interface ReturnInfo {

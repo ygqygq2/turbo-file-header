@@ -2,6 +2,16 @@
 
 All notable changes to the "turbo-file-header" extension will be documented in this file.
 
+# [0.2.3]
+
+## 新增功能 🌱
+
+- feat: 函数注释支持 go
+
+## 功能优化 🚀
+
+- refactor: js/ts 匹配更准确，支持可选参数，默认参数
+
 # [0.2.2]
 
 ## 新增功能 🌱
