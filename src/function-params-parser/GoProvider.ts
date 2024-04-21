@@ -3,8 +3,11 @@ import * as vscode from 'vscode';
 import { ConfigManager } from '@/configuration/ConfigManager';
 import { logger } from '@/extension';
 import { LanguageFunctionCommentSettings } from '@/typings/types';
+import { escapeRegexString } from '@/utils/str';
 
+import { extractFunctionParamsString } from './extractFunctionParamsString';
 import { FunctionParamsParser } from './FunctionParamsParser';
+import { splitParams } from './go-splitParams';
 import { FunctionParamsInfo, ParamsInfo, ReturnInfo } from './types';
 
 function matchNormalFunction(
@@ -16,25 +19,30 @@ function matchNormalFunction(
   params: ParamsInfo;
 } {
   const { defaultReturnName = 'default' } = languageSettings;
-  let returnType = {};
+  const returnType: ReturnInfo = {};
   let matched = false;
-  const params: ParamsInfo = {};
+  let params: ParamsInfo = {};
 
-  // 普通写法，一个小括号一个大括号，可能有参数，可能有一个返回值，但返回值没有命令，没有括号
-  const functionPattern = /func\s+([a-zA-Z0-9_]+)\s*\((.*?)\)\s*([a-zA-Z0-9_]+)?\s*{[\s\S]*?}/m;
+  // 提取参数括号里的字符串
+  const functionParamsStr = extractFunctionParamsString(functionDefinition);
+  const functionParamsRegStr = escapeRegexString(functionParamsStr);
+  // 普通写法，一个小括号一个大括号，参数使用上面变量，可能有一个返回值，但返回值没有命名，没有括号
+  const functionPattern = new RegExp(
+    `func\\s+([a-zA-Z0-9_]+)\\s*\\(${functionParamsRegStr}\\)\\s*([a-zA-Z0-9_]+)?\\s*{[\\s\\S]*?}`,
+    'm',
+  );
 
   const match = functionPattern.exec(functionDefinition);
 
   if (match) {
     matched = true;
-    returnType = { [defaultReturnName]: { type: match[3], description: '' } };
-
-    const paramsString = match[2];
-    const paramsArray = paramsString.split(',');
-    for (const param of paramsArray) {
-      const [name, type] = param.trim().split(' ');
-      params[name] = { type, description: '' };
+    const returnString = match[2];
+    if (returnString) {
+      const returnTypeStr = returnString.trim();
+      returnType[defaultReturnName] = { type: returnTypeStr, description: '' };
     }
+
+    params = splitParams(functionParamsStr, languageSettings);
   }
 
   return { matched, returnType, params };
@@ -48,32 +56,25 @@ function matchMultiReturnTypeFunction(
   returnType: ReturnInfo;
   params: ParamsInfo;
 } {
-  const { defaultReturnName = 'default' } = languageSettings;
-  const returnType: ReturnInfo = {};
+  let returnType: ReturnInfo = {};
   let matched = false;
-  const params: ParamsInfo = {};
+  let params: ParamsInfo = {};
 
-  // 函数可能有参数，一定有一个或多个返回值，返回值可能有命名，也可能无命名，但一定有括号包住返回值
-  const functionPattern = /func\s+([a-zA-Z0-9_]+)\s*\((.*?)\)\s*\((.*?)\)\s*{[\s\S]*?}/m;
+  const functionParamsStr = extractFunctionParamsString(functionDefinition);
+  const functionParamsRegStr = escapeRegexString(functionParamsStr);
+  // 函数参数使用上面变量，一定有一个或多个返回值，返回值可能有命名，也可能无命名，但一定有括号包住返回值
+  const functionPattern = new RegExp(
+    `func\\s+([a-zA-Z0-9_]+)\\s*\\(${functionParamsRegStr}\\)\\s*\\((.*?)\\)\\s*{[\\s\\S]*?}`,
+    'm',
+  );
   const match = functionPattern.exec(functionDefinition);
 
   if (match) {
     matched = true;
+    params = splitParams(functionParamsStr, languageSettings);
 
-    const paramsString = match[2];
-    const paramsArray = paramsString.split(',');
-    for (const param of paramsArray) {
-      const [name, type] = param.trim().split(' ');
-      params[name] = { type, description: '' };
-    }
-
-    const returnString = match[3];
-    const returnArray = returnString.split(',');
-    let defaultCount = 0;
-    for (const ret of returnArray) {
-      const [name, type] = ret.trim().split(' ');
-      returnType[name || `${defaultReturnName}${defaultCount++}`] = { type, description: '' };
-    }
+    const returnString = match[2] || '';
+    returnType = splitParams(returnString, languageSettings);
   }
 
   return { matched, returnType, params };
@@ -87,31 +88,26 @@ function matchBindTypeFunction(
   returnType: ReturnInfo;
   params: ParamsInfo;
 } {
-  const { defaultReturnName = 'default' } = languageSettings;
-  const returnType: ReturnInfo = {};
+  let returnType: ReturnInfo = {};
   let matched = false;
-  const params: ParamsInfo = {};
+  let params: ParamsInfo = {};
 
-  // 绑定到类型的函数，可能有参数，可能有一个或多个返回值，返回值可能有命名
-  const functionPattern =
-    /func\s+\((.*?)\s*\*\s*([a-zA-Z0-9_]+)\)\s*([a-zA-Z0-9_]+)\s*\((.*?)\)\s*\((.*?)\)\s*{[\s\S]*?}/m;
+  const functionParamsStr = extractFunctionParamsString(functionDefinition);
+  const functionParamsRegStr = escapeRegexString(functionParamsStr);
+  // 绑定到类型的函数，参数使用上面变量，可能有一个或多个返回值，返回值可能有命名
+  const functionPattern = new RegExp(
+    `func\\s+([a-zA-Z0-9_]+)\\s*\\(${functionParamsRegStr}\\)\\s*\\((.*?)\\)\\s*{[\\s\\S]*?}`,
+    'm',
+  );
 
   const match = functionPattern.exec(functionDefinition);
   if (match) {
     matched = true;
-    const paramsString = match[4];
-    const paramsArray = paramsString.split(',');
-    for (const param of paramsArray) {
-      const [name, type] = param.trim().split(' ');
-      params[name] = { type, description: '' };
-    }
+    const functionParamsStr = match[4] || '';
+    params = splitParams(functionParamsStr, languageSettings);
 
     const returnString = match[5];
-    const returnArray = returnString.split(',');
-    for (const ret of returnArray) {
-      const [name, type] = ret.trim().split(' ');
-      returnType[name || defaultReturnName] = { type, description: '' };
-    }
+    returnType = splitParams(returnString, languageSettings);
   }
 
   return { matched, returnType, params };
@@ -133,18 +129,14 @@ function matchFunction(
   let params: ParamsInfo = {};
 
   const matchers = [matchNormalFunction, matchMultiReturnTypeFunction, matchBindTypeFunction];
-  const result = matchers
-    .map((matcher) => matcher(functionDefinition, languageSettings))
-    .find((result) => result.matched);
-  if (result?.matched) {
-    matched = result.matched;
-    params = result.params;
-    if (
-      Object.keys(result.returnType).length === 1 &&
-      defaultReturnName in result.returnType &&
-      result.returnType?.[defaultReturnName]?.type !== undefined
-    ) {
+
+  for (const matcher of matchers) {
+    const result = matcher(functionDefinition, languageSettings);
+    if (result.matched) {
+      matched = result.matched;
+      params = result.params;
       returnType = result.returnType;
+      break;
     }
   }
 

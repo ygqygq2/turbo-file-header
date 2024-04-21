@@ -178,7 +178,7 @@ export class FileheaderManager {
           range,
         ) || {
           paramsInfo: {},
-          returnInfo: { default: { type: '', description: '' } },
+          returnInfo: {},
           descriptionInfo: '',
         };
         const functionCommentInfo = parser?.generateFunctionCommentInfo(
@@ -187,7 +187,7 @@ export class FileheaderManager {
         );
 
         if (functionCommentInfo) {
-          const originFunctionComment = generateFunctionComment(originFunctionInfo);
+          const originFunctionComment = generateFunctionComment(originFunctionInfo, true);
           const functionComment = generateFunctionComment(functionCommentInfo);
           // 函数注释没有变化
           if (originFunctionComment === functionComment) {

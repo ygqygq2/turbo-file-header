@@ -273,8 +273,21 @@ export function updateBlockCommentState(
   return isInsideBlockComment;
 }
 
-export function generateFunctionComment(functionCommentInfo: FunctionCommentInfo): string {
+export function generateFunctionComment(
+  functionCommentInfo: FunctionCommentInfo,
+  isOrigin: boolean = false,
+): string {
   const { paramsInfo, returnInfo, descriptionInfo } = functionCommentInfo;
+
+  if (isOrigin) {
+    if (
+      Object.keys(paramsInfo).length === 0 &&
+      Object.keys(returnInfo).length === 0 &&
+      !descriptionInfo
+    ) {
+      return '';
+    }
+  }
 
   let functionComment = '/**\n';
   functionComment += ` * @description ${descriptionInfo}\n`;

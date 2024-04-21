@@ -1,8 +1,8 @@
 /**
- * @description 
- * @return default {string} 
- * @param a {string} 
- * @param b {{key: string}} 
+ * @description test
+ * @return default {string} returnValue
+ * @param a {string} stringA
+ * @param b {{key: string}} stringB
  */
 const func = function(a: string, b: {key: string}): string {
   console.log(a + b);
