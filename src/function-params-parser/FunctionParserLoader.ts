@@ -4,6 +4,7 @@ import { logger } from '@/extension';
 
 import { FunctionParamsParser } from './FunctionParamsParser';
 import { GoParser } from './GoProvider';
+import { JavaParser } from './JavaProvider';
 import { JavascriptParser } from './JavascriptProvider';
 import { TypescriptParser } from './TypescriptProvider';
 
@@ -27,6 +28,7 @@ export class FunctionParserLoader {
     javascript: JavascriptParser,
     javascriptreact: JavascriptParser,
     go: GoParser,
+    java: JavaParser,
   };
 
   public async loadParser(languageId: string): Promise<FunctionParamsParser | null> {

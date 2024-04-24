@@ -4,6 +4,7 @@
     { "path": "file-header-project" },
     { "path": "function-comment-for-ts" },
     { "path": "function-comment-for-go" },
+    { "path": "function-comment-for-java" },
     { "path": "workspace" },
   ],
   "settings": {},
