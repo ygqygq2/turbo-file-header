@@ -274,10 +274,12 @@ export function updateBlockCommentState(
 }
 
 export function generateFunctionComment(
+  comments: vscode.CommentRule,
   functionCommentInfo: FunctionCommentInfo,
   isOrigin: boolean = false,
 ): string {
   const { paramsInfo, returnInfo, descriptionInfo } = functionCommentInfo;
+  const { blockCommentStart, blockCommentEnd } = getBlockComment(comments);
 
   if (isOrigin) {
     if (
@@ -289,24 +291,34 @@ export function generateFunctionComment(
     }
   }
 
-  let functionComment = '/**\n';
-  functionComment += ` * @description ${descriptionInfo}\n`;
+  let functionComment = '';
+  let lineStart = '';
+  if (comments && comments?.blockComment && comments?.blockComment.length) {
+    lineStart = ` `;
+  } else {
+    lineStart = `${blockCommentStart} `;
+  }
+
+  functionComment += `${blockCommentStart === '/*' ? '/**' : blockCommentStart}\n`;
+  functionComment += `${lineStart}* @description ${descriptionInfo}\n`;
 
   for (const returnKey in returnInfo) {
-    functionComment += ` * @return ${returnKey} {${returnInfo[returnKey].type}} ${returnInfo[returnKey].description}\n`;
+    functionComment += `${lineStart}* @return ${returnKey} {${returnInfo[returnKey].type}} ${returnInfo[returnKey].description}\n`;
   }
 
   for (const paramName in paramsInfo) {
     if (paramsInfo[paramName]?.defaultValue) {
-      functionComment += ` * @param [${paramName}=${paramsInfo[paramName].defaultValue}] {${paramsInfo[paramName].type}} ${paramsInfo[paramName].description} \n`;
+      functionComment += `${lineStart}* @param [${paramName}=${paramsInfo[paramName].defaultValue}] {${paramsInfo[paramName].type}} ${paramsInfo[paramName].description} \n`;
     } else if (paramsInfo[paramName]?.optional) {
-      functionComment += ` * @param [${paramName}] {${paramsInfo[paramName].type}} ${paramsInfo[paramName].description}\n`;
+      functionComment += `${lineStart}* @param [${paramName}] {${paramsInfo[paramName].type}} ${paramsInfo[paramName].description}\n`;
     } else {
-      functionComment += ` * @param ${paramName} {${paramsInfo[paramName].type}} ${paramsInfo[paramName].description}\n`;
+      functionComment += `${lineStart}* @param ${paramName} {${paramsInfo[paramName].type}} ${paramsInfo[paramName].description}\n`;
     }
   }
 
-  functionComment += ' */';
+  functionComment +=
+    blockCommentEnd === '*/' ? `${lineStart}${blockCommentEnd}` : `${blockCommentEnd}`;
+
   return functionComment;
 }
 

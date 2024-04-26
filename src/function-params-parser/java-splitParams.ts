@@ -17,7 +17,9 @@ export function splitParams(
       bracketCount++;
     } else if (char === ')' || char === ']' || char === '}' || char === '>') {
       bracketCount--;
-    } else if (
+    }
+
+    if (
       (char === ',' && bracketCount === 0) ||
       (i === paramsStr.length - 1 && bracketCount === 0)
     ) {

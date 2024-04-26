@@ -6,7 +6,7 @@ export function splitParams(
   paramsStr: string,
   languageSettings: LanguageFunctionCommentSettings,
 ): ParamsInfo {
-  const { defaultParamType = 'any', defaultReturnName = 'default' } = languageSettings;
+  const { defaultParamType = 'Any', defaultReturnName = 'default' } = languageSettings;
   let bracketCount = 0;
   let paramStartIndex = 0;
   let defaultCount = 0;
@@ -26,23 +26,22 @@ export function splitParams(
       const paramStr = paramsStr
         .slice(paramStartIndex, i === paramsStr.length - 1 ? i + 1 : i)
         .trim();
-      const paramPattern = /^(\w+)?\s*(.*)$/;
+
+      const paramPattern = /^(\*\*|\*)?(\w+)?\s*(:\s*(.*?))?(=\s*(.*))?$/;
       const match = paramPattern.exec(paramStr);
       if (match) {
-        let name, type;
-        if (match[2]) {
-          name =
-            match[1] ||
-            (defaultCount > 0 ? `${defaultReturnName}${defaultCount++}` : defaultReturnName);
-          type = match[2].trim() || defaultParamType;
-        } else {
-          name = defaultCount > 0 ? `${defaultReturnName}${defaultCount++}` : defaultReturnName;
-          type = match[1].trim() || defaultParamType;
-        }
-        params[name] = { type, description: '' };
+        const name =
+          match[2] ||
+          (defaultCount > 0 ? `${defaultReturnName}${defaultCount++}` : defaultReturnName);
+        const type = match[4] || defaultParamType;
+        const optional = match[1] || match[6] ? { optional: true } : {};
+        const defaultValue = match[6] ? { defaultValue: match[6] } : {};
+
+        params[name] = { type, description: '', ...optional, ...defaultValue };
       }
       paramStartIndex = i + 1;
     }
   }
+
   return params;
 }

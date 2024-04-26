@@ -7,7 +7,7 @@ import { escapeRegexString } from '@/utils/str';
 
 import { extractFunctionParamsString } from './extractFunctionParamsString';
 import { FunctionParamsParser } from './FunctionParamsParser';
-import { splitParams } from './go-splitParams';
+import { splitParams } from './python-splitParams';
 import { FunctionParamsInfo, ParamsInfo, ReturnInfo } from './types';
 
 function matchNormalFunction(
@@ -18,7 +18,7 @@ function matchNormalFunction(
   returnType: ReturnInfo;
   params: ParamsInfo;
 } {
-  const { defaultReturnName = 'default' } = languageSettings;
+  const { defaultReturnName = 'default', defaultReturnType = 'Any' } = languageSettings;
   const returnType: ReturnInfo = {};
   let matched = false;
   let params: ParamsInfo = {};
@@ -26,9 +26,8 @@ function matchNormalFunction(
   // 提取参数括号里的字符串
   const functionParamsStr = extractFunctionParamsString(functionDefinition);
   const functionParamsRegStr = escapeRegexString(functionParamsStr);
-  // 普通写法，一个小括号一个大括号，参数使用上面变量，可能有一个返回值，但返回值没有命名，没有括号
   const functionPattern = new RegExp(
-    `func\\s+([a-zA-Z0-9_]+)\\s*\\(${functionParamsRegStr}\\)\\s*([a-zA-Z0-9_]+)?\\s*{[\\s\\S]*?}`,
+    `def\\s+([a-zA-Z0-9_]+)\\s*\\(${functionParamsRegStr}\\)\\s*(->\\s*(.*))?\\s*:`,
     'm',
   );
 
@@ -36,78 +35,14 @@ function matchNormalFunction(
 
   if (match) {
     matched = true;
-    const returnString = match[2];
-    if (returnString) {
-      const returnTypeStr = returnString.trim();
-      returnType[defaultReturnName] = { type: returnTypeStr, description: '' };
-    }
+    const returnTypeStr = match[3] ? match[3].trim() : defaultReturnType;
+
+    returnType[defaultReturnName] = {
+      type: returnTypeStr,
+      description: '',
+    };
 
     params = splitParams(functionParamsStr, languageSettings);
-  }
-
-  return { matched, returnType, params };
-}
-
-function matchMultiReturnTypeFunction(
-  functionDefinition: string,
-  languageSettings: LanguageFunctionCommentSettings,
-): {
-  matched: boolean;
-  returnType: ReturnInfo;
-  params: ParamsInfo;
-} {
-  let returnType: ReturnInfo = {};
-  let matched = false;
-  let params: ParamsInfo = {};
-
-  const functionParamsStr = extractFunctionParamsString(functionDefinition);
-  const functionParamsRegStr = escapeRegexString(functionParamsStr);
-  // 函数参数使用上面变量，一定有一个或多个返回值，返回值可能有命名，也可能无命名，但一定有括号包住返回值
-  const functionPattern = new RegExp(
-    `func\\s+([a-zA-Z0-9_]+)\\s*\\(${functionParamsRegStr}\\)\\s*\\((.*?)\\)\\s*{[\\s\\S]*?}`,
-    'm',
-  );
-  const match = functionPattern.exec(functionDefinition);
-
-  if (match) {
-    matched = true;
-    params = splitParams(functionParamsStr, languageSettings);
-
-    const returnString = match[2] || '';
-    returnType = splitParams(returnString, languageSettings);
-  }
-
-  return { matched, returnType, params };
-}
-
-function matchBindTypeFunction(
-  functionDefinition: string,
-  languageSettings: LanguageFunctionCommentSettings,
-): {
-  matched: boolean;
-  returnType: ReturnInfo;
-  params: ParamsInfo;
-} {
-  let returnType: ReturnInfo = {};
-  let matched = false;
-  let params: ParamsInfo = {};
-
-  const functionParamsStr = extractFunctionParamsString(functionDefinition);
-  const functionParamsRegStr = escapeRegexString(functionParamsStr);
-  // 绑定到类型的函数，参数使用上面变量，可能有一个或多个返回值，返回值可能有命名
-  const functionPattern = new RegExp(
-    `func\\s+([a-zA-Z0-9_]+)\\s*\\(${functionParamsRegStr}\\)\\s*\\((.*?)\\)\\s*{[\\s\\S]*?}`,
-    'm',
-  );
-
-  const match = functionPattern.exec(functionDefinition);
-  if (match) {
-    matched = true;
-    const functionParamsStr = match[4] || '';
-    params = splitParams(functionParamsStr, languageSettings);
-
-    const returnString = match[5];
-    returnType = splitParams(returnString, languageSettings);
   }
 
   return { matched, returnType, params };
@@ -121,14 +56,14 @@ function matchFunction(
   functionDefinition: string,
   languageSettings: LanguageFunctionCommentSettings,
 ): { matched: boolean; returnType: ReturnInfo; params: ParamsInfo } {
-  const { defaultReturnName = 'default', defaultReturnType = 'auto' } = languageSettings;
+  const { defaultReturnName = 'default', defaultReturnType = 'Any' } = languageSettings;
   let returnType: ReturnInfo = {
     [defaultReturnName]: { type: defaultReturnType, description: '' },
   };
   let matched = false;
   let params: ParamsInfo = {};
 
-  const matchers = [matchNormalFunction, matchMultiReturnTypeFunction, matchBindTypeFunction];
+  const matchers = [matchNormalFunction];
 
   for (const matcher of matchers) {
     const result = matcher(functionDefinition, languageSettings);
@@ -143,7 +78,7 @@ function matchFunction(
   return { matched, returnType, params };
 }
 
-export class GoParser extends FunctionParamsParser {
+export class PythonParser extends FunctionParamsParser {
   constructor(configManager: ConfigManager, languageId: string) {
     super(configManager, languageId);
   }
@@ -152,6 +87,7 @@ export class GoParser extends FunctionParamsParser {
     let functionDefinition = '';
     let bracketCount = 0; // 大括号计数
     let parenthesisCount = 0; // 小括号计数
+    let colonDetected = false; // 函数冒号检测
 
     for (let i = startLine; i < document.lineCount; i++) {
       const line = document.lineAt(i);
@@ -166,10 +102,12 @@ export class GoParser extends FunctionParamsParser {
           bracketCount++;
         } else if (char === '}') {
           bracketCount--;
+        } else if (char === ':' && parenthesisCount === 0) {
+          colonDetected = true;
         }
       }
 
-      if (bracketCount === 0 && parenthesisCount === 0) {
+      if (bracketCount === 0 && parenthesisCount === 0 && colonDetected) {
         break;
       }
     }

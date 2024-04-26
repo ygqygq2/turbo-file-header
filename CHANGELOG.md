@@ -2,6 +2,12 @@
 
 All notable changes to the "turbo-file-header" extension will be documented in this file.
 
+# [0.2.5]
+
+## 新增功能 🌱
+
+- feat: 函数注释支持 python
+
 # [0.2.4]
 
 ## 新增功能 🌱

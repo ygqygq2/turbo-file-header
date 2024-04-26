@@ -7,7 +7,7 @@ import { escapeRegexString } from '@/utils/str';
 
 import { extractFunctionParamsString } from './extractFunctionParamsString';
 import { FunctionParamsParser } from './FunctionParamsParser';
-import { splitParams } from './go-splitParams';
+import { splitParams } from './java-splitParams';
 import { FunctionParamsInfo, ParamsInfo, ReturnInfo } from './types';
 
 function matchNormalFunction(
@@ -112,10 +112,6 @@ export class JavaParser extends FunctionParamsParser {
     for (let i = startLine; i < document.lineCount; i++) {
       const line = document.lineAt(i);
       functionDefinition += line.text + '\n';
-
-      if (line.text.includes('=>') && !line.text.match(/=>\s*{/)) {
-        break;
-      }
 
       for (const char of line.text) {
         if (char === '(') {

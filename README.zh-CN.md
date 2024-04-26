@@ -45,7 +45,7 @@ Properties:
 | 配置 `tags` 在明亮主题   | 明亮主题中的 `tags` 配置                                              | tagsLight                        | `[]`                     |
 | 配置 `tags` 在暗黑主题   | 暗黑主题中的 `tags` 配置                                              | tagsDark                         | `[]`                     |
 
-**注意e**:
+**注意**:
 
 - `include` 和 `exclude` 是为了控制文件头影响范围，`addFileheader` 命令不受它们影响。
 - `author` 包含用户名/邮箱，如果文件被 VCS 追踪，将从 VCS 中获取用户信息，否则将使用备用用户名/邮箱.

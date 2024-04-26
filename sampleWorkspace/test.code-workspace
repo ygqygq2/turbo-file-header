@@ -5,6 +5,7 @@
     { "path": "function-comment-for-ts" },
     { "path": "function-comment-for-go" },
     { "path": "function-comment-for-java" },
+    { "path": "function-comment-for-python" },
     { "path": "workspace" },
   ],
   "settings": {},

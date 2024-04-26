@@ -6,6 +6,7 @@ import { FunctionParamsParser } from './FunctionParamsParser';
 import { GoParser } from './GoProvider';
 import { JavaParser } from './JavaProvider';
 import { JavascriptParser } from './JavascriptProvider';
+import { PythonParser } from './PythonProvider';
 import { TypescriptParser } from './TypescriptProvider';
 
 export class FunctionParserLoader {
@@ -29,6 +30,7 @@ export class FunctionParserLoader {
     javascriptreact: JavascriptParser,
     go: GoParser,
     java: JavaParser,
+    python: PythonParser,
   };
 
   public async loadParser(languageId: string): Promise<FunctionParamsParser | null> {
