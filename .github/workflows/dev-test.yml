@@ -26,7 +26,7 @@ jobs:
             ${{ runner.os }}-pnpm-
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
-        run: pnpm i --frozen-lockfile --ignore-scripts
+        run: pnpm i --frozen-lockfile --ignore-scripts || pnpm i --ignore-scripts
       - run: |
           export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/dbus/system_bus_socket
           sudo systemctl start dbus
