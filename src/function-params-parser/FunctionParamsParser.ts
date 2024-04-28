@@ -53,8 +53,9 @@ export abstract class FunctionParamsParser {
       mergedParams[key] = {
         // 因为默认值无法确认类型，所以以用户修改的类型为准
         type:
-          (params[key]?.defaultValue ? paramsInfo[key]?.type : params[key].type) ??
-          params[key].type,
+          (params[key]?.defaultValue && paramsInfo[key]?.defaultValue
+            ? paramsInfo[key]?.type
+            : params[key].type) ?? params[key].type,
         description: paramsInfo[key]?.description || '',
         ...(params[key]?.optional && { optional: true }),
         ...(params[key]?.defaultValue && { defaultValue: params[key].defaultValue }),
@@ -144,7 +145,7 @@ export abstract class FunctionParamsParser {
   ): FunctionCommentInfo {
     const descriptionPattern = /@description\s+(.*)/;
     const paramPattern =
-      /@param\s+(?:\[(\w+)(?:=(.*?))?\]|(\w+))\s*\{((?:[^}]|\}(?!\s*$))*)\}\s*(.*)/;
+      /@param\s+(?:\[\s*([^=\]]+)(?:=(.*?))?\s*\]|([^=\]]+))\s*\{((?:[^}]|\}(?!\s*$))*)\}\s*(.*)/;
     const returnPattern = /@return\s+(?:(\w+)\s*)?\{((?:[^}]|\}(?!\s*$))*)\}\s*(.*)/;
 
     const functionCommentLines = document.getText(range).split('\n');

@@ -9,6 +9,7 @@ const testInfo: TestInfo = [
       { fileName: 'function-none-params-with-return.py', cursorLine: 0 },
       { fileName: 'function-none-params-without-return.py', cursorLine: 0 },
       { fileName: 'function-optional-params-with-return.py', cursorLine: 0 },
+      { fileName: 'function-with-params-with-return.py', cursorLine: 0 },
       { fileName: 'function-with-params-without-return.py', cursorLine: 0 },
     ],
   },

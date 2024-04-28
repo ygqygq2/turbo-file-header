@@ -1,10 +1,8 @@
-/**
+"""
  * @description 
- * @return default {int} 
- * @param String {a} 
- * @param int {b} 
- */
-public int func(String a, int b) {
-  System.out.println("test");
-  return 1;
-}
+ * @return default {Union[int, float]} 
+ * @param a {Union[int, float]} 
+ * @param b {Union[int, float]} 
+"""
+def add(a: Union[int, float], b: Union[int, float]) -> Union[int, float]:
+    return a + b
