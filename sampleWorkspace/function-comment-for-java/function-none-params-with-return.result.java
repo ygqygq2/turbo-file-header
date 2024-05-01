@@ -1,6 +1,6 @@
 /**
  * @description 
- * @return default {void} 
+ * @return {void} default 
  */
 public static void func() {
   System.out.println("test");

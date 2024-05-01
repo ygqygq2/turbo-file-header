@@ -1,8 +1,8 @@
 /**
  * @description 
- * @return default {int} 
- * @param String {a} 
- * @param int {b} 
+ * @return {int} default 
+ * @param {a} String 
+ * @param {b} int 
  */
 public int func(String a, int b) {
   System.out.println("test");

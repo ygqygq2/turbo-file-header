@@ -349,6 +349,11 @@
                       "type": "boolean",
                       "default": true,
                       "description": "%turboFileHeader.functionComment.languagesSettings.items.properties.useTypeAlias.description%"
+                    },
+                    "paramNameBeforeType": {
+                      "type": "boolean",
+                      "description": "%turboFileHeader.functionComment.languagesSettings.items.properties.paramNameBeforeType.description%",
+                      "default": true
                     }
                   }
                 }
@@ -368,7 +373,15 @@
                   "unknown",
                   "any"
                 ],
-                "useTypeAlias": true
+                "useTypeAlias": true,
+                "paramNameBeforeType": true
+              },
+              {
+                "languageId": "java",
+                "defaultReturnName": "default",
+                "defaultReturnType": "auto",
+                "defaultParamType": "any",
+                "paramNameBeforeType": false
               }
             ]
           }

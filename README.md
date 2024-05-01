@@ -157,8 +157,21 @@ Properties:
       "defaultReturnName": "default",
       "defaultReturnType": "auto",
       "defaultParamType": "any",
-      "typesUsingDefaultReturnType": ["void", "never", "unknown", "any"],
-      "useTypeAlias": true
+      "typesUsingDefaultReturnType": [
+        "void",
+        "never",
+        "unknown",
+        "any"
+      ],
+      "useTypeAlias": true,
+      "paramNameBeforeType": true
+    },
+    {
+      "languageId": "java",
+      "defaultReturnName": "default",
+      "defaultReturnType": "auto",
+      "defaultParamType": "any",
+      "paramNameBeforeType": false
     }
   ]
 }

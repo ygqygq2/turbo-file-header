@@ -22,7 +22,7 @@ export abstract class FunctionParamsParser {
     languageSettings?: LanguageFunctionCommentSettings,
   ): FunctionParamsInfo;
 
-  protected getLanguageSettings() {
+  public getLanguageSettings() {
     const configuration = this.configManager.getConfiguration();
     const languagesSettings = configuration.functionComment?.languagesSettings || [];
     const currentLanguageSetting = languagesSettings.find(
@@ -143,13 +143,36 @@ export abstract class FunctionParamsParser {
     document: vscode.TextDocument,
     range: vscode.Range,
   ): FunctionCommentInfo {
-    const descriptionPattern = /@description\s+(.*)/;
+    const { paramNameBeforeType } = this.languageSettings;
+    const functionCommentLines = document.getText(range).split('\n');
+
+    return paramNameBeforeType
+      ? this.parseFunctionCommentNameFirst(functionCommentLines)
+      : this.parseFunctionCommentTypeFirst(functionCommentLines);
+  }
+
+  protected parseFunctionCommentNameFirst(functionCommentLines: string[]): FunctionCommentInfo {
     const paramPattern =
       /@param\s+(?:\[\s*([^=\]]+)(?:=(.*?))?\s*\]|([^=\]]+))\s*\{((?:[^}]|\}(?!\s*$))*)\}\s*(.*)/;
     const returnPattern = /@return\s+(?:(\w+)\s*)?\{((?:[^}]|\}(?!\s*$))*)\}\s*(.*)/;
 
-    const functionCommentLines = document.getText(range).split('\n');
+    return this.parseFunctionCommentLines(functionCommentLines, paramPattern, returnPattern, true);
+  }
 
+  protected parseFunctionCommentTypeFirst(functionCommentLines: string[]): FunctionCommentInfo {
+    const paramPattern =
+      /@param\s+\{((?:[^}]|\}(?!\s*$))*)\}\s*(?:\[\s*([^=\]]+)(?:=(.*?))?\s*\]|([^=\]]+))\s*(.*)/;
+    const returnPattern = /@return\s+\{((?:[^}]|\}(?!\s*$))*)\}\s*(\w+)\s*(.*)/;
+
+    return this.parseFunctionCommentLines(functionCommentLines, paramPattern, returnPattern, false);
+  }
+
+  protected parseFunctionCommentLines(
+    functionCommentLines: string[],
+    paramPattern: RegExp,
+    returnPattern: RegExp,
+    paramNameBeforeType: boolean,
+  ): FunctionCommentInfo {
     const paramsInfo: ParamsInfo = {};
     const returnInfo: ReturnInfo = {};
     let descriptionInfo = '';
@@ -158,17 +181,30 @@ export abstract class FunctionParamsParser {
       defaultReturnType = 'auto',
       defaultParamType = 'any',
     } = this.languageSettings;
+    const descriptionPattern = /@description\s+(.*)/;
     for (const line of functionCommentLines) {
       let match;
       if ((match = paramPattern.exec(line)) !== null) {
-        const [
-          _,
-          optionalName,
-          defaultValue,
-          name,
-          type = defaultParamType as string,
-          description = '',
-        ] = match;
+        let _, optionalName, defaultValue, name, type, description;
+        if (paramNameBeforeType) {
+          [
+            _,
+            optionalName,
+            defaultValue,
+            name,
+            type = defaultParamType as string,
+            description = '',
+          ] = match;
+        } else {
+          [
+            _,
+            type = defaultParamType as string,
+            optionalName,
+            defaultValue,
+            name,
+            description = '',
+          ] = match;
+        }
         const realName = optionalName || name;
         paramsInfo[realName] = {
           type,

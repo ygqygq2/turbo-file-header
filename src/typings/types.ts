@@ -153,6 +153,7 @@ export interface LanguageFunctionCommentSettings {
   defaultParamType?: string;
   typesUsingDefaultReturnType?: string[];
   useTypeAlias?: boolean;
+  paramNameBeforeType?: boolean;
 }
 
 export type LanguagesSettings = LanguageFunctionCommentSettings[];

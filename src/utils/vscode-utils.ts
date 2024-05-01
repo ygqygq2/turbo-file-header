@@ -276,6 +276,7 @@ export function updateBlockCommentState(
 export function generateFunctionComment(
   comments: vscode.CommentRule,
   functionCommentInfo: FunctionCommentInfo,
+  paramNameBeforeType: boolean = true,
   isOrigin: boolean = false,
 ): string {
   const { paramsInfo, returnInfo, descriptionInfo } = functionCommentInfo;
@@ -303,17 +304,22 @@ export function generateFunctionComment(
   functionComment += `${lineStart}* @description ${descriptionInfo}\n`;
 
   for (const returnKey in returnInfo) {
-    functionComment += `${lineStart}* @return ${returnKey} {${returnInfo[returnKey].type}} ${returnInfo[returnKey].description}\n`;
+    const returnContent = paramNameBeforeType
+      ? `${returnKey} {${returnInfo[returnKey].type}} ${returnInfo[returnKey].description}`
+      : `{${returnInfo[returnKey].type}} ${returnKey} ${returnInfo[returnKey].description}`;
+    functionComment += `${lineStart}* @return ${returnContent}\n`;
   }
 
   for (const paramName in paramsInfo) {
+    let paramContent = paramNameBeforeType
+      ? `${paramName} {${paramsInfo[paramName].type}}`
+      : `{${paramsInfo[paramName].type}} ${paramName}`;
     if (paramsInfo[paramName]?.defaultValue) {
-      functionComment += `${lineStart}* @param [${paramName}=${paramsInfo[paramName].defaultValue}] {${paramsInfo[paramName].type}} ${paramsInfo[paramName].description} \n`;
+      paramContent = `[${paramName}=${paramsInfo[paramName].defaultValue}] {${paramsInfo[paramName].type}}`;
     } else if (paramsInfo[paramName]?.optional) {
-      functionComment += `${lineStart}* @param [${paramName}] {${paramsInfo[paramName].type}} ${paramsInfo[paramName].description}\n`;
-    } else {
-      functionComment += `${lineStart}* @param ${paramName} {${paramsInfo[paramName].type}} ${paramsInfo[paramName].description}\n`;
+      paramContent = `[${paramName}] {${paramsInfo[paramName].type}}`;
     }
+    functionComment += `${lineStart}* @param ${paramContent} ${paramsInfo[paramName].description}\n`;
   }
 
   functionComment +=
@@ -321,7 +327,6 @@ export function generateFunctionComment(
 
   return functionComment;
 }
-
 export async function getText(workspaceFolderName: string, expectedFile: string) {
   const base = getWorkspaceFolderUriByName(workspaceFolderName);
   const expectedPath = path.join(base.fsPath, expectedFile);

@@ -187,8 +187,19 @@ export class FileheaderManager {
         );
 
         if (functionCommentInfo) {
-          const originFunctionComment = generateFunctionComment(comments, originFunctionInfo, true);
-          const functionComment = generateFunctionComment(comments, functionCommentInfo);
+          const { paramNameBeforeType = true } = parser?.getLanguageSettings() ?? {};
+          const originFunctionComment = generateFunctionComment(
+            comments,
+            originFunctionInfo,
+            paramNameBeforeType,
+            true,
+          );
+          const functionComment = generateFunctionComment(
+            comments,
+            functionCommentInfo,
+            paramNameBeforeType,
+            false,
+          );
           // 函数注释没有变化
           if (originFunctionComment === functionComment) {
             logger.info('Not need update function comment:', document.uri.fsPath);

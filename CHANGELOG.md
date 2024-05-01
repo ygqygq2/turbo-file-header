@@ -2,6 +2,16 @@
 
 All notable changes to the "turbo-file-header" extension will be documented in this file.
 
+# [0.2.7]
+
+## 新增功能 🌱
+
+- feat: 函数注释支持 rust
+
+## 功能优化 🚀
+
+- refactor: 增加配置控制函数注释参数在前还是类型在前
+
 # [0.2.6]
 
 ## 新增功能 🌱
