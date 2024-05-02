@@ -8,6 +8,7 @@ import { JavaParser } from './JavaProvider';
 import { JavascriptParser } from './JavascriptProvider';
 import { PhpParser } from './PhpProvider';
 import { PythonParser } from './PythonProvider';
+import { RustParser } from './RustProvider';
 import { TypescriptParser } from './TypescriptProvider';
 
 export class FunctionParserLoader {
@@ -33,6 +34,7 @@ export class FunctionParserLoader {
     java: JavaParser,
     python: PythonParser,
     php: PhpParser,
+    rust: RustParser,
   };
 
   public async loadParser(languageId: string): Promise<FunctionParamsParser | null> {

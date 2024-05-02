@@ -2,7 +2,7 @@
   "name": "turbo-file-header",
   "displayName": "Turbo File Header",
   "description": "%description%",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "icon": "resources/icons/icon.png",
   "repository": {
     "type": "git",
