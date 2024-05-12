@@ -2,6 +2,16 @@
 
 All notable changes to the "turbo-file-header" extension will be documented in this file.
 
+# [0.2.8]
+
+## 新增功能 🌱
+
+- feat: 函数注释支持 c
+
+## 问题修复 🐛
+
+- fix: 修复 paramNameBeforeType 解构时未设置默认值引起问题
+
 # [0.2.7]
 
 ## 新增功能 🌱

@@ -2,6 +2,7 @@ import { ConfigManager } from '@/configuration/ConfigManager';
 import { CustomError, ErrorCode } from '@/error';
 import { logger } from '@/extension';
 
+import { CParser } from './CProvider';
 import { FunctionParamsParser } from './FunctionParamsParser';
 import { GoParser } from './GoProvider';
 import { JavaParser } from './JavaProvider';
@@ -30,11 +31,13 @@ export class FunctionParserLoader {
     typescriptreact: TypescriptParser,
     javascript: JavascriptParser,
     javascriptreact: JavascriptParser,
+    vue: TypescriptParser,
     go: GoParser,
     java: JavaParser,
     python: PythonParser,
     php: PhpParser,
     rust: RustParser,
+    c: CParser,
   };
 
   public async loadParser(languageId: string): Promise<FunctionParamsParser | null> {

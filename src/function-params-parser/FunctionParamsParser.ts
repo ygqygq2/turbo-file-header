@@ -143,7 +143,7 @@ export abstract class FunctionParamsParser {
     document: vscode.TextDocument,
     range: vscode.Range,
   ): FunctionCommentInfo {
-    const { paramNameBeforeType } = this.languageSettings;
+    const { paramNameBeforeType = true } = this.languageSettings;
     const functionCommentLines = document.getText(range).split('\n');
 
     return paramNameBeforeType
@@ -154,8 +154,7 @@ export abstract class FunctionParamsParser {
   protected parseFunctionCommentNameFirst(functionCommentLines: string[]): FunctionCommentInfo {
     const paramPattern =
       /@param\s+(?:\[\s*([^=\]]+)(?:=(.*?))?\s*\]|([^=\]]+))\s*\{((?:[^}]|\}(?!\s*$))*)\}\s*(.*)/;
-    const returnPattern = /@return\s+(?:(\w+)\s*)?\{((?:[^}]|\}(?!\s*$))*)\}\s*(.*)/;
-
+    const returnPattern = /@return\s+(\w+)\s*\{((?:[^}]|\}(?!\s*$))*)\}\s*(.*)/;
     return this.parseFunctionCommentLines(functionCommentLines, paramPattern, returnPattern, true);
   }
 
@@ -182,39 +181,61 @@ export abstract class FunctionParamsParser {
       defaultParamType = 'any',
     } = this.languageSettings;
     const descriptionPattern = /@description\s+(.*)/;
+
+    const handleParamNameBeforeType = (match: RegExpExecArray) => {
+      const [
+        _,
+        optionalName,
+        defaultValue,
+        name,
+        type = defaultParamType as string,
+        description = '',
+      ] = match;
+      const realName = optionalName || name;
+      paramsInfo[realName] = {
+        type,
+        description,
+        ...(defaultValue && { defaultValue }),
+        ...(!defaultValue && optionalName && { optional: true }),
+      };
+    };
+
+    const handleParamTypeBeforeName = (match: RegExpExecArray) => {
+      const [
+        _,
+        type = defaultParamType as string,
+        optionalName,
+        defaultValue,
+        name,
+        description = '',
+      ] = match;
+      const realName = optionalName || name;
+      paramsInfo[realName] = {
+        type,
+        description,
+        ...(defaultValue && { defaultValue }),
+        ...(!defaultValue && optionalName && { optional: true }),
+      };
+    };
+
+    const handleReturn = (match: RegExpExecArray) => {
+      let [_, name, type, description = ''] = match;
+      if (!paramNameBeforeType) {
+        [_, type, name, description = ''] = match;
+      }
+      returnInfo[name || defaultReturnName] = { type: type || defaultReturnType, description };
+    };
+
     for (const line of functionCommentLines) {
       let match;
       if ((match = paramPattern.exec(line)) !== null) {
-        let _, optionalName, defaultValue, name, type, description;
         if (paramNameBeforeType) {
-          [
-            _,
-            optionalName,
-            defaultValue,
-            name,
-            type = defaultParamType as string,
-            description = '',
-          ] = match;
+          handleParamNameBeforeType(match);
         } else {
-          [
-            _,
-            type = defaultParamType as string,
-            optionalName,
-            defaultValue,
-            name,
-            description = '',
-          ] = match;
+          handleParamTypeBeforeName(match);
         }
-        const realName = optionalName || name;
-        paramsInfo[realName] = {
-          type,
-          description,
-          ...(defaultValue && { defaultValue }),
-          ...(!defaultValue && optionalName && { optional: true }),
-        };
       } else if ((match = returnPattern.exec(line)) !== null) {
-        const [_, key = defaultReturnName, type = defaultReturnType, description = ''] = match;
-        returnInfo[key] = { type, description };
+        handleReturn(match);
       } else if ((match = descriptionPattern.exec(line)) !== null) {
         const [_, description] = match;
         descriptionInfo = description.trim();
