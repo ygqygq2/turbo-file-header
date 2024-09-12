@@ -1,6 +1,6 @@
 /*
  * @file            sampleWorkspace/file-header/fileheader-update.result.go
- * @description     
+ * @description     test file header
  * @author          ygqygq2 <ygqygq2@qq.com>
  * @createTime      2024-04-15 18:06:30
  * @lastModified    2024-04-15 18:10:28

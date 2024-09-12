@@ -53,7 +53,9 @@ function parseDecorationRenderOption(tag: TagFlatten) {
   };
 
   const textDecorations: string[] = [];
+  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
   tag.strikethrough && textDecorations.push('line-through');
+  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
   tag.underline && textDecorations.push('underline');
   options.textDecoration = textDecorations.join(' ');
 

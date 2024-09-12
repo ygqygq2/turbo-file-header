@@ -2,6 +2,12 @@
 
 All notable changes to the "turbo-file-header" extension will be documented in this file.
 
+# [0.2.9]
+
+## 问题修复 🐛
+
+- fix: 修复自定义模板配置文件路径获取错误问题
+
 # [0.2.8]
 
 ## 新增功能 🌱

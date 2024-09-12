@@ -1,6 +1,6 @@
 /*
  * @file            sampleWorkspace/file-header/
- * @description     test
+ * @description     test file header
  * @author          ygqygq2 <ygqygq2@qq.com>
  * @createTime      2024-04-11 16:37:11
  * @lastModified    2024-04-11 16:37:59

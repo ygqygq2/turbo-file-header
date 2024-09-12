@@ -327,9 +327,25 @@ export function generateFunctionComment(
 
   return functionComment;
 }
+
 export async function getText(workspaceFolderName: string, expectedFile: string) {
   const base = getWorkspaceFolderUriByName(workspaceFolderName);
   const expectedPath = path.join(base.fsPath, expectedFile);
   const expected = await fs.readFile(expectedPath, 'utf8');
   return expected;
+}
+
+/**
+ * @description 获取指定文件的项目根目录
+ * @param fileUri 文件的 URI
+ * @return {string | undefined} 项目根目录路径或 undefined
+ */
+export function getWorkspaceRoot(fileUri: vscode.Uri): string | undefined {
+  const workspaceFolder = vscode.workspace.getWorkspaceFolder(fileUri);
+
+  if (!workspaceFolder) {
+    return undefined;
+  }
+
+  return workspaceFolder.uri.fsPath;
 }

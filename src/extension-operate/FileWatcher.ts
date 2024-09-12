@@ -19,6 +19,7 @@ export class FileWatcher {
   };
 
   private reloadConfig = () => {
+    console.log('reloadConfig');
     this.configManager.getConfigurationFromCustomConfig(true);
   };
 

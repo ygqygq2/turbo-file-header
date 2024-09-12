@@ -7,6 +7,7 @@ import { CUSTOM_CONFIG_FILE_NAME } from '@/constants';
 import { CustomError, ErrorCode } from '@/error';
 import { logger } from '@/extension';
 import { ConfigYaml } from '@/typings/types';
+import { getWorkspaceRoot } from '@/utils/vscode-utils';
 
 export class ConfigReader {
   private static instance: ConfigReader;
@@ -33,7 +34,12 @@ export class ConfigReader {
       return defaultConfig;
     }
 
-    const configPath = path.join(activeWorkspaceUri.fsPath, '.vscode', CUSTOM_CONFIG_FILE_NAME);
+    const projectRoot = getWorkspaceRoot(activeWorkspaceUri);
+    if (!projectRoot) {
+      return defaultConfig;
+    }
+
+    const configPath = path.join(projectRoot, '.vscode', CUSTOM_CONFIG_FILE_NAME);
     if (!fs.existsSync(configPath)) {
       return defaultConfig;
     }
@@ -43,6 +49,7 @@ export class ConfigReader {
       const configContent = fs.readFileSync(configPath, 'utf8');
       const config: ConfigYaml = YAML.parse(configContent);
       return { ...defaultConfig, ...config };
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       logger.handleError(new CustomError(ErrorCode.GetCustomConfigFail));
     }

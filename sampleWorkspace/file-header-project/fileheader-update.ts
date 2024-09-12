@@ -1,10 +1,10 @@
 /*
- * @file            sampleWorkspace/file-header/no-fileheader.ts
+ * @file            sampleWorkspace/file-header-project/
  * @description     test file header
  * @author          ygqygq2 <ygqygq2@qq.com>
  * @createTime      2024-04-11 16:37:11
  * @lastModified    2024-04-11 16:37:59
- * Copyright ©ygqygq2 All rights reserved
+ * Copyright ©test All rights reserved
 */
 
 const testString = 'this is a string';

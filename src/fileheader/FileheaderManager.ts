@@ -60,6 +60,7 @@ export class FileheaderManager {
     const provider = await findProvider(this.configManager, this.providers, document);
 
     if (!provider) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       !allowInsert && logger.handleError(new CustomError(ErrorCode.LanguageNotSupport));
       return;
     }

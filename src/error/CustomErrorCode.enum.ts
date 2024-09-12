@@ -77,7 +77,7 @@ const gitCustomErrorCodeMessage = {
 };
 
 const vcsCustomErrorCodeMessage = {
-  [CustomErrorCode.NoVCSProvider]: `${extensionPrefix}No VCS provider available.`,
+  [CustomErrorCode.NoVCSProvider]: `${extensionPrefix}No VCS provider available. Try git init.`,
   [CustomErrorCode.VCSProviderCreateFail]: `${extensionPrefix}Failed to create VCS provider.`,
   [CustomErrorCode.VCSInvalid]: `${extensionPrefix}Invalid VCS provider.`,
 };

@@ -3,7 +3,9 @@ import Mocha from 'mocha';
 import * as path from 'path';
 
 // 为了解析别名
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 require('tsconfig-paths/register');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 require('ts-node/register');
 
 export async function run() {
