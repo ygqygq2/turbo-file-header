@@ -1,23 +1,147 @@
 # turbo-file-header
 
 [![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/ygqygq2.turbo-file-header.svg?color=07c160&label=turbo-file-header&logo=visual-studio-code)](https://marketplace.visualstudio.com/items?itemName=ygqygq2.turbo-file-header)
-![Visual Studio Marketplace Installs](https://img.shields.io/visual-studio-marketplace/i/ygqygq2.turbo-file-header)
+[![VSCode Installs](https://img.shields.io/visual-studio-marketplace/i/ygqygq2.turbo-file-header?label=vscode%20installs)](https://marketplace.visualstudio.com/items?itemName=ygqygq2.turbo-file-header)
+[![OpenVSX Downloads](https://img.shields.io/open-vsx/dt/ygqygq2/turbo-file-header?label=openvsx%20downloads)](https://open-vsx.org/extension/ygqygq2/turbo-file-header)
 
 [中文](README.zh-CN.md) | [Wiki](https://github.com/ygqygq2/turbo-file-header/wiki)
 
-Turbo file header, sets file header information globally or for a project.
+> 🎨 **Make Your Code Comments Professional, Unified, and Intelligent** — Best Practice Tool for Team Collaboration
 
-## Features
+One-Click Professional File Headers & Function Comments • Multiple Languages Supported • Team Config Sharing • Git Smart Integration
 
-- `ctrl + alt + h` generate the active document file header.
-- `ctrl + alt + /` add function comment when cursor at the function name line.
-- Supports global settings to manage header template.
-- Project to generate custom YAML format file header configuration file, easy to configure, others as long as the installation of extensions can be used directly, more consistent with unified collaborative development.
-- Use more reader-friendly comments to highlight important parts in your code.
-- Support for languages in [VSCode known identifiers](https://code.visualstudio.com/docs/languages/identifiers#_known-language-identifiers).
-- Extension configuration Multi-language display, l10n support.
+---
 
-## Settings
+## ✨ Core Features
+
+### 🚀 File Header Management
+
+- ⚡ **Keyboard Shortcuts** - `Ctrl+Alt+H` to generate/update file headers instantly
+- 🎯 **Project-Level Config** - YAML config file, auto-sync across team members
+- 🔄 **Batch Update** - Batch update multiple files with glob patterns
+- 📦 **VCS Integration** - Auto-fetch author info and file time from Git
+
+### 💡 Function Comment Generation
+
+- 🔧 **Auto Parsing** - Supports multiple mainstream languages, auto-extract function signatures
+- ⌨️ **Quick Shortcut** - `Ctrl+Alt+/` to auto-generate comment template for current function
+- 📝 **Type Recognition** - Auto-extract function parameters and return types
+- 🎨 **Multiple Styles** - Supports JSDoc, standard block comments, etc.
+
+### 🎨 Comment Highlighting
+
+- 🌈 **Comment Highlighting** - Custom tags highlighting with configurable colors
+- 🎯 **Custom Tags** - # ! ? // todo \* tag highlighting
+- 🌓 **Theme Adaptive** - Separate configs for light/dark themes
+- ⚙️ **Fully Configurable** - Colors, styles, tags all customizable
+
+---
+
+## � Feature Demos
+
+### 📝 File Header Generation
+
+![File Header Demo](https://raw.githubusercontent.com/ygqygq2/turbo-file-header/main/docs/images/file-header.gif)
+
+Press `Ctrl+Alt+H` to auto-generate file headers with author, time, copyright info
+
+### 🔧 Auto Function Comments
+
+![Function Comment Demo](https://raw.githubusercontent.com/ygqygq2/turbo-file-header/main/docs/images/function-comment.gif)
+
+Press `Ctrl+Alt+/` to auto-extract function signature and generate comment template
+
+### 🎨 Comment Highlighting
+
+![Comment Highlighting](https://raw.githubusercontent.com/ygqygq2/turbo-file-header/main/docs/images/highlight.png)
+
+# ! ? // todo \* tags auto-colored for better readability
+
+---
+
+## �🌟 Core Advantages
+
+| Feature                              | Description                                                                                     |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| 📁 **Project-Level Config**          | YAML config file, auto-sync across team, unified code standards                                 |
+| 🔥 **Auto Function Comments**        | Supports multiple languages (TypeScript/JavaScript/Java/Go/Python/PHP/Rust/C) with auto parsing |
+| 📦 **Deep VCS Integration**          | Auto-fetch author info, file creation/modification time from Git                                |
+| 🎨 **Enhanced Comment Highlighting** | Built-in full comment highlighting, auto-color # ! ? // todo \* tags                            |
+| 🌍 **Multi-Language UI**             | Config interface supports English/Chinese, better localization                                  |
+| ⚡ **Batch Operations**              | Supports glob pattern batch update, one-click for entire project                                |
+| 🎯 **Fine-Grained Config**           | 20+ config options, complete control over every detail                                          |
+| 🔧 **Advanced Variable System**      | Supports variable calculation, reference, custom formatting                                     |
+| 🔄 **Automated Workflow**            | Auto-insert on file creation, auto-update on save                                               |
+| 📝 **Field Preservation**            | Keep specific fields (like description) when updating                                           |
+
+---
+
+## 🚀 Quick Start
+
+### 📦 Installation
+
+Search `turbo-file-header` in VS Code Marketplace or [Click to Install](vscode:extension/ygqygq2.turbo-file-header)
+
+### ⚡ Get Started in 10 Seconds
+
+1. **Create/Open a file** → Press `Ctrl+Alt+H` → Auto-insert file header ✨
+2. **Move cursor to function** → Press `Ctrl+Alt+/` → Generate function comment 🎯
+3. **Auto-update on save** → Enable `autoUpdateOnSave` config 🔄
+
+### 👥 Team Collaboration
+
+```bash
+# 1. Execute command in project root
+Ctrl+Shift+P → "Turbo File Header: Generate Custom Template Config File"
+
+# 2. Edit the generated config file
+.fileheader/fileheader.config.yaml
+
+# 3. Commit to Git
+git add .fileheader/
+git commit -m "feat: add unified file header config"
+
+# 4. Team members auto-sync after pull ✅
+```
+
+---
+
+## 📚 Features in Detail
+
+### 🎯 Basic Features
+
+- **`Ctrl+Alt+H`** - Generate/update file headers with keyboard shortcut
+- **`Ctrl+Alt+/`** - Add function comments (when cursor is on function name line)
+- **Project Config** - Command `Generate Custom Template Config File` to create project-level config
+- **Global + Project Config** - Supports both global and project configs, project config takes priority
+- **Comment Highlighting** - Built-in comment highlighting with custom tags and colors
+- **Multi-Language** - Supports all [VSCode known languages](https://code.visualstudio.com/docs/languages/identifiers#_known-language-identifiers)
+- **i18n Interface** - Configuration descriptions support English/Chinese l10n
+
+### 💻 Function Comment Supported Languages
+
+Currently supports automatic function comment generation for (auto-extract function signature, parameters, return values):
+
+| Language       | Features                                                          |
+| -------------- | ----------------------------------------------------------------- |
+| **TypeScript** | ✅ Parameter types, return types, optional params, default values |
+| **JavaScript** | ✅ Arrow functions, regular functions, class methods, generators  |
+| **Java**       | ✅ Method signatures, modifiers, annotation support               |
+| **Go**         | ✅ Functions, methods, multiple return values                     |
+| **Python**     | ✅ Functions, class methods, type hints                           |
+| **PHP**        | ✅ Functions, class methods, type declarations                    |
+| **Rust**       | ✅ Functions, methods, trait implementations                      |
+| **C**          | ✅ Function declarations, pointer parameters                      |
+
+> 💡 **Tip**: File header feature supports all VSCode languages, not limited to the above
+
+---
+
+## ⚙️ Configuration Guide
+
+### Configuration Overview
+
+Turbo File Header provides **20+ configuration options** to give you complete control over every detail of file headers and comments:
 
 Properties:
 

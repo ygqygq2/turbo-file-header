@@ -1,6 +1,9 @@
-# Change Log
+**Change Log**
 
 All notable changes to the "turbo-file-header" extension will be documented in this file.
+
+# [0.3.0]
+
 
 # [0.2.9]
 

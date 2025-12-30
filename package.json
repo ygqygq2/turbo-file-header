@@ -2,7 +2,7 @@
   "name": "turbo-file-header",
   "displayName": "Turbo File Header",
   "description": "%description%",
-  "version": "0.2.9",
+  "version": "0.3.0",
   "icon": "resources/icons/icon.png",
   "repository": {
     "type": "git",
@@ -26,19 +26,27 @@
     "vscode": "^1.92.0"
   },
   "categories": [
+    "Formatters",
+    "Snippets",
     "Other"
   ],
   "keywords": [
-    "annotation",
-    "comment",
     "fileheader",
+    "file header",
+    "comment",
     "function comment",
+    "jsdoc",
+    "annotation",
     "copyright",
+    "license",
+    "template",
+    "snippet",
+    "comment-highlighting",
+    "highlight",
     "头部注释",
     "文件头注释",
-    "项目文件注释",
-    "许可证注释",
-    "函数注释"
+    "函数注释",
+    "注释高亮"
   ],
   "license": "MIT",
   "activationEvents": [
@@ -616,6 +624,7 @@
     "test:suite": "node out/test/runTests.js",
     "test:unit": "vitest unit --watch=false",
     "test:coverage": "vitest run --coverage",
+    "test:ci": "npm run test:coverage && npm run test:suite:mocha",
     "lint": "eslint src",
     "lint-fix": "eslint --fix src",
     "prepush": "pnpm run lint",

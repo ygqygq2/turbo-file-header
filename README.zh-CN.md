@@ -1,23 +1,147 @@
 # turbo-file-header
 
 [![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/ygqygq2.turbo-file-header.svg?color=07c160&label=turbo-file-header&logo=visual-studio-code)](https://marketplace.visualstudio.com/items?itemName=ygqygq2.turbo-file-header)
-![Visual Studio Marketplace Installs](https://img.shields.io/visual-studio-marketplace/i/ygqygq2.turbo-file-header)
+[![VSCode Installs](https://img.shields.io/visual-studio-marketplace/i/ygqygq2.turbo-file-header?label=vscode%20installs)](https://marketplace.visualstudio.com/items?itemName=ygqygq2.turbo-file-header)
+[![OpenVSX Downloads](https://img.shields.io/open-vsx/dt/ygqygq2/turbo-file-header?label=openvsx%20downloads)](https://open-vsx.org/extension/ygqygq2/turbo-file-header)
 
 [English](README.md) | [Wiki](https://github.com/ygqygq2/turbo-file-header/wiki)
 
-Turbo file header, 可以全局设置文件头或者项目级设置文件头。
+> 🎨 **让你的代码注释专业、统一、智能** — 团队协作的最佳实践工具
 
-## 功能
+一键生成专业的文件头和函数注释 • 支持多种主流语言 • 团队配置共享 • Git 智能集成
 
-- `ctrl + alt + h` 快捷键生成/更新文件头。
-- `ctrl + alt + /` 快捷键添加函数注释，当光标在函数名行时。
-- 命令 `Turbo File Header: Generate Custom Template Config File` 生成项目级自定义文件头配置文件。
-- 支持全局配置或项目级自定义文件头模板配置生成文件头。
-- 更友好的注释高亮显示，支持自定义配置。
-- 支持各种语言[VSCode known identifiers](https://code.visualstudio.com/docs/languages/identifiers#_known-language-identifiers).
-- 扩展配置说明多语言显示 l10n 支持.
+---
 
-## 配置
+## ✨ 核心特性
+
+### 🚀 文件头管理
+
+- ⚡ **快捷键操作** - `Ctrl+Alt+H` 一键生成/更新文件头
+- 🎯 **项目级配置** - YAML 配置文件，团队成员自动同步
+- 🔄 **批量更新** - 支持按 glob 模式批量更新多个文件
+- 📦 **VCS 集成** - 自动从 Git 获取作者信息和文件时间
+
+### 💡 函数注释生成
+
+- 🔧 **自动解析** - 支持多种主流编程语言，自动提取函数签名信息
+- ⌨️ **快捷键** - `Ctrl+Alt+/` 光标所在函数自动生成注释框架
+- 📝 **参数类型识别** - 自动提取函数参数、返回值类型
+- 🎨 **多种风格** - 支持 JSDoc、标准块注释等格式
+
+### 🎨 注释高亮增强
+
+- 🌈 **注释高亮增强** - 自定义标签高亮，可配置颜色样式
+- 🎯 **自定义标签** - # ! ? // todo \* 等标签高亮
+- 🌓 **主题适配** - 支持明亮/暗黑主题分别配置
+- ⚙️ **完全可配置** - 颜色、样式、标签全可自定义
+
+---
+
+## � 功能演示
+
+### 📝 一键生成文件头
+
+![文件头生成演示](https://raw.githubusercontent.com/ygqygq2/turbo-file-header/main/docs/images/file-header.gif)
+
+按 `Ctrl+Alt+H` 自动生成包含作者、时间、版权等信息的文件头
+
+### 🔧 自动函数注释
+
+![函数注释演示](https://raw.githubusercontent.com/ygqygq2/turbo-file-header/main/docs/images/function-comment.gif)
+
+按 `Ctrl+Alt+/` 自动提取函数签名，生成注释模板
+
+### 🎨 注释高亮
+
+![注释高亮展示](https://raw.githubusercontent.com/ygqygq2/turbo-file-header/main/docs/images/highlight.png)
+
+# ! ? // todo \* 等标签自动着色，代码更易读
+
+---
+
+## �🌟 核心优势
+
+| 特性                | 说明                                                                            |
+| ------------------- | ------------------------------------------------------------------------------- |
+| 📁 **项目级配置**   | YAML 配置文件，团队成员自动同步，统一代码规范                                   |
+| 🔥 **自动函数注释** | 支持多种语言（TypeScript/JavaScript/Java/Go/Python/PHP/Rust/C）自动解析函数签名 |
+| 📦 **VCS 深度集成** | 自动从 Git 获取作者信息、文件创建/修改时间                                      |
+| 🎨 **注释高亮增强** | 内置完整注释高亮功能，# ! ? // todo \* 等标签自动着色                           |
+| 🌍 **多语言界面**   | 配置界面支持中英文切换，更友好的本地化体验                                      |
+| ⚡ **批量操作**     | 支持 glob 模式批量更新，一键处理整个项目                                        |
+| 🎯 **精细配置**     | 20+ 配置项，完全掌控文件头和注释的每个细节                                      |
+| 🔧 **高级变量系统** | 支持变量计算、引用、自定义格式化                                                |
+| 🔄 **自动化工作流** | 支持文件创建时自动插入、保存时自动更新                                          |
+| 📝 **保留字段**     | 更新文件头时可保留特定字段（如 description）                                    |
+
+---
+
+## 🚀 快速开始
+
+### 📦 安装
+
+从 VS Code 市场搜索 `turbo-file-header` 或 [点击安装](vscode:extension/ygqygq2.turbo-file-header)
+
+### ⚡ 10 秒上手
+
+1. **创建/打开文件** → 按 `Ctrl+Alt+H` → 自动插入文件头 ✨
+2. **光标移到函数名** → 按 `Ctrl+Alt+/` → 生成函数注释 🎯
+3. **保存时自动更新** → 开启 `autoUpdateOnSave` 配置 🔄
+
+### 👥 团队协作
+
+```bash
+# 1. 在项目根目录执行命令
+Ctrl+Shift+P → "Turbo File Header: Generate Custom Template Config File"
+
+# 2. 编辑生成的配置文件
+.fileheader/fileheader.config.yaml
+
+# 3. 提交到 Git
+git add .fileheader/
+git commit -m "feat: 添加统一文件头配置"
+
+# 4. 团队成员拉取后自动生效 ✅
+```
+
+---
+
+## 📚 功能详解
+
+### 🎯 基础功能
+
+- **`Ctrl+Alt+H`** - 快捷键生成/更新文件头
+- **`Ctrl+Alt+/`** - 快捷键添加函数注释(光标在函数名行时)
+- **项目配置生成** - 命令 `Generate Custom Template Config File` 创建项目级配置
+- **全局 + 项目配置** - 支持全局配置和项目级配置，项目配置优先
+- **注释高亮** - 内置注释高亮功能，支持自定义标签和颜色
+- **多语言支持** - 支持所有 [VSCode 已知语言](https://code.visualstudio.com/docs/languages/identifiers#_known-language-identifiers)
+- **国际化界面** - 配置说明支持中英文 l10n 显示
+
+### 💻 函数注释支持语言
+
+当前支持以下语言的函数注释智能生成：
+
+| 语言           | 支持特性                                  |
+| -------------- | ----------------------------------------- |
+| **TypeScript** | ✅ 参数类型、返回值类型、可选参数、默认值 |
+| **JavaScript** | ✅ 箭头函数、普通函数、类方法、生成器函数 |
+| **Java**       | ✅ 方法签名、修饰符、注解支持             |
+| **Go**         | ✅ 函数、方法、多返回值                   |
+| **Python**     | ✅ 函数、类方法、类型注解                 |
+| **PHP**        | ✅ 函数、类方法、类型声明                 |
+| **Rust**       | ✅ 函数、方法、trait 实现                 |
+| **C**          | ✅ 函数声明、指针参数                     |
+
+> 💡 **提示**: 文件头功能支持所有 VSCode 语言，不受上述限制
+
+---
+
+## ⚙️ 配置说明
+
+### 配置项总览
+
+Turbo File Header 提供了 **20+ 配置项**，让你完全掌控文件头和注释的每个细节：
 
 Properties:
 

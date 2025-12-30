@@ -6,3 +6,6 @@ node_modules
 .DS_Store
 coverage
 **/*.copy.*
+
+# Turbo AI Rules - Auto-generated files
+.github/copilot-instructions.md

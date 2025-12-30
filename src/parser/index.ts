@@ -1,3 +1,12 @@
+/**
+ * Comment Highlighting Parser
+ *
+ * This module implements comment highlighting functionality.
+ * The design concept is inspired by Better Comments (https://github.com/aaron-bond/better-comments)
+ * but the implementation is completely independent and original.
+ *
+ * @see ATTRIBUTIONS.md for full attribution details
+ */
 import * as vscode from 'vscode';
 
 import { configEvent, configManager } from '@/extension';
