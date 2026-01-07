@@ -37,7 +37,7 @@ One-Click Professional File Headers & Function Comments • Multiple Languages S
 
 ---
 
-## � Feature Demos
+## 🎬 Feature Demos
 
 ### 📝 File Header Generation
 
@@ -59,7 +59,7 @@ Press `Ctrl+Alt+/` to auto-extract function signature and generate comment templ
 
 ---
 
-## �🌟 Core Advantages
+## 🌟 Core Advantages
 
 | Feature                              | Description                                                                                     |
 | ------------------------------------ | ----------------------------------------------------------------------------------------------- |
