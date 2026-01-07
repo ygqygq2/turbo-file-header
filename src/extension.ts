@@ -139,4 +139,9 @@ export const activate = async (context: vscode.ExtensionContext) => {
   );
 };
 
-export const deactivate = () => {};
+export const deactivate = () => {
+  // Clean up resources
+  fileHashMemento.clear();
+  debounceManager.dispose();
+  fileWatcher.dispose();
+};

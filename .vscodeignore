@@ -1,12 +1,42 @@
+# 开发工具配置
 .vscode/**
 .vscode-test/**
-src/**
+.vscode-test.mjs
+.vscode-test-debug.mjs
+.editorconfig
 .gitignore
-.yarnrc
-vsc-extension-quickstart.md
-**/tsconfig.json
-**/.eslintrc.json
-**/*.map
+.npmrc
+.prettierignore
+.prettierrc.json
+.lintstagedrc
+.simple-git-hooks.json
+.cspell.json
+
+# 源代码（仅打包 out/）
+src/**
 **/*.ts
-**/.vscode-test.*
-node_modules
+!out/**/*.ts
+**/*.map
+**/tsconfig.json
+tsconfig.test.json
+vite.config.ts
+eslint.config.mjs
+
+# 测试相关
+coverage/**
+sampleWorkspace/**
+__mocks__/**
+
+# 文档和示例（发布时不需要）
+vsc-extension-quickstart.md
+CONTRIBUTING.md
+SECURITY.md
+docs/**
+ai-rules/**
+
+# 依赖管理
+node_modules/**
+pnpm-lock.yaml
+
+# GitHub 配置
+.github/**

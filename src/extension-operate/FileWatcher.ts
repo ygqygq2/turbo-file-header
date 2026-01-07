@@ -19,8 +19,12 @@ export class FileWatcher {
   };
 
   private reloadConfig = () => {
-    console.log('reloadConfig');
     this.configManager.getConfigurationFromCustomConfig(true);
+  };
+
+  private handleConfigChange = () => {
+    this.reloadProviders();
+    this.reloadConfig();
   };
 
   public createWatcher = () => {
@@ -29,12 +33,10 @@ export class FileWatcher {
     this.watcher = vscode.workspace.createFileSystemWatcher(
       `**/.vscode/${CUSTOM_CONFIG_FILE_NAME}`,
     );
-    this.watcher.onDidCreate(this.reloadProviders);
-    this.watcher.onDidChange(this.reloadProviders);
-    this.watcher.onDidDelete(this.reloadProviders);
-    this.watcher.onDidCreate(this.reloadConfig);
-    this.watcher.onDidChange(this.reloadConfig);
-    this.watcher.onDidDelete(this.reloadConfig);
+    // Combine all config change events
+    this.watcher.onDidCreate(this.handleConfigChange);
+    this.watcher.onDidChange(this.handleConfigChange);
+    this.watcher.onDidDelete(this.handleConfigChange);
   };
 
   public dispose = () => {

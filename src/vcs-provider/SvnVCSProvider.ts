@@ -89,7 +89,7 @@ export class SVNProvider extends BaseVCSProvider {
         cwd: dirname(filePath),
       });
       return status.includes(filePath);
-    } catch (e) {
+    } catch (_e) {
       return false;
     }
   }

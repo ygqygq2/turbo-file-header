@@ -35,4 +35,5 @@ export async function createVCSProvider(): Promise<BaseVCSProvider | undefined> 
     return vcsProvider;
   }
   logger.throw(new CustomError(ErrorCode.NoVCSProvider));
+  return undefined; // unreachable but satisfies TS
 }

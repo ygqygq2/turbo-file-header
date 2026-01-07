@@ -38,9 +38,9 @@ export function exec(
   const p = new Promise<string>((resolve, reject) => {
     handler = _exec(command, options, (error, stdout, stderr) => {
       if (stderr || error) {
-        reject(new CommandExecError(stderr, stdout, error));
+        reject(new CommandExecError(stderr.toString(), stdout.toString(), error));
       } else {
-        resolve(stdout);
+        resolve(stdout.toString());
       }
     });
   }) as Promise<string> & { handler: ChildProcess | null };

@@ -4,6 +4,21 @@ All notable changes to the "turbo-file-header" extension will be documented in t
 
 # [0.3.0]
 
+## 功能优化 🚀
+
+- refactor: 移除 mathjs 依赖，使用自定义轻量级数学表达式解析器，减小包体积 1.4MB
+- refactor: 优化 .vscodeignore 配置，VSIX 包体积优化至 2.56MB
+- refactor: 更新所有 npm 依赖至最新稳定版本（vite 7.x, vitest 4.x 等）
+
+## 测试增强 ✅
+
+- test: 单元测试覆盖从 30 个增加到 84 个
+- test: 新增独立测试配置 tsconfig.test.json，支持 ESNext 模块
+
+## 问题修复 🐛
+
+- fix: 修复 utils.exec 函数 stdout/stderr 类型转换问题
+- fix: 修复所有 ESLint 警告
 
 # [0.2.9]
 

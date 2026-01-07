@@ -89,7 +89,7 @@ export async function setActiveWorkspaceByName(
   // 检查文件是否存在
   try {
     await vscode.workspace.fs.stat(targetFileUri);
-  } catch (error) {
+  } catch (_error) {
     throw new Error(`File "${fileName}" not found in workspace "${workspaceFolderName}".`);
   }
 

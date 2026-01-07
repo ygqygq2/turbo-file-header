@@ -1,6 +1,5 @@
 import dayjs from 'dayjs';
 import { stat } from 'fs/promises';
-import { evaluate } from 'mathjs';
 import { basename, dirname, relative } from 'path';
 import upath from 'upath';
 import vscode, { WorkspaceFolder } from 'vscode';
@@ -10,6 +9,7 @@ import { CustomError, ErrorCode } from '@/error';
 import { logger } from '@/extension';
 import { initVCSProvider } from '@/init';
 import { LanguageProvider } from '@/language-providers';
+import { simpleEval } from '@/utils/simple-eval';
 import { BaseVCSProvider } from '@/vcs-provider/BaseVCSProvider';
 
 import { WILDCARD_ACCESS_VARIABLES } from '../constants';
@@ -25,14 +25,15 @@ export class FileheaderVariableBuilder {
   private fileUri?: vscode.Uri;
   private dateFormat: string;
 
-  constructor(private configManager: ConfigManager) {
+  constructor(configManager: ConfigManager) {
     this.config = configManager.getConfiguration();
     this.dateFormat = this.config.dateFormat || 'YYYY-MM-DD HH:mm:ss';
     this.variableBuilders = {
       ...Object.keys(WILDCARD_ACCESS_VARIABLES).reduce(
         (obj, key) => {
-          const methodName =
-            `build${key.charAt(0).toUpperCase() + key.slice(1)}` as keyof FileheaderVariableBuilder;
+          const methodName = `build${
+            key.charAt(0).toUpperCase() + key.slice(1)
+          }` as keyof FileheaderVariableBuilder;
           if (typeof this[methodName] === 'function') {
             obj[key] = (this[methodName] as unknown as VariableBuilder).bind(this);
           }
@@ -104,7 +105,7 @@ export class FileheaderVariableBuilder {
       if (typeof builder === 'function' && builderName === 'now') {
         result = await builder(param);
         if (calculation) {
-          result = String(evaluate(result + calculation));
+          result = simpleEval(result + calculation);
         }
       } else {
         result = await builder();
@@ -143,7 +144,7 @@ export class FileheaderVariableBuilder {
   }
 
   private buildNow = async (param: string = '') => {
-    const cleanedParam = param.trim().replace(/^['"]|['"]$/g, '');
+    const cleanedParam = param.trim().replace(/^['"]+|['"]+$/g, '');
     return dayjs().format(cleanedParam || this.dateFormat);
   };
 

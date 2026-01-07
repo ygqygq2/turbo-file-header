@@ -48,6 +48,15 @@ export class FileheaderManager {
     this.providers = await this.fileheaderProviderLoader.loadProviders(forceRefresh);
   }
 
+  /**
+   * Update or insert file header for a document
+   * @param document - The document to update
+   * @param options - Update options
+   * @param options.allowInsert - Whether to allow inserting header if not exists (default: true)
+   * @param options.addSelection - Whether to add cursor selection after update (default: false)
+   * @param options.newFile - Whether this is a new file (default: false)
+   * @returns Promise<boolean> - true if updated successfully
+   */
   public async updateFileheader(
     document: vscode.TextDocument,
     {
@@ -106,6 +115,10 @@ export class FileheaderManager {
     return true;
   }
 
+  /**
+   * Batch update file headers for multiple files based on include/exclude patterns
+   * Shows progress notification during update
+   */
   public async batchUpdateFileheader() {
     let failedFiles = (await this.fileMatcher.findFiles()) || [];
     const totalFiles = failedFiles.length;
@@ -156,6 +169,12 @@ export class FileheaderManager {
     this.fileHashManager.set(document);
   }
 
+  /**
+   * Generate and insert function comment at cursor position
+   * Automatically parses function signature and creates comment template
+   * @param activeEditor - The active text editor
+   * @returns Promise<void>
+   */
   public async updateFunctionComment(activeEditor: vscode.TextEditor) {
     const document = activeEditor.document;
     const parser = await this.functionParserLoader.loadParser(document.languageId);

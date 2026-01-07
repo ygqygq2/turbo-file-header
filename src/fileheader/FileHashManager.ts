@@ -68,4 +68,14 @@ export class FileHashManager {
     this.mainTextRecords.set(fsPath, this.calculate(mainText));
     return true;
   }
+
+  /**
+   * Clear all hash records
+   * Should be called when extension is deactivated
+   */
+  public clear() {
+    this.originRecords.clear();
+    this.records.clear();
+    this.mainTextRecords.clear();
+  }
 }

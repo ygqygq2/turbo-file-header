@@ -96,7 +96,7 @@ export class GitVCSProvider extends BaseVCSProvider {
       }
 
       return true;
-    } catch (e) {
+    } catch (_e) {
       return false;
     }
   }

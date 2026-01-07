@@ -13,4 +13,13 @@ export class DebounceManager {
       }, delay),
     );
   }
+
+  /**
+   * Clear all pending timers
+   * Should be called when extension is deactivated
+   */
+  public dispose() {
+    this.timers.forEach((timer) => clearTimeout(timer));
+    this.timers.clear();
+  }
 }

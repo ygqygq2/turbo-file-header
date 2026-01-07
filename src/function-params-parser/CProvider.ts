@@ -5,9 +5,9 @@ import { logger } from '@/extension';
 import { LanguageFunctionCommentSettings } from '@/typings/types';
 import { escapeRegexString } from '@/utils/str';
 
-import { FunctionParamsParser } from './FunctionParamsParser';
 import { splitParams } from './c-splitParams';
 import { extractFunctionParamsString } from './extractFunctionParamsString';
+import { FunctionParamsParser } from './FunctionParamsParser';
 import { FunctionParamsInfo, ParamsInfo, ReturnInfo } from './types';
 
 function matchNormalFunction(

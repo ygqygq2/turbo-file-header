@@ -12,7 +12,7 @@ export async function findProvider(
   configManager: ConfigManager,
   providers: LanguageProvider[],
   document: vscode.TextDocument,
-) {
+): Promise<LanguageProvider | undefined> {
   let languageId = document.languageId;
   // 如果没有识别到自定义语言，则尝试使用后缀匹配
   if (languageId === 'plaintext') {
@@ -51,4 +51,5 @@ export async function findProvider(
     }
   }
   logger.info(new CustomError(ErrorCode.LanguageProviderNotFound));
+  return undefined;
 }

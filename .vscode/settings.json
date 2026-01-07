@@ -4,7 +4,59 @@
       "enabled": true,
       "sortBy": "priority",
       "sortOrder": "asc"
+    },
+    "cursor": {
+      "enabled": false,
+      "sortBy": "priority",
+      "sortOrder": "asc"
+    },
+    "windsurf": {
+      "enabled": false,
+      "sortBy": "priority",
+      "sortOrder": "asc"
+    },
+    "continue": {
+      "enabled": false,
+      "sortBy": "priority",
+      "sortOrder": "asc"
+    },
+    "cline": {
+      "enabled": false,
+      "sortBy": "priority",
+      "sortOrder": "asc"
+    },
+    "roo-cline": {
+      "enabled": false,
+      "sortBy": "priority",
+      "sortOrder": "asc"
+    },
+    "aider": {
+      "enabled": false,
+      "sortBy": "priority",
+      "sortOrder": "asc"
+    },
+    "bolt": {
+      "enabled": false,
+      "sortBy": "priority",
+      "sortOrder": "asc"
+    },
+    "qodo-gen": {
+      "enabled": false,
+      "sortBy": "priority",
+      "sortOrder": "asc"
     }
   },
-  "turbo-ai-rules.adapters.custom": []
+  "turbo-ai-rules.adapters.custom": [],
+  "turbo-ai-rules.sources": [
+    {
+      "id": "ai-rules",
+      "name": "ygqygq2's AI Rules",
+      "gitUrl": "https://github.com/ygqygq2/ai-rules.git",
+      "branch": "main",
+      "enabled": true,
+      "authentication": {
+        "type": "none"
+      }
+    }
+  ]
 }
