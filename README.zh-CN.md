@@ -55,7 +55,7 @@
 
 ![注释高亮展示](https://raw.githubusercontent.com/ygqygq2/turbo-file-header/main/docs/images/highlight.png)
 
-# ! ? // todo \* 等标签自动着色，代码更易读
+`# ! ? // todo *` 等标签自动着色，代码更易读
 
 ---
 

@@ -55,7 +55,7 @@ Press `Ctrl+Alt+/` to auto-extract function signature and generate comment templ
 
 ![Comment Highlighting](https://raw.githubusercontent.com/ygqygq2/turbo-file-header/main/docs/images/highlight.png)
 
-# ! ? // todo \* tags auto-colored for better readability
+`# ! ? // todo * tags` auto-colored for better readability
 
 ---
 
