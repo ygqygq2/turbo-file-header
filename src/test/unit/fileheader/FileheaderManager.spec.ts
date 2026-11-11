@@ -62,11 +62,14 @@ describe('FileheaderManager - batchUpdateFileheader', () => {
 
   it('caps retries for persistently failing files instead of looping forever', async () => {
     const { manager } = createManager(['/bad.ts', '/good.ts']);
+    // fsPath 在 Windows 上是反斜杠形式，必须通过 Uri.file 动态获取以保持平台无关
+    const badFsPath = vscode.Uri.file('/bad.ts').fsPath;
+    const goodFsPath = vscode.Uri.file('/good.ts').fsPath;
     // bad.ts 一直失败，good.ts 成功；初始尝试 + 最多 2 次重试 = 3 次
     const updateFileheader = vi
       .fn()
       .mockImplementation(async (document: { uri: { fsPath: string } }) => {
-        if (document.uri.fsPath === '/bad.ts') {
+        if (document.uri.fsPath === badFsPath) {
           throw new Error('boom');
         }
         return true;
@@ -76,10 +79,10 @@ describe('FileheaderManager - batchUpdateFileheader', () => {
     await manager.batchUpdateFileheader();
 
     const badAttempts = updateFileheader.mock.calls.filter(
-      ([doc]) => (doc as { uri: { fsPath: string } }).uri.fsPath === '/bad.ts',
+      ([doc]) => (doc as { uri: { fsPath: string } }).uri.fsPath === badFsPath,
     ).length;
     const goodAttempts = updateFileheader.mock.calls.filter(
-      ([doc]) => (doc as { uri: { fsPath: string } }).uri.fsPath === '/good.ts',
+      ([doc]) => (doc as { uri: { fsPath: string } }).uri.fsPath === goodFsPath,
     ).length;
 
     expect(badAttempts).toBe(3);
