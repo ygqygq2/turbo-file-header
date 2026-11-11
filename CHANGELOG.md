@@ -2,6 +2,32 @@
 
 All notable changes to the "turbo-file-header" extension will be documented in this file.
 
+# [0.3.1]
+
+## 问题修复 🐛
+
+- fix: 修复批量更新文件头失败文件无限重试导致死循环的问题（最多重试 2 次）
+- fix: 修复 createVCSProvider 漏 await validate 导致 VCS 校验失效的问题
+- fix: 保存时自动更新文件头改为在保存事务内完成（e.waitUntil），消除二次写盘与 mtime 自更新
+- fix: git/svn 命令路径统一加引号，支持含空格路径；svn 去除 awk 依赖，兼容 Windows
+- fix: exec 仅按退出码判失败，不再把 git/svn 成功输出的 stderr 当作错误
+- fix: 修复 GitVCSProvider.isChanged 已暂存修改被误判为未修改的问题
+- fix: 修复 include/exclude 为空时 minimatch 抛错的问题
+- fix: 无 VCS 环境降级可用，不再强制抛异常终止
+
+## 功能优化 🚀
+
+- refactor: 抽出独立服务模块 src/services.ts，打破业务模块对入口文件的循环依赖
+- refactor: FileheaderVariableBuilder 动态读取配置，修改设置即时生效无需重启
+- feat: include/exclude 支持逗号分隔多个 glob 模式
+
+## 测试增强 ✅
+
+- test: 单元测试覆盖从 84 个增加到 116 个（新增 FileMatcher/DocumentHandler/文件头更新决策/批量重试/VCS 校验等）
+- test: vitest 增加 coverage 阈值兜底与 typecheck 类型检查
+- ci: 修复 CI ERR_PNPM_IGNORED_BUILDS（构建批准迁移至 pnpm-workspace.yaml 并锁定 pnpm 版本）
+- ci: workflow actions 全面升级（checkout@v5/setup-node@v5/codecov-action@v5），Node 升级至 24
+
 # [0.3.0]
 
 ## 功能优化 🚀

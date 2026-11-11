@@ -18,7 +18,7 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v5
         with:
-          node-version: '20'
+          node-version: '24'
           # v5 默认缓存 pnpm store, 但本 job 的 node_modules 已由 actions/cache 缓存,
           # 缓存命中时安装被跳过, store 目录不存在会导致 Post 阶段报 Path Validation Error
           package-manager-cache: false
