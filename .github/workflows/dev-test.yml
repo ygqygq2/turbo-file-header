@@ -14,10 +14,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v5
         with:
           node-version: '20'
-      - run: npm i -g @vscode/vsce pnpm
+          cache: 'pnpm'
+      - run: npm i -g @vscode/vsce
       - name: Cache dependencies
         uses: actions/cache@v4
         id: cache

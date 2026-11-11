@@ -677,12 +677,5 @@
     "upath": "^2.0.1",
     "yaml": "^2.5.0"
   },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@vscode/vsce-sign",
-      "esbuild",
-      "keytar",
-      "simple-git-hooks"
-    ]
-  }
+  "packageManager": "pnpm@10.15.0"
 }
