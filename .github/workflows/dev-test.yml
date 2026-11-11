@@ -19,21 +19,10 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: '24'
-          # v5 默认缓存 pnpm store, 但本 job 的 node_modules 已由 actions/cache 缓存,
-          # 缓存命中时安装被跳过, store 目录不存在会导致 Post 阶段报 Path Validation Error
-          package-manager-cache: false
+          # setup-node v5 默认缓存 pnpm store(而非 node_modules), 安装走 store 硬链接,
+          # 速度足够且规避了 Windows 上 actions/cache 还原 node_modules 后 esbuild 等二进制损坏的问题
       - run: npm i -g @vscode/vsce
-      - name: Cache dependencies
-        uses: actions/cache@v4
-        id: cache
-        with:
-          path: |
-            **/node_modules
-          key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-
       - name: Install dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
         run: pnpm i --frozen-lockfile --ignore-scripts || pnpm i --ignore-scripts
       - run: |
           export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/dbus/system_bus_socket
