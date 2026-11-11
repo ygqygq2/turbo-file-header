@@ -11,6 +11,9 @@ jobs:
   package-publish:
     permissions:
       contents: write
+      # Marketplace Trusted Publishing(OIDC) 需要 id-token 权限,
+      # 参见 https://code.visualstudio.com/api/working-with-extensions/publishing-extension#secure-automated-publishing-to-visual-studio-marketplace
+      id-token: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -34,11 +37,12 @@ jobs:
         run: pnpm i --frozen-lockfile --ignore-scripts
       - name: Publish
         env:
-          VSCODE_PUBLISH_TOKEN: ${{ secrets.VSCODE_PUBLISH_TOKEN }}
+          # OpenVSX 暂不支持 OIDC, 仍需 PAT
           OPENVSX_PUBLISH_TOKEN: ${{ secrets.OPENVSX_PUBLISH_TOKEN }}
         run: |
           vsce package --no-dependencies
-          vsce publish --no-dependencies -p $VSCODE_PUBLISH_TOKEN
+          # Marketplace 使用 Trusted Publishing(OIDC), 无需 PAT
+          vsce publish --no-dependencies --oidc
           ovsx publish --no-dependencies -p $OPENVSX_PUBLISH_TOKEN
       # - name: Upload assets
       #   uses: softprops/action-gh-release@v1
