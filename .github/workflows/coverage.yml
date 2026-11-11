@@ -10,15 +10,16 @@ jobs:
   coverage:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: '20'
       - run: npm i -g pnpm
       - run: pnpm i --frozen-lockfile
+      - run: pnpm run typecheck
       - run: pnpm run test:coverage
       - name: Upload coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
-          files: ./coverage/clover.xml
+          files: ./coverage/lcov.info
           flags: unittests

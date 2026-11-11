@@ -3,7 +3,7 @@ import path from 'path';
 import vscode, { Uri } from 'vscode';
 
 import { CustomError, ErrorCode } from '@/error';
-import { logger } from '@/extension';
+import { logger } from '@/services';
 import { getActiveDocumentWorkspaceUri } from '@/utils/vscode-utils';
 
 import { CUSTOM_CONFIG_FILE_NAME } from '../constants';

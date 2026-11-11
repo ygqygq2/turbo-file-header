@@ -40,6 +40,7 @@ export class FileHashManager {
     const fsPath = document.uri.fsPath;
     this.records.delete(fsPath);
     this.originRecords.delete(fsPath);
+    this.mainTextRecords.delete(fsPath);
   }
 
   public isHashUpdated(document: vscode.TextDocument, skipCheckHash = false) {

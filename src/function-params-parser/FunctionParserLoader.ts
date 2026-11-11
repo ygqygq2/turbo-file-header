@@ -1,6 +1,6 @@
 import { ConfigManager } from '@/configuration/ConfigManager';
 import { CustomError, ErrorCode } from '@/error';
-import { logger } from '@/extension';
+import { logger } from '@/services';
 
 import { CParser } from './CProvider';
 import { FunctionParamsParser } from './FunctionParamsParser';

@@ -1,61 +1,24 @@
-import { CustomError, Logger } from '@ygqygq2/vscode-log';
 import * as vscode from 'vscode';
 
 import { getAllCommands } from '@/commands';
-import { ConfigEvent } from '@/configuration/ConfigEvent';
-import { CHANNEL_TITLE } from '@/constants';
-import { FileheaderManager } from '@/fileheader/FileheaderManager';
-import { LanguageEvent } from '@/languages/LanguageEvent';
-import { useParser } from '@/parser';
+import {
+  configEvent,
+  configManager,
+  contextService,
+  fileHashManager,
+  fileheaderManager,
+  languageEvent,
+} from '@/services';
 import { Command } from '@/typings/types';
 
-import { ConfigManager } from './configuration/ConfigManager';
-import { ConfigReader } from './configuration/ConfigReader';
-import { errorCodeMessages } from './error';
-import { ContextService } from './extension-operate/ContextService';
 import { DebounceManager } from './extension-operate/DebounceManager';
 import { DocumentHandler } from './extension-operate/DocumentHandler';
-import { FileMatcher } from './extension-operate/FileMatcher';
 import { FileWatcher } from './extension-operate/FileWatcher';
-import { FileHashManager } from './fileheader/FileHashManager';
-import { FileheaderProviderLoader } from './fileheader/FileheaderProviderLoader';
-import { FileheaderVariableBuilder } from './fileheader/FileheaderVariableBuilder';
-import { GenerateTemplateConfig } from './fileheader/GenerateTemplateConfig';
-import { FunctionParserLoader } from './function-params-parser/FunctionParserLoader';
-import { GenerateCustomProviderClasses } from './language-providers/GenerateCustomProviderClasses';
-import { LanguageManager } from './languages/LanguageManager';
+import { useParser } from './parser';
 
-CustomError.configure(errorCodeMessages);
-Logger.configure(vscode.window, CHANNEL_TITLE);
-export const logger = Logger.getInstance();
-const configReader = ConfigReader.getInstance();
-export const configManager = ConfigManager.getInstance(configReader);
-const fileMatcher = new FileMatcher(configManager);
-export const configEvent = new ConfigEvent(configManager);
-export const languageManager = LanguageManager.getInstance(configManager);
-export const languageEvent = new LanguageEvent(languageManager);
-const generateCustomProviderClasses = new GenerateCustomProviderClasses(configReader);
-const fileheaderProviderLoader = new FileheaderProviderLoader(
-  configManager,
-  languageManager,
-  generateCustomProviderClasses,
-);
-const fileHashMemento = new FileHashManager();
-const fileheaderVariableBuilder = new FileheaderVariableBuilder(configManager);
-const functionParserLoader = new FunctionParserLoader(configManager);
-export const fileheaderManager = new FileheaderManager(
-  configManager,
-  fileMatcher,
-  fileheaderProviderLoader,
-  fileHashMemento,
-  fileheaderVariableBuilder,
-  functionParserLoader,
-);
 const fileWatcher = new FileWatcher(configManager, fileheaderManager);
 const debounceManager = new DebounceManager();
 const documentHandler = new DocumentHandler(debounceManager, configManager, fileheaderManager);
-export const generateCustomTemplate = GenerateTemplateConfig.getInstance();
-export const contextService = new ContextService();
 
 export const activate = async (context: vscode.ExtensionContext) => {
   contextService.setContext(context);
@@ -137,11 +100,17 @@ export const activate = async (context: vscode.ExtensionContext) => {
       documentHandler.onDidChangeTextDocument(e),
     ),
   );
+  // 文档关闭时清理对应的 hash 缓存，避免长时间会话内存泄漏
+  context.subscriptions.push(
+    vscode.workspace.onDidCloseTextDocument((document: vscode.TextDocument) =>
+      fileHashManager.remove(document),
+    ),
+  );
 };
 
 export const deactivate = () => {
   // Clean up resources
-  fileHashMemento.clear();
+  fileHashManager.clear();
   debounceManager.dispose();
   fileWatcher.dispose();
 };

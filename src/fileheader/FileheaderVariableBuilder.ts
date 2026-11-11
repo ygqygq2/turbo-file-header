@@ -6,9 +6,9 @@ import vscode, { WorkspaceFolder } from 'vscode';
 
 import { ConfigManager } from '@/configuration/ConfigManager';
 import { CustomError, ErrorCode } from '@/error';
-import { logger } from '@/extension';
 import { initVCSProvider } from '@/init';
 import { LanguageProvider } from '@/language-providers';
+import { logger } from '@/services';
 import { simpleEval } from '@/utils/simple-eval';
 import { BaseVCSProvider } from '@/vcs-provider/BaseVCSProvider';
 
@@ -17,17 +17,15 @@ import { Config } from '../typings/types';
 import { VariableBuilder } from './types';
 
 export class FileheaderVariableBuilder {
-  private config: Config;
+  private configManager: ConfigManager;
   private variableBuilders: { [key: string]: VariableBuilder };
   private workspace?: WorkspaceFolder;
   private vcsProvider?: BaseVCSProvider;
   private variableRegex = /{{(.*?)}}/g;
   private fileUri?: vscode.Uri;
-  private dateFormat: string;
 
   constructor(configManager: ConfigManager) {
-    this.config = configManager.getConfiguration();
-    this.dateFormat = this.config.dateFormat || 'YYYY-MM-DD HH:mm:ss';
+    this.configManager = configManager;
     this.variableBuilders = {
       ...Object.keys(WILDCARD_ACCESS_VARIABLES).reduce(
         (obj, key) => {
@@ -44,6 +42,15 @@ export class FileheaderVariableBuilder {
     };
   }
 
+  // 动态读取配置，保证用户修改 dateFormat/fileheader 等设置后无需重启窗口即可生效
+  private get config(): Config {
+    return this.configManager.getConfiguration();
+  }
+
+  private get dateFormat(): string {
+    return this.config.dateFormat || 'YYYY-MM-DD HH:mm:ss';
+  }
+
   public async build(
     fileUri: vscode.Uri,
     _provider: LanguageProvider,
@@ -54,12 +61,13 @@ export class FileheaderVariableBuilder {
     this.workspace = vscode.workspace.getWorkspaceFolder(fileUri);
     try {
       this.vcsProvider = await initVCSProvider();
-      if (!this.vcsProvider) {
-        logger.throw(new CustomError(ErrorCode.VCSInvalid));
+      if (this.vcsProvider) {
+        await this.vcsProvider.validate(dirname(fsPath));
       }
-      await this.vcsProvider.validate(dirname(fsPath));
     } catch (error) {
-      logger.throw(new CustomError(ErrorCode.VCSInvalid, error));
+      // 无 VCS 环境或校验失败时降级为不使用 VCS 信息（作者/时间回退到配置与文件属性），而不是直接终止
+      logger.handleError(new CustomError(ErrorCode.VCSInvalid, error));
+      this.vcsProvider = undefined;
     }
 
     const { fileheader, disableLabels } = this.config;
@@ -169,13 +177,12 @@ export class FileheaderVariableBuilder {
   private buildBirthtime = async () => {
     const fsPath = this.fileUri!.fsPath;
     const fileStat = await stat(fsPath);
-    const isTracked = await this.vcsProvider!.isTracked(fsPath);
-    const birthtime = isTracked
-      ? dayjs((await this.vcsProvider?.getBirthtime(fsPath)) ?? fileStat.birthtime).format(
-          this.dateFormat,
-        )
-      : dayjs(fileStat.birthtime).format(this.dateFormat);
-    return birthtime;
+    const isTracked = this.vcsProvider ? await this.vcsProvider.isTracked(fsPath) : false;
+    const birthtime =
+      isTracked && this.vcsProvider
+        ? ((await this.vcsProvider.getBirthtime(fsPath)) ?? fileStat.birthtime)
+        : fileStat.birthtime;
+    return dayjs(birthtime).format(this.dateFormat);
   };
 
   private async buildMtime() {
@@ -201,18 +208,27 @@ export class FileheaderVariableBuilder {
   }
 
   private buildProjectName() {
-    const projectName = upath.normalize(basename(this.workspace!.uri.path));
+    if (!this.workspace) {
+      return '';
+    }
+    const projectName = upath.normalize(basename(this.workspace.uri.path));
     return projectName;
   }
 
   private buildFilePath() {
-    const filePath = upath.normalize(relative(this.workspace!.uri.path, this.fileUri!.path));
+    if (!this.workspace) {
+      return upath.normalize(basename(this.fileUri!.path));
+    }
+    const filePath = upath.normalize(relative(this.workspace.uri.path, this.fileUri!.path));
     return filePath;
   }
 
   private buildDirPath() {
+    if (!this.workspace) {
+      return '';
+    }
     const dirPath =
-      upath.normalize(relative(this.workspace!.uri.path, dirname(this.fileUri!.path))) || '';
+      upath.normalize(relative(this.workspace.uri.path, dirname(this.fileUri!.path))) || '';
     return dirPath;
   }
 

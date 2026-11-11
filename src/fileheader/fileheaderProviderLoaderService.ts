@@ -3,9 +3,9 @@ import vscode from 'vscode';
 
 import { ConfigManager } from '@/configuration/ConfigManager';
 import { CustomError, ErrorCode } from '@/error';
-import { logger } from '@/extension';
 import { LanguageProvider } from '@/language-providers';
 import { VscodeInternalProvider } from '@/language-providers/VscodeInternalProvider';
+import { logger } from '@/services';
 import { getLanguageIdByExt } from '@/utils/vscode-utils';
 
 export async function findProvider(

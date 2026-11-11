@@ -2,8 +2,8 @@ import * as fs from 'fs-extra';
 import path from 'path';
 import * as vscode from 'vscode';
 
-import { logger } from '@/extension';
 import { FunctionCommentInfo } from '@/function-params-parser/types';
+import { logger } from '@/services';
 import { Config } from '@/typings/types';
 
 export async function promptForWorkspace(

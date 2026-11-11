@@ -14,6 +14,9 @@ importers:
       dayjs:
         specifier: ^1.11.13
         version: 1.11.19
+      fs-extra:
+        specifier: ^11.2.0
+        version: 11.3.3
       handlebars:
         specifier: ^4.7.8
         version: 4.7.8
@@ -99,9 +102,6 @@ importers:
       eslint-plugin-simple-import-sort:
         specifier: ^12.1.1
         version: 12.1.1(eslint@9.39.2)
-      fs-extra:
-        specifier: ^11.2.0
-        version: 11.3.3
       glob:
         specifier: ^13.0.0
         version: 13.0.0
@@ -114,6 +114,9 @@ importers:
       mocha:
         specifier: ^11.7.5
         version: 11.7.5
+      prettier:
+        specifier: 3.7.4
+        version: 3.7.4
       rimraf:
         specifier: ^6.0.1
         version: 6.1.2

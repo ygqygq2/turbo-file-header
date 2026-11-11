@@ -28,6 +28,13 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],
       exclude: ['node_modules', 'out', 'src/test', 'src/typings', '.vscode-test'],
+      // 覆盖率下限兜底，防止回归（当前基线约 39%，后续可逐步收紧）
+      thresholds: {
+        statements: 38,
+        branches: 37,
+        functions: 36,
+        lines: 38,
+      },
     },
   },
 });

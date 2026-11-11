@@ -2,12 +2,33 @@ import { minimatch } from 'minimatch';
 import * as vscode from 'vscode';
 
 import { ConfigManager } from '@/configuration/ConfigManager';
-import { contextService } from '@/extension';
+import { contextService } from '@/services';
 import { FindFilesConfig } from '@/typings/types';
 import { getActiveDocumentWorkspaceUri } from '@/utils/vscode-utils';
 
 export interface Matcher {
   findFiles(): Promise<vscode.Uri[]>;
+}
+
+/**
+ * 拆分逗号分隔的多个 glob 模式，返回模式数组
+ */
+function splitGlobPatterns(pattern?: string): string[] {
+  return (pattern || '')
+    .split(',')
+    .map((p) => p.trim())
+    .filter(Boolean);
+}
+
+/**
+ * 将逗号分隔的多个 glob 模式转换为 vscode.workspace.findFiles 支持的花括号多模式语法
+ */
+function toMultiGlob(pattern?: string): string {
+  const patterns = splitGlobPatterns(pattern);
+  if (patterns.length <= 1) {
+    return patterns[0] || '';
+  }
+  return `{${patterns.join(',')}}`;
 }
 
 export class FileMatcher implements Matcher {
@@ -32,20 +53,22 @@ export class FileMatcher implements Matcher {
     }
 
     const cancellationTokenSource = new vscode.CancellationTokenSource();
-    const token = cancellationTokenSource.token;
+    try {
+      const globalConfig = this.configManager.getConfiguration();
+      const config = this.config as unknown as FindFilesConfig;
+      const includePattern = config?.include || globalConfig.include || '**/*';
+      const excludePattern = config?.exclude || globalConfig.exclude || undefined;
 
-    const globalConfig = this.configManager.getConfiguration();
-    const config = this.config as unknown as FindFilesConfig;
-    const includePattern = config?.include || globalConfig.include || '**/*';
-    const excludePattern = config?.exclude || globalConfig.exclude || undefined;
-
-    const files = await vscode.workspace.findFiles(
-      includePattern,
-      excludePattern,
-      config?.maxResults ? config.maxResults : undefined,
-      token,
-    );
-    return files;
+      const files = await vscode.workspace.findFiles(
+        toMultiGlob(includePattern) || '**/*',
+        excludePattern ? toMultiGlob(excludePattern) : undefined,
+        config?.maxResults ? config.maxResults : undefined,
+        cancellationTokenSource.token,
+      );
+      return files;
+    } finally {
+      cancellationTokenSource.dispose();
+    }
   };
 
   public shouldAddHeader = (filePath: string): boolean => {
@@ -57,11 +80,12 @@ export class FileMatcher implements Matcher {
     // 获取文件相对于工作空间的路径
     const relativePath = vscode.workspace.asRelativePath(filePath);
 
-    // 如果文件路径匹配 "include" 配置，但不匹配 "exclude" 配置，那么应该添加头部
-    if (minimatch(relativePath, includePattern) && !minimatch(relativePath, excludePattern)) {
-      return true;
-    }
+    const includePatterns = splitGlobPatterns(includePattern);
+    const excludePatterns = splitGlobPatterns(excludePattern);
 
-    return false;
+    // 如果文件路径匹配任一 "include" 模式，且不匹配 "exclude" 模式，那么应该添加头部
+    const isIncluded = includePatterns.some((p) => minimatch(relativePath, p));
+    const isExcluded = excludePatterns.some((p) => minimatch(relativePath, p));
+    return isIncluded && !isExcluded;
   };
 }

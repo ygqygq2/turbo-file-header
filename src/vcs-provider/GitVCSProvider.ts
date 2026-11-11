@@ -3,9 +3,9 @@ import { stat } from 'fs/promises';
 import { dirname } from 'path';
 
 import { CustomError, ErrorCode } from '@/error';
-import { logger } from '@/extension';
+import { logger } from '@/services';
 
-import { exec, getFirstLine } from '../utils/utils';
+import { exec, getFirstLine, quotePath } from '../utils/utils';
 import { BaseVCSProvider } from './BaseVCSProvider';
 
 export class GitVCSProvider extends BaseVCSProvider {
@@ -21,7 +21,7 @@ export class GitVCSProvider extends BaseVCSProvider {
   public async getAuthorName(filePath: string): Promise<string> {
     try {
       const authors = await exec(
-        `git --no-pager log --format='%aN' --follow --reverse ${filePath}`,
+        `git --no-pager log --format='%aN' --follow --reverse ${quotePath(filePath)}`,
         { cwd: dirname(filePath) },
       );
       // 如果结果有空格，会有单引号
@@ -34,7 +34,7 @@ export class GitVCSProvider extends BaseVCSProvider {
   public async getAuthorEmail(filePath: string): Promise<string> {
     try {
       const emails = await exec(
-        `git --no-pager log --format='%aE' --follow --reverse ${filePath}`,
+        `git --no-pager log --format='%aE' --follow --reverse ${quotePath(filePath)}`,
         { cwd: dirname(filePath) },
       );
       return getFirstLine(emails).replace(/'/g, '');
@@ -64,7 +64,7 @@ export class GitVCSProvider extends BaseVCSProvider {
   public async getBirthtime(filePath: string): Promise<Dayjs> {
     try {
       const isoTimes = await exec(
-        `git --no-pager log --format='%ai' --follow --reverse ${filePath}`,
+        `git --no-pager log --format='%ai' --follow --reverse ${quotePath(filePath)}`,
         { cwd: dirname(filePath) },
       );
 
@@ -81,10 +81,10 @@ export class GitVCSProvider extends BaseVCSProvider {
   public async isTracked(filePath: string): Promise<boolean> {
     try {
       const [result, status] = await Promise.all([
-        exec(`git ls-files ${filePath}`, {
+        exec(`git ls-files ${quotePath(filePath)}`, {
           cwd: dirname(filePath),
         }),
-        await exec(`git status --short ${filePath}`, {
+        await exec(`git status --short ${quotePath(filePath)}`, {
           cwd: dirname(filePath),
         }),
       ]);
@@ -103,10 +103,11 @@ export class GitVCSProvider extends BaseVCSProvider {
 
   public async isChanged(filePath: string): Promise<boolean> {
     try {
-      const result = await exec(`git status --porcelain ${filePath}`, {
+      const result = await exec(`git status --porcelain ${quotePath(filePath)}`, {
         cwd: dirname(filePath),
       });
-      return !!result && !result.replace(/'/g, '').startsWith('M');
+      // porcelain 输出非空即表示相对 HEAD 有任何变化（含已暂存、未暂存、重命名、删除等）
+      return !!result.trim();
     } catch {
       return false;
     }

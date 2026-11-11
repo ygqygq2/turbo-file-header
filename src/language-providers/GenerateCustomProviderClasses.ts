@@ -2,8 +2,8 @@ import Handlebars from 'handlebars';
 import * as vscode from 'vscode';
 
 import { ConfigManager } from '@/configuration/ConfigManager';
-import { logger } from '@/extension';
 import { LanguageManager } from '@/languages/LanguageManager';
+import { logger } from '@/services';
 import { IFileheaderVariables, ITemplateFunction, Provider } from '@/typings/types';
 import { getBlockComment } from '@/utils/vscode-utils';
 

@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import { generateCustomTemplate } from '@/extension';
+import { generateCustomTemplate } from '@/services';
 import { Command } from '@/typings/types';
 
 export const generateTemplateConfig = (): Command => {

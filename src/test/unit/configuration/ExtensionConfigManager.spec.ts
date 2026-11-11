@@ -6,7 +6,7 @@ import { ConfigReader } from '@/configuration/ConfigReader';
 import { CONFIG_TAG, ConfigSection } from '@/constants';
 
 vi.mock('vscode');
-vi.mock('@/extension', () => ({
+vi.mock('@/services', () => ({
   logger: {
     handleError: vi.fn(),
     throw: vi.fn(),

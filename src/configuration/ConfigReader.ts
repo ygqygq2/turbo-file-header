@@ -5,7 +5,7 @@ import YAML from 'yaml';
 
 import { CUSTOM_CONFIG_FILE_NAME } from '@/constants';
 import { CustomError, ErrorCode } from '@/error';
-import { logger } from '@/extension';
+import { logger } from '@/services';
 import { ConfigYaml } from '@/typings/types';
 import { getWorkspaceRoot } from '@/utils/vscode-utils';
 

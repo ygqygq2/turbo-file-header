@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 
 import { ConfigManager } from '@/configuration/ConfigManager';
 import { CustomError, ErrorCode } from '@/error';
-import { logger } from '@/extension';
+import { logger } from '@/services';
 import { LanguageFunctionCommentSettings } from '@/typings/types';
 
 import { FunctionParamsParser } from './FunctionParamsParser';

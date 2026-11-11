@@ -9,7 +9,7 @@
  */
 import * as vscode from 'vscode';
 
-import { configEvent, configManager } from '@/extension';
+import { configEvent, configManager } from '@/services';
 import { TagFlatten } from '@/typings/types';
 
 import { useBlockPicker } from './block-picker';
@@ -85,6 +85,8 @@ export function useParser() {
 
   let tagDecorations: TagDecoration[] = generateTagDecorations();
   configEvent.onDidChange(() => {
+    // 释放旧的 decorationType，避免配置变更时泄漏
+    tagDecorations.forEach((td) => td.decorationType.dispose());
     tagDecorations = generateTagDecorations();
   });
 

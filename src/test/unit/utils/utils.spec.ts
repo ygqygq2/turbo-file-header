@@ -8,6 +8,7 @@ import {
   getStringHash,
   getTaggedTemplateInputs,
   hasShebang,
+  quotePath,
   sleep,
 } from '@/utils/utils';
 
@@ -104,5 +105,35 @@ describe('extractComplexType', () => {
   it('handles nested brackets', () => {
     const result = extractComplexType('fn(outer(inner))', '(', ')');
     expect(result).toBe('(outer(inner');
+  });
+});
+
+describe('quotePath', () => {
+  const originalPlatform = process.platform;
+
+  const stubPlatform = (platform: NodeJS.Platform) => {
+    Object.defineProperty(process, 'platform', { value: platform });
+  };
+
+  const restorePlatform = () => {
+    Object.defineProperty(process, 'platform', { value: originalPlatform });
+  };
+
+  it('quotes path with spaces on unix', () => {
+    stubPlatform('linux');
+    expect(quotePath('/my dir/file.ts')).toBe("'/my dir/file.ts'");
+    restorePlatform();
+  });
+
+  it('escapes single quotes on unix', () => {
+    stubPlatform('linux');
+    expect(quotePath("/it's/file.ts")).toBe("'/it'\\''s/file.ts'");
+    restorePlatform();
+  });
+
+  it('quotes path with double quotes on windows', () => {
+    stubPlatform('win32');
+    expect(quotePath('C:\\my dir\\file.ts')).toBe('"C:\\my dir\\file.ts"');
+    restorePlatform();
   });
 });

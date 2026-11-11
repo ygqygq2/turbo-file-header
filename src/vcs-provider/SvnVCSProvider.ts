@@ -3,9 +3,9 @@ import { stat } from 'fs/promises';
 import { dirname } from 'path';
 
 import { CustomError, ErrorCode } from '@/error';
-import { logger } from '@/extension';
+import { logger } from '@/services';
 
-import { exec, getFirstLine } from '../utils/utils';
+import { exec, getFirstLine, quotePath } from '../utils/utils';
 import { BaseVCSProvider } from './BaseVCSProvider';
 
 export class SVNProvider extends BaseVCSProvider {
@@ -27,9 +27,13 @@ export class SVNProvider extends BaseVCSProvider {
 
   public async getAuthorName(filePath: string): Promise<string> {
     try {
-      const authors = await exec(`svn log -l 1 --quiet ${filePath}|awk '/^r/ {print $3}'`, {
-        cwd: dirname(filePath),
-      });
+      // 使用 svn info 直接获取该文件最后修改作者，避免依赖 Unix 专有的 awk（Windows 上不可用）
+      const authors = await exec(
+        `svn info --show-item last-changed-author ${quotePath(filePath)}`,
+        {
+          cwd: dirname(filePath),
+        },
+      );
       return getFirstLine(authors);
     } catch (error) {
       logger.handleError(new CustomError(ErrorCode.SVNGetUserNameFail, error));
@@ -66,7 +70,7 @@ export class SVNProvider extends BaseVCSProvider {
   // SVN 没有直接的等价于 Git 的 birthtime 命令，通常使用 commit 时间作为参考
   public async getBirthtime(filePath: string): Promise<Dayjs> {
     try {
-      const logOutput = await exec(`svn log -l 1 ${filePath}`, {
+      const logOutput = await exec(`svn log -l 1 ${quotePath(filePath)}`, {
         cwd: dirname(filePath),
       });
       const dateLine = logOutput.split('\n').find((line) => line.startsWith('Date:'));
@@ -85,7 +89,7 @@ export class SVNProvider extends BaseVCSProvider {
   public async isTracked(filePath: string): Promise<boolean> {
     try {
       // SVN没有直接的等价于Git的ls-files命令，但可以通过检查文件是否在版本控制下来判断
-      const status = await exec(`svn status ${filePath}`, {
+      const status = await exec(`svn status ${quotePath(filePath)}`, {
         cwd: dirname(filePath),
       });
       return status.includes(filePath);
@@ -97,7 +101,7 @@ export class SVNProvider extends BaseVCSProvider {
   public async isChanged(filePath: string): Promise<boolean> {
     try {
       // SVN使用'svn status'命令来检查文件状态，然后判断是否有修改
-      const status = await exec(`svn status --show-updates ${filePath}`, {
+      const status = await exec(`svn status --show-updates ${quotePath(filePath)}`, {
         cwd: dirname(filePath),
       });
 

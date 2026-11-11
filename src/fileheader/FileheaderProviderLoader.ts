@@ -3,10 +3,10 @@ import * as vscode from 'vscode';
 import { ConfigManager } from '@/configuration/ConfigManager';
 import { CUSTOM_CONFIG_FILE_NAME } from '@/constants';
 import { CustomError, ErrorCode } from '@/error';
-import { contextService, logger } from '@/extension';
 import { LanguageProvider } from '@/language-providers';
 import { VueProvider } from '@/language-providers/VueProvider';
 import { LanguageManager } from '@/languages/LanguageManager';
+import { contextService, logger } from '@/services';
 import { getActiveDocumentWorkspaceUri } from '@/utils/vscode-utils';
 
 import { GenerateCustomProviderClasses } from '../language-providers/GenerateCustomProviderClasses';

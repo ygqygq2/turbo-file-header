@@ -6,6 +6,7 @@ import { FileheaderManager } from '@/fileheader/FileheaderManager';
 
 export class FileWatcher {
   private watcher: vscode.FileSystemWatcher | undefined;
+  private watcherDisposables: vscode.Disposable[] = [];
   private configManager: ConfigManager;
   private fileheaderManager: FileheaderManager;
 
@@ -28,18 +29,23 @@ export class FileWatcher {
   };
 
   public createWatcher = () => {
-    // 释放先前的 watcher
+    // 释放先前的 watcher 及其事件订阅
     this.dispose();
     this.watcher = vscode.workspace.createFileSystemWatcher(
       `**/.vscode/${CUSTOM_CONFIG_FILE_NAME}`,
     );
     // Combine all config change events
-    this.watcher.onDidCreate(this.handleConfigChange);
-    this.watcher.onDidChange(this.handleConfigChange);
-    this.watcher.onDidDelete(this.handleConfigChange);
+    this.watcherDisposables = [
+      this.watcher.onDidCreate(this.handleConfigChange),
+      this.watcher.onDidChange(this.handleConfigChange),
+      this.watcher.onDidDelete(this.handleConfigChange),
+    ];
   };
 
   public dispose = () => {
+    this.watcherDisposables.forEach((d) => d.dispose());
+    this.watcherDisposables = [];
     this.watcher?.dispose();
+    this.watcher = undefined;
   };
 }

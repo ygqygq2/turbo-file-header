@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { escapeRegexString } from '@/utils/str';
 
-vi.mock('@/extension', () => ({
+vi.mock('@/services', () => ({
   configEvent: {
     onDidChange: vi.fn(),
   },

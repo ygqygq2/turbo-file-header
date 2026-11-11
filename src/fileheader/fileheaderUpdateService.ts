@@ -1,8 +1,8 @@
 import vscode from 'vscode';
 
-import { logger } from '@/extension';
 import { FileMatcher } from '@/extension-operate/FileMatcher';
 import { LanguageProvider } from '@/language-providers';
+import { logger } from '@/services';
 import { hasShebang } from '@/utils/utils';
 import { isLineStartOrEnd } from '@/utils/vscode-utils';
 
@@ -74,6 +74,7 @@ export async function processFileheaderInsertionOrReplacement(
   config: Config,
   allowInsert: boolean,
   newFile: boolean,
+  autoSave = true,
 ) {
   const document = editor?.document;
   const { useJSDocStyle } = config;
@@ -128,7 +129,9 @@ export async function processFileheaderInsertionOrReplacement(
     editBuilder.replace(rangeToReplace, replaceFileheader + '\n\n');
   });
 
-  await document.save();
+  if (autoSave) {
+    await document.save();
+  }
   logger.info('File header updated:', document.uri.fsPath);
   return true;
 }

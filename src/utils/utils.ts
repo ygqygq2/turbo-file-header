@@ -29,6 +29,8 @@ export function getTaggedTemplateInputs(
 
 /**
  * Promisify node exec function
+ * 只以退出码（error）判断失败；git/svn 等工具成功时也常输出 stderr（warning/info），
+ * 不能仅凭 stderr 判定为失败
  */
 export function exec(
   command: string,
@@ -37,7 +39,7 @@ export function exec(
   let handler: ChildProcess | null = null;
   const p = new Promise<string>((resolve, reject) => {
     handler = _exec(command, options, (error, stdout, stderr) => {
-      if (stderr || error) {
+      if (error) {
         reject(new CommandExecError(stderr.toString(), stdout.toString(), error));
       } else {
         resolve(stdout.toString());
@@ -47,6 +49,16 @@ export function exec(
 
   p.handler = handler;
   return p;
+}
+
+/**
+ * 为 shell 命令参数添加引号，处理路径含空格等情况
+ */
+export function quotePath(filePath: string): string {
+  if (process.platform === 'win32') {
+    return `"${filePath}"`;
+  }
+  return `'${filePath.replace(/'/g, `'\\''`)}'`;
 }
 
 export function getFirstLine(input: string) {

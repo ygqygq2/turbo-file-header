@@ -56,10 +56,12 @@ describe('FileHashManager', () => {
     } as vscode.TextDocument;
 
     hashManager.set(mockDocument);
+    hashManager.isMainTextUpdated(mockDocument, 'main text');
     hashManager.remove(mockDocument);
 
     expect(hashManager.originRecords.has('/test/file.ts')).toBe(false);
     expect(hashManager.records.has('/test/file.ts')).toBe(false);
+    expect(hashManager.mainTextRecords.has('/test/file.ts')).toBe(false);
   });
 
   it('should track main text updates', () => {

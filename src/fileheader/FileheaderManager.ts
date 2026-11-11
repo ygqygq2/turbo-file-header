@@ -2,11 +2,11 @@ import vscode from 'vscode';
 
 import { ConfigManager } from '@/configuration/ConfigManager';
 import { CustomError, ErrorCode } from '@/error';
-import { logger } from '@/extension';
 import { FileMatcher } from '@/extension-operate/FileMatcher';
 import { FunctionParserLoader } from '@/function-params-parser/FunctionParserLoader';
 import { FunctionCommentInfo, FunctionParamsInfo } from '@/function-params-parser/types';
 import { LanguageProvider } from '@/language-providers';
+import { logger } from '@/services';
 import { addSelectionAfterString, generateFunctionComment } from '@/utils/vscode-utils';
 import { updateProgress, withProgress } from '@/utils/with-progress';
 
@@ -63,6 +63,7 @@ export class FileheaderManager {
       allowInsert = true,
       addSelection = false,
       newFile = false,
+      autoSave = true,
     }: UpdateFileheaderManagerOptions = {},
   ) {
     const config = this.configManager.getConfiguration();
@@ -102,6 +103,7 @@ export class FileheaderManager {
       config,
       allowInsert,
       newFile,
+      autoSave,
     );
     if (!result) {
       return false;
@@ -120,16 +122,19 @@ export class FileheaderManager {
    * Shows progress notification during update
    */
   public async batchUpdateFileheader() {
-    let failedFiles = (await this.fileMatcher.findFiles()) || [];
-    const totalFiles = failedFiles.length;
+    const files = (await this.fileMatcher.findFiles()) || [];
+    const totalFiles = files.length;
     let processedFiles = 0;
+    // 失败文件最多重试次数，避免持续失败的文件（如二进制/损坏文件）导致死循环
+    const maxRetries = 2;
 
     await withProgress(
       'Updating File Header',
       async (progress) => {
-        while (failedFiles.length > 0) {
-          let reprocessedFiles: vscode.Uri[] = [];
-          for (const file of failedFiles) {
+        let pendingFiles = files;
+        for (let attempt = 0; attempt <= maxRetries && pendingFiles.length > 0; attempt++) {
+          const failedFiles: vscode.Uri[] = [];
+          for (const file of pendingFiles) {
             try {
               const document = await vscode.workspace.openTextDocument(file);
               await this.updateFileheader(document);
@@ -138,19 +143,13 @@ export class FileheaderManager {
               processedFiles++;
               updateProgress(progress, processedFiles, totalFiles);
             } catch (error) {
-              reprocessedFiles.push(file);
+              failedFiles.push(file);
               logger.handleError(
                 new CustomError(ErrorCode.UpdateFileHeaderFail, file.fsPath, error),
               );
             }
           }
-
-          failedFiles = reprocessedFiles;
-          reprocessedFiles = [];
-
-          if (failedFiles.length === 0) {
-            break;
-          }
+          pendingFiles = failedFiles;
         }
       },
       totalFiles,

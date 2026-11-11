@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 
 import { CustomError, ErrorCode } from '@/error';
-import { contextService, logger } from '@/extension';
+import { contextService, logger } from '@/services';
 import { findVCSRoot } from '@/utils/utils';
 import { getActiveDocumentWorkspaceUri } from '@/utils/vscode-utils';
 
@@ -30,7 +30,7 @@ export async function createVCSProvider(): Promise<BaseVCSProvider | undefined> 
     vcsProvider = new SVNProvider();
   }
 
-  const isValid = vcsProvider?.validate(vcsRootPath);
+  const isValid = vcsProvider ? await vcsProvider.validate(vcsRootPath) : false;
   if (isValid) {
     return vcsProvider;
   }

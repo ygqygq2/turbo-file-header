@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 
 import { ConfigSection, CUSTOM_CONFIG_FILE_NAME } from '@/constants';
+import { logger } from '@/services';
 
 import { ConfigManager } from '../configuration/ConfigManager';
 import { FileheaderManager } from '../fileheader/FileheaderManager';
@@ -46,7 +47,7 @@ export class DocumentHandler {
     }
   };
 
-  public onSaveDocument = async (e: vscode.TextDocumentWillSaveEvent) => {
+  public onSaveDocument = (e: vscode.TextDocumentWillSaveEvent) => {
     const enabled = this.configManager.get<boolean>(ConfigSection.autoUpdateOnSave);
     if (!enabled) {
       return;
@@ -55,15 +56,15 @@ export class DocumentHandler {
       return;
     }
 
-    const fsPath = e.document.uri.fsPath;
-    this.debounceManager.debounce(
-      'saveDocument' + fsPath,
-      async () => {
-        await this.fileheaderManager.updateFileheader(e.document, {
-          allowInsert: false,
-        });
-      },
-      2000,
+    // 通过 waitUntil 在保存事务内完成文件头更新，避免保存后再改文件导致二次写盘、mtime 被自身更新
+    const updatePromise = this.fileheaderManager.updateFileheader(e.document, {
+      allowInsert: false,
+      autoSave: false,
+    });
+    e.waitUntil(
+      updatePromise.catch((error) => {
+        logger.handleError(error);
+      }),
     );
   };
 

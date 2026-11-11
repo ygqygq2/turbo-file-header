@@ -180,19 +180,19 @@
               },
               "value": {
                 "type": "string",
-                "description": "turboFileHeader.fileheader.items.properties.value.description%"
+                "description": "%turboFileHeader.fileheader.items.properties.value.description%"
               },
               "usePrevious": {
                 "type": "boolean",
-                "description": "turboFileHeader.fileheader.items.properties.usePrevious.description%"
+                "description": "%turboFileHeader.fileheader.items.properties.usePrevious.description%"
               },
               "wholeLine": {
                 "type": "boolean",
-                "description": "turboFileHeader.fileheader.items.properties.wholeLine.description%"
+                "description": "%turboFileHeader.fileheader.items.properties.wholeLine.description%"
               }
             },
             "required": [
-              "key",
+              "label",
               "value"
             ]
           },
@@ -327,43 +327,40 @@
               "description": "%turboFileHeader.functionComment.languagesSettings.description%",
               "items": {
                 "type": "object",
-                "additionalProperties": {
-                  "type": "object",
-                  "properties": {
-                    "languageId": {
-                      "type": "string",
-                      "markdownDescription": "%turboFileHeader.functionComment.languagesSettings.items.properties.languageId.markdownDescription%"
-                    },
-                    "defaultReturnName": {
-                      "type": "string",
-                      "default": "default",
-                      "description": "%turboFileHeader.functionComment.languagesSettings.items.properties.defaultReturnName.description%"
-                    },
-                    "defaultReturnType": {
-                      "type": "string",
-                      "default": "auto",
-                      "description": "%turboFileHeader.functionComment.languagesSettings.items.properties.defaultReturnType.description%"
-                    },
-                    "defaultParamType": {
-                      "type": "string",
-                      "default": "",
-                      "description": "%turboFileHeader.functionComment.languagesSettings.items.properties.defaultParamType.description%"
-                    },
-                    "typesUsingDefaultReturnType": {
-                      "type": "array",
-                      "default": [],
-                      "description": "%turboFileHeader.functionComment.languagesSettings.items.properties.typesUsingDefaultReturnType.description%"
-                    },
-                    "useTypeAlias": {
-                      "type": "boolean",
-                      "default": true,
-                      "description": "%turboFileHeader.functionComment.languagesSettings.items.properties.useTypeAlias.description%"
-                    },
-                    "paramNameBeforeType": {
-                      "type": "boolean",
-                      "description": "%turboFileHeader.functionComment.languagesSettings.items.properties.paramNameBeforeType.description%",
-                      "default": true
-                    }
+                "properties": {
+                  "languageId": {
+                    "type": "string",
+                    "markdownDescription": "%turboFileHeader.functionComment.languagesSettings.items.properties.languageId.markdownDescription%"
+                  },
+                  "defaultReturnName": {
+                    "type": "string",
+                    "default": "default",
+                    "description": "%turboFileHeader.functionComment.languagesSettings.items.properties.defaultReturnName.description%"
+                  },
+                  "defaultReturnType": {
+                    "type": "string",
+                    "default": "auto",
+                    "description": "%turboFileHeader.functionComment.languagesSettings.items.properties.defaultReturnType.description%"
+                  },
+                  "defaultParamType": {
+                    "type": "string",
+                    "default": "",
+                    "description": "%turboFileHeader.functionComment.languagesSettings.items.properties.defaultParamType.description%"
+                  },
+                  "typesUsingDefaultReturnType": {
+                    "type": "array",
+                    "default": [],
+                    "description": "%turboFileHeader.functionComment.languagesSettings.items.properties.typesUsingDefaultReturnType.description%"
+                  },
+                  "useTypeAlias": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "%turboFileHeader.functionComment.languagesSettings.items.properties.useTypeAlias.description%"
+                  },
+                  "paramNameBeforeType": {
+                    "type": "boolean",
+                    "description": "%turboFileHeader.functionComment.languagesSettings.items.properties.paramNameBeforeType.description%",
+                    "default": true
                   }
                 }
               }
@@ -513,7 +510,7 @@
           "description": "%turboFileHeader.tagsLight.description%",
           "items": {
             "type": "object",
-            "title": "tag item",
+            "title": "%turboFileHeader.tagsLight.items.title%",
             "properties": {
               "tag": {
                 "type": [
@@ -558,7 +555,7 @@
           "description": "%turboFileHeader.tagsDark.description%",
           "items": {
             "type": "object",
-            "title": "tag item",
+            "title": "%turboFileHeader.tagsDark.items.title%",
             "properties": {
               "tag": {
                 "type": [
@@ -618,17 +615,17 @@
     "package": "vsce package --no-dependencies",
     "publish": "vsce publish --no-dependencies",
     "clean": "rimraf out/",
+    "typecheck": "tsc -p ./ --noEmit",
     "test-compile": "npm run clean && tsc -p ./ && npm run compile",
-    "test": "npm run test-compile && vscode-test",
+    "test": "npm run lint && npm run test-compile && vscode-test",
     "test-grep": "vscode-test -f",
     "test:suite:mocha": "npm run test-compile && node out/test/runTests.js",
     "test:suite": "node out/test/runTests.js",
     "test:unit": "vitest unit --watch=false",
     "test:coverage": "vitest run --coverage",
-    "test:ci": "npm run test:coverage && npm run test:suite:mocha",
+    "test:ci": "npm run lint && npm run typecheck && npm run test:coverage && npm run test:suite:mocha",
     "lint": "eslint src",
     "lint-fix": "eslint --fix src",
-    "prepush": "pnpm run lint",
     "postinstall": "simple-git-hooks",
     "preinstall": "npx only-allow pnpm"
   },
@@ -653,11 +650,11 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-simple-import-sort": "^12.1.1",
-    "fs-extra": "^11.2.0",
     "glob": "^13.0.0",
     "jest-mock-vscode": "^4.0.1",
     "lint-staged": "^16.2.7",
     "mocha": "^11.7.5",
+    "prettier": "3.7.4",
     "rimraf": "^6.0.1",
     "simple-git-hooks": "^2.11.1",
     "tmp": "^0.2.3",
@@ -670,6 +667,7 @@
   "dependencies": {
     "@ygqygq2/vscode-log": "^0.0.3",
     "dayjs": "^1.11.13",
+    "fs-extra": "^11.2.0",
     "handlebars": "^4.7.8",
     "json5": "^2.2.3",
     "lodash": "^4.17.21",
@@ -678,5 +676,13 @@
     "typescript": "^5.5.4",
     "upath": "^2.0.1",
     "yaml": "^2.5.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@vscode/vsce-sign",
+      "esbuild",
+      "keytar",
+      "simple-git-hooks"
+    ]
   }
 }

@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 
 import { CustomError, ErrorCode } from '@/error';
-import { logger } from '@/extension';
+import { logger } from '@/services';
 import { ConfigYaml } from '@/typings/types';
 import { escapeRegexString } from '@/utils/str';
 

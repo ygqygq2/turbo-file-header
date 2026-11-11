@@ -13,8 +13,8 @@ jobs:
         os: [macos-latest, ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: '20'
       - run: npm i -g @vscode/vsce pnpm
@@ -39,7 +39,7 @@ jobs:
         if: runner.os != 'Linux'
       - run: pnpm run test:coverage
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         if: runner.os == 'Linux'
         with:
           files: ./coverage/lcov.info

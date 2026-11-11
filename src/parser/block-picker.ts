@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import { configEvent, configManager, languageEvent, languageManager } from '@/extension';
+import { configEvent, configManager, languageEvent, languageManager } from '@/services';
 import { escapeRegexString } from '@/utils/str';
 
 import { TagDecorationOptions } from '.';
