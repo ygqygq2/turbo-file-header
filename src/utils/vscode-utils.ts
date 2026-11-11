@@ -25,7 +25,7 @@ export async function getActiveDocumentWorkspaceUri(
   context?: vscode.ExtensionContext,
 ): Promise<vscode.Uri | undefined> {
   const activeDocumentUri = vscode.window.activeTextEditor?.document?.uri;
-  let activeWorkspace: vscode.WorkspaceFolder | undefined = undefined;
+  let activeWorkspace: vscode.WorkspaceFolder | undefined;
 
   if (activeDocumentUri) {
     activeWorkspace = vscode.workspace.getWorkspaceFolder(activeDocumentUri);
@@ -90,7 +90,9 @@ export async function setActiveWorkspaceByName(
   try {
     await vscode.workspace.fs.stat(targetFileUri);
   } catch (_error) {
-    throw new Error(`File "${fileName}" not found in workspace "${workspaceFolderName}".`);
+    throw new Error(`File "${fileName}" not found in workspace "${workspaceFolderName}".`, {
+      cause: _error,
+    });
   }
 
   // 打开文件来设置活动工作区
@@ -293,7 +295,7 @@ export function generateFunctionComment(
   }
 
   let functionComment = '';
-  let lineStart = '';
+  let lineStart: string;
   if (comments && comments?.blockComment && comments?.blockComment.length) {
     lineStart = ` `;
   } else {

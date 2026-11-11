@@ -40,7 +40,7 @@ export function headerChanged(
   const dateformat = config.get(ConfigSection.dateFormat, 'YYYY-MM-DD HH:mm:ss');
   const dateRegex = new RegExp(convertDateFormatToRegex(dateformat), 'g');
 
-  let headerSame: boolean = false;
+  let headerSame: boolean;
   if (originContentLineCount > 1) {
     let originContentLines = originContent.split('\n').map((line) => line.trim());
     if (

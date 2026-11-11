@@ -20,5 +20,4 @@ export type OriginFileheaderInfo = {
 };
 
 export type VariableBuilder =
-  | ((param?: string) => Promise<string | undefined>)
-  | (() => Promise<string | undefined>);
+  ((param?: string) => Promise<string | undefined>) | (() => Promise<string | undefined>);

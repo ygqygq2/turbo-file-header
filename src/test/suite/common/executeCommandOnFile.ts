@@ -76,7 +76,7 @@ async function executeCommandWithRetry(options: {
   shouldRetry: boolean;
 }) {
   const { commandName, workspaceFolderName, doc, originText, shouldRetry } = options;
-  let actual = '';
+  let actual: string;
   let retryCount = 0;
 
   do {
